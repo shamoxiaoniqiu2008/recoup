@@ -332,7 +332,7 @@
   </update>
   
   
-   <resultMap id="ExtendResultMap" type="service.configureManage.PensionDeptDoman">
+   <resultMap id="ExtendResultMap" type="service.system.PensionDeptDoman">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="parent_id" jdbcType="INTEGER" property="parentId" />
