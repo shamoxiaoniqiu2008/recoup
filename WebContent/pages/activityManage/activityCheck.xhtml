@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css">
+		</link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		</meta>
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<body>
+	<p:growl id="msg"></p:growl>
+	<h:form id="showForm">
+		<h:outputText value="项目名称:"></h:outputText>
+		<h:inputText id="itemNameInputText"
+			value="#{activityCheckController.itemName}"></h:inputText>
+		<his:IME for="showForm:itemNameInputText"
+			fitcol="#{activityCheckController.fitcolItem}" resultcol="1"
+			lock="false" rawSQL="true" SQL="#{activityCheckController.itemToSql}"
+			SQLResult="#{activityCheckController.displaycolItem}"
+			multiresult="showForm:itemNameInputTextHidden;0,showForm:itemNameInputText;1" />
+		<h:inputHidden id="itemNameInputTextHidden"
+			value="#{activityCheckController.itemId}"></h:inputHidden>
+		<h:outputText value="老人姓名:"></h:outputText>
+		<h:inputText id="olderNameInputText"
+			value="#{activityCheckController.olderName}"></h:inputText>
+		<his:IME for="showForm:olderNameInputText"
+			fitcol="#{activityCheckController.fitcolName}" resultcol="1"
+			lock="false" rawSQL="true" SQL="#{activityCheckController.nameToSql}"
+			SQLResult="#{activityCheckController.displaycolName}"
+			multiresult="showForm:olderNameInputTextHidden;0,showForm:olderNameInputText;1" />
+		<h:inputHidden id="olderNameInputTextHidden"
+			value="#{activityCheckController.olderId}"></h:inputHidden>
+		<h:outputText value="项目时间:"></h:outputText>
+		<p:calendar id="applyStartDate" pattern="yyyy-MM-dd" size="12"
+			value="#{activityCheckController.startDate}"></p:calendar>
+		<h:outputText value="至"></h:outputText>
+		<p:calendar id="applyEndDate" pattern="yyyy-MM-dd" size="12"
+			value="#{activityCheckController.endDate}"></p:calendar>
+		<p:commandButton styleClass="searchbtn" value=""
+			action="#{activityCheckController.searchAttendCheckInfo}"
+			update=":msg,:showForm:showTable"></p:commandButton>
+		<p:commandButton styleClass="blankbtn" value=""
+			action="#{activityCheckController.initParam}" update=":showForm"></p:commandButton>
+		<p:dataTable id="showTable" emptyMessage="没有找到合适记录！"
+			value="#{activityCheckController.pensionAttendolderList}"
+			widgetVar="attendList" var="attendList" rowKey="#{attendList.id}"
+			paginator="true" paginatorPosition="bottom" rows="8" paginatorAlwaysVisible="false"
+			paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+			<p:column headerText="选择" width="40">
+				<h:selectBooleanCheckbox value="#{attendList.selectedFlag}">
+					<p:ajax event="change"
+						listener="#{activityCheckController.checkIsSelectAll}"
+						update=":showForm:selectAllBooleanCheckBox"></p:ajax>
+				</h:selectBooleanCheckbox>
+			</p:column>
+			<p:column headerText="项目名称" width="100">
+				<h:outputText value="#{attendList.itemName}"></h:outputText>
+			</p:column>
+			<p:column headerText="项目时间" width="120">
+				<h:outputText value="#{attendList.startDate}">
+					<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+				</h:outputText>
+			</p:column>
+			<p:column headerText="老人姓名" width="80">
+				<h:outputText value="#{attendList.olderName}"></h:outputText>
+			</p:column>
+			<p:column headerText="老人评价" width="80">
+				<h:outputText value="#{attendList.appraiseName}"></h:outputText>
+			</p:column>
+			<p:column headerText="质检结果">
+				<h:selectOneMenu value="#{attendList.checkresult}">
+					<f:selectItem itemValue="0" itemLabel="  "></f:selectItem>
+					<f:selectItem itemValue="1" itemLabel="满意"></f:selectItem>
+					<f:selectItem itemValue="2" itemLabel="不满意"></f:selectItem>
+				</h:selectOneMenu>
+			</p:column>
+			<p:column headerText="质检人">
+				<h:outputText value="#{attendList.checkerName}"></h:outputText>
+			</p:column>
+			<p:column headerText="质检时间">
+				<h:outputText value="#{attendList.checktime}">
+					<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+				</h:outputText>
+			</p:column>
+			<p:column headerText="备注">
+				<h:inputText value="#{attendList.notes}"></h:inputText>
+			</p:column>
+			<p:column headerText="操作">
+				<p:commandButton id="confirmButtonColumn" value=""
+					styleClass="submitbtn"
+					action="#{activityCheckController.saveCheckInfo(attendList)}"
+					update=":msg,:showForm:showTable"></p:commandButton>
+			</p:column>
+		</p:dataTable>
+		<p:watermark value="调用输入法" for="itemNameInputText"></p:watermark>
+		<p:watermark value="调用输入法" for="olderNameInputText"></p:watermark>
+		<p:watermark value="开始时间" for="applyStartDate"></p:watermark>
+		<p:watermark value="截止时间" for="applyEndDate"></p:watermark>
+		<div align="center"><h:panelGroup id="selectAllGroup">
+			<h:outputLabel value="全选:"></h:outputLabel>
+			<h:selectBooleanCheckbox id="selectAllBooleanCheckBox"
+				valueChangeListener="#{activityCheckController.setSelectedAllFlag}"
+				value="#{activityCheckController.selectedAllFlag}">
+				<p:ajax event="change" update=":showForm:showTable"></p:ajax>
+			</h:selectBooleanCheckbox>
+		</h:panelGroup> <h:outputLabel value="质检结果:"></h:outputLabel> <h:selectOneMenu
+			value="#{activityCheckController.checkResultFlag}">
+			<f:selectItem itemValue="0" itemLabel="  "></f:selectItem>
+			<f:selectItem itemValue="1" itemLabel="满意"></f:selectItem>
+			<f:selectItem itemValue="2" itemLabel="不满意"></f:selectItem>
+		</h:selectOneMenu> <h:outputLabel value="备注:" id="notesLable"></h:outputLabel> <h:inputText
+			size="50" value="#{activityCheckController.noteString}"></h:inputText>
+		<p:commandButton id="confirmButton" value="" styleClass="submitbtn"
+			action="#{activityCheckController.checkDialogShow}" update=":msg"
+			oncomplete="handleAttendRequest(xhr, status, args)">
+		</p:commandButton></div>
+	</h:form>
+
+	<p:dialog appendTo="@(body)" header="质检确认" modal="true"
+		position="center" widgetVar="checkDialog" height="100" width="300">
+		<h:form id="checkForm">
+			<h:outputLabel value="确定要质检吗？"></h:outputLabel>
+			<h:panelGrid columns="2" style="margin:0px auto">
+				<p:commandButton id="okButton" value="" styleClass="submitbtn"
+					action="#{activityCheckController.saveCheckInfoList}"
+					update=":msg,:showForm" oncomplete="checkDialog.hide()"></p:commandButton>
+				<p:commandButton id="noButton" value="" styleClass="cancelbtn"
+					onclick="checkDialog.hide()"></p:commandButton>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+	<script type="text/javascript">
+		function handleAttendRequest(xhr, status, args) {
+			if (args.showFlag) {
+				checkDialog.show();
+			}
+		}
+		</script>
+	</body>
+</f:view>
+</html>

@@ -1,0 +1,789 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人状态:</td>
+					<td><h:selectOneMenu style="width:70px;"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+							value="#{livingApplyController.personState}">
+							<f:selectItem itemValue="" itemLabel="全部" />
+							<f:selectItem itemValue="1" itemLabel="待评估" />
+							<f:selectItem itemValue="2" itemLabel="已评估" />
+						</h:selectOneMenu></td>
+					<td class="leftcell">申请人:</td>
+					<td><p:inputText value="#{livingApplyController.applier}"
+							style="width:70px;" /></td>
+					<td class="leftcell">老人:</td>
+					<td><p:inputText id="olderName" style="width:70px;"
+							value="#{livingApplyController.olderName}" /> <his:IME
+							for="searchForm:olderName" rawSQL="true" sortcol="id"
+							SQL="#{livingApplyController.olderSQL}" fitcol="inputCode"
+							multiresult="searchForm:olderName;1,searchForm:olderId;0"
+							SQLResult="编号:0,姓名:1,输入码:2" resultcol="1" lock="true" /> <h:inputHidden
+							value="#{livingApplyController.olderId}" id="olderId" /></td>
+
+					<td class="leftcell">自理类型:</td>
+					<td><h:selectOneMenu value="#{livingApplyController.types}"
+							style="width:90px"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemValue="" itemLabel="全部" />
+							<f:selectItem itemValue="1" itemLabel="自理" />
+							<f:selectItem itemValue="2" itemLabel="半自理" />
+							<f:selectItem itemValue="3" itemLabel="不能自理" />
+						</h:selectOneMenu></td>
+					<td class="leftcell">申请日期:</td>
+					<td><p:calendar value="#{livingApplyController.startDate}"
+							size="9" locale="zh_CN" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar value="#{livingApplyController.endDate}"
+							pattern="yyyy-MM-dd" size="9"></p:calendar></td>
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value=""
+							actionListener="#{livingApplyController.searchApplications}"
+							update=":applicationForm,:message" /></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{livingApplyController.clearSearchForm}"
+							update=":searchForm" styleClass="blankbtn" value="" /></td>
+				</tr>
+			</table>
+		</h:form>
+
+		<h:form id="applicationForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="6" style="width:100%"
+							id="applicationTable"
+							selection="#{livingApplyController.selectedRow}"
+							value="#{livingApplyController.pensionOlderList}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="apply" rowKey="#{apply.applyId}" selectionMode="single"
+							emptyMessage="没有相应记录">
+
+							<p:ajax event="rowSelect"
+								listener="#{livingApplyController.setEnableFlag}" />
+							<p:ajax event="rowUnselect"
+								listener="#{livingApplyController.setUnableFlag}" />
+							<p:column headerText="申请日期" styleClass="width60">
+								<h:outputText value="#{apply.applyTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+							<p:column headerText="申请人" styleClass="width60">
+								<h:outputText value="#{apply.applyName}" />
+							</p:column>
+							<p:column headerText="联系电话" styleClass="width60">
+								<h:outputText value="#{apply.phoneNum}" />
+							</p:column>
+							<p:column headerText="老人类别" styleClass="width60">
+								<h:outputText value="在院" rendered="#{apply.pensionCategary==1}" />
+								<h:outputText value="社区" rendered="#{apply.pensionCategary==2}" />
+								<h:outputText value="居家" rendered="#{apply.pensionCategary==3}" />
+							</p:column>
+							<p:column headerText="老人姓名" styleClass="width60">
+								<h:outputText value="#{apply.name}" />
+							</p:column>
+							<p:column headerText="性别" styleClass="width50">
+								<h:outputText value="#{apply.oldSex}" />
+							</p:column>
+							<p:column headerText="出生日期" styleClass="width60">
+								<h:outputText value="#{apply.birthday}">
+									<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+							<p:column headerText="身份证号" styleClass="width60">
+								<h:outputText value="#{apply.idcardnum}" />
+							</p:column>
+
+
+							<p:column headerText="自理类型" styleClass="width60">
+								<h:outputText value="#{apply.oldType}" />
+							</p:column>
+
+							<p:column headerText="老人状态" styleClass="width60">
+								<h:outputText value="#{apply.olderState}" />
+							</p:column>
+							<p:column headerText="评估结果" styleClass="width60">
+								<h:outputText value="同意" rendered="#{apply.evaluateresult==1}" />
+								<h:outputText value="不同意" rendered="#{apply.evaluateresult==2}" />
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+		</h:form>
+		<!-- 申请信息维护 -->
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton oncomplete="addApplyDialog.show()" id="addButton"
+					actionListener="#{livingApplyController.showAddForm}"
+					styleClass="addbtn" value="" update=":addForm"></p:commandButton>
+				<p:commandButton oncomplete="addApplyDialogShow(xhr,status,args)"
+					id="editButton"
+					actionListener="#{livingApplyController.showEditForm}"
+					update=":addForm,:message" styleClass="modifybtn" value=""></p:commandButton>
+				<p:commandButton id="delButton"
+					oncomplete="confirmDelDialogShow(xhr,status,args)"
+					styleClass="deletebtn" value="" update=":message"
+					actionListener="#{livingApplyController.showDelForm}">
+				</p:commandButton>
+				<p:commandButton id="confirmApplyButton" value="提交"
+					actionListener="#{livingApplyController.showEvaluate}"
+					styleClass="commonbtn" update=":message"></p:commandButton>
+			</div>
+
+		</h:form>
+
+		<!-- 删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="确认删除申请"
+			widgetVar="confirmDelDialog" width="220">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="您确定要删除该申请？" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{livingApplyController.deleteApplication}"
+							update=":applicationForm:applicationTable"
+							oncomplete="confirmDelDialog.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();"></p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<!-- 新增申请信息 -->
+		<p:dialog header="入住申请" widgetVar="addApplyDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="addForm">
+				<div style="height: 350px; overflow: scroll;">
+					<table class="hengbiaoge" width="500px" align="center">
+						<tr>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="applyName">申请人姓名:</label></td>
+							<td class="hengbiaogedata"><p:inputText id="applyName"
+									value="#{livingApplyController.addPensionOlder.applyName}">
+								</p:inputText></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="申请人性別:" />
+							</td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									style="width:150px"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.applySex}">
+									<f:selectItem itemLabel="" itemValue="" />
+									<f:selectItem itemLabel="男" itemValue="1" />
+									<f:selectItem itemLabel="女" itemValue="2" />
+								</h:selectOneMenu></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="relation">关系:</label></td>
+							<td class="hengbiaogedata"><h:selectOneMenu id="relation"
+									style="width:150px"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.relationShip}">
+									<f:selectItems
+										value="#{livingApplyController.relationshipList}" var="family"
+										rowKey="#{family.id}" itemValue="#{family.relationship}"
+										itemLabel="#{family.relationship}"></f:selectItems>
+								</h:selectOneMenu></td>
+						</tr>
+						<tr>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="applyPhone">联系方式:</label></td>
+							<td class="hengbiaogedata"><p:inputText id="applyPhone"
+									validatorMessage="联系方式格式错误"
+									value="#{livingApplyController.addPensionOlder.phoneNum}">
+									<f:validateRegex pattern="((\d{11})|^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$)" />
+								</p:inputText></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="pensionCategary">老人类别:</label></td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									style="width:150px" id="pensionCategary"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.pensionCategary}">
+									<f:selectItem itemValue="1" itemLabel="在院" />
+									<f:selectItem itemValue="2" itemLabel="社区" />
+									<f:selectItem itemValue="3" itemLabel="居家" />
+								</h:selectOneMenu></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="olderName">老人姓名:</label></td>
+							<td class="hengbiaogedata"><p:inputText id="olderName"
+									value="#{livingApplyController.addPensionOlder.name}">
+									<p:ajax event="blur"
+										listener="#{livingApplyController.updateInputCode}"
+										update=":addForm:olderInputCode"></p:ajax>
+								</p:inputText></td>
+						</tr>
+						<tr>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="olderInputCode">输入码:</label></td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.inputcode}"
+									id="olderInputCode">
+								</p:inputText></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="状态:" /></td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									disabled="#{livingApplyController.addOlderStatuseFlag}"
+									style="width:150px"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.statuses}">
+									<f:selectItem itemValue="1" itemLabel="待评估" />
+									<f:selectItem itemValue="2" itemLabel="已评估" />
+									<f:selectItem itemValue="3" itemLabel="入住" />
+									<f:selectItem itemValue="4" itemLabel="请假" />
+									<f:selectItem itemValue="5" itemLabel="退住" />
+								</h:selectOneMenu></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="idcardNum">身份证号:</label></td>
+							<td class="hengbiaogedata"><p:inputText maxlength="18"
+									id="idcardNum"
+									value="#{livingApplyController.addPensionOlder.idcardnum}">
+										<p:ajax  event="blur" listener="#{livingApplyController.getBirthdayAndSex}" process="@this" update=":addForm:sex,:addForm:birthday"></p:ajax>
+								</p:inputText></td>
+						</tr>
+						<tr>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="sex">性别:</label></td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									style="width:150px" id="sex"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.sex}">
+									<f:selectItem itemLabel="男" itemValue="1" />
+									<f:selectItem itemLabel="女" itemValue="2" />
+								</h:selectOneMenu></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="birthday_input">出生日期:</label></td>
+							<td class="hengbiaogedata"><p:calendar id="birthday"
+									mode="popup" navigator="true" yearRange="-120:-60"
+									value="#{livingApplyController.addPensionOlder.birthday}"
+									pattern="yyyy-MM-dd" converterMessage="请输入正确的日期格式">
+									<p:ajax event="dateSelect"
+										listener="#{livingApplyController.selectAge}"
+										update="addForm:age" process="@this,addForm:birthday"></p:ajax>
+								</p:calendar> <h:inputHidden id="age"
+									value="#{livingApplyController.addPensionOlder.age}"></h:inputHidden>
+							</td>
+							<td class="hengbiaogeHeader1"><h:outputText value="信仰:" /></td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									style="width:150px"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.faith}">
+									<f:selectItem itemLabel="" itemValue="" />
+									<f:selectItem itemLabel="佛教" itemValue="佛教" />
+									<f:selectItem itemLabel="基督教" itemValue="基督教" />
+									<f:selectItem itemLabel="伊斯兰教" itemValue="伊斯兰教" />
+								</h:selectOneMenu></td>
+						</tr>
+						<tr>
+							<td class="hengbiaogeHeader1"><h:outputText value="手机:" /></td>
+							<td class="hengbiaogedata"><p:inputText
+									validatorMessage="手机格式不正确"
+									value="#{livingApplyController.addPensionOlder.phone}">
+									<f:validateRegex pattern="^1([\d]{10})$" />
+								</p:inputText></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="nationId">民族:</label></td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									style="width:150px" id="nationId"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.nationId}">
+									<f:selectItems value="#{livingApplyController.nationList}"
+										var="nation" rowKey="#{nation.id}" itemLabel="#{nation.type}"
+										itemValue="#{nation.id}"></f:selectItems>
+								</h:selectOneMenu></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="politicsId">政治面貌:</label></td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									style="width:150px" id="politicsId"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.politicsId}">
+									<f:selectItems value="#{livingApplyController.politicList}"
+										var="politic" rowKey="#{politic.id}"
+										itemLabel="#{politic.type}" itemValue="#{politic.id}"></f:selectItems>
+								</h:selectOneMenu></td>
+
+						</tr>
+						<tr>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="oldType">自理类型:</label></td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									style="width:150px" id="oldType"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.types}">
+									<f:selectItem itemLabel="自理" itemValue="1" />
+									<f:selectItem itemLabel="半自理" itemValue="2" />
+									<f:selectItem itemLabel="不能自理" itemValue="3" />
+								</h:selectOneMenu></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="本人成分:" />
+							</td>
+							<td class="hengbiaogedata"><h:selectOneMenu
+									style="width:150px"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+									value="#{livingApplyController.addPensionOlder.jobs}">
+									<f:selectItem itemLabel="" itemValue=""></f:selectItem>
+									<f:selectItem itemLabel="干部" itemValue="干部"></f:selectItem>
+									<f:selectItem itemLabel="工人" itemValue="工人"></f:selectItem>
+									<f:selectItem itemLabel="军人" itemValue="军人"></f:selectItem>
+									<f:selectItem itemLabel="农民" itemValue="农民"></f:selectItem>
+									<f:selectItem itemLabel="商人" itemValue="商人"></f:selectItem>
+									<f:selectItem itemLabel="职员" itemValue="职员"></f:selectItem>
+								</h:selectOneMenu></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="户籍:" /></td>
+							<td class="hengbiaogedata"><p:inputText id="olderAdress"
+									value="#{livingApplyController.addPensionOlder.household}">
+								</p:inputText></td>
+						</tr>
+						<tr>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="pluse">脉搏:</label></td>
+							<td class="hengbiaogedata"><p:inputText
+									converterMessage="脉搏:只能输入数字" id="pluse"
+									value="#{livingApplyController.addPensionOlder.pluse}"
+									validatorMessage="脉搏的输入范围为0~100">
+									<f:validateLongRange minimum="0" maximum="100"></f:validateLongRange>
+									<f:convertNumber pattern="0" />
+								</p:inputText></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="systolicpres">收缩压:</label></td>
+							<td class="hengbiaogedata"><p:inputText maxlength="3"
+									id="systolicpres"
+									value="#{livingApplyController.addPensionOlder.systolicpres}"
+									converterMessage="收缩压只能输入数字" validatorMessage="收缩压最小为0">
+									<f:validateLongRange minimum="0"></f:validateLongRange>
+									<f:convertNumber pattern="0" />
+								</p:inputText></td>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="diastolicpre">舒张压:</label></td>
+							<td class="hengbiaogedata"><p:inputText id="diastolicpre"
+									converterMessage="舒张压只能输入数字" maxlength="3"
+									value="#{livingApplyController.addPensionOlder.diastolicpre}"
+									validatorMessage="舒张压最小为0">
+									<f:validateLongRange minimum="0"></f:validateLongRange>
+									<f:convertNumber pattern="0" />
+								</p:inputText></td>
+
+						</tr>
+						<tr>
+							<td class="hengbiaogeHeader1"><h:outputText value="主治医院:" />
+							</td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.hospital}">
+								</p:inputText></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="主治医生:" />
+							</td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.doctor}">
+								</p:inputText></td>
+
+							<td class="hengbiaogeHeader1"><h:outputText value="医院电话:" />
+							</td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.hospitalphone}">
+								</p:inputText></td>
+
+						</tr>
+						<tr>
+							<td class="hengbiaogeHeader1"><label class="redfont"
+								for="sensitives">过敏药物:</label></td>
+							<td class="hengbiaogedata"><p:inputText id="sensitives"
+									value="#{livingApplyController.addPensionOlder.sensitives}">
+								</p:inputText></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="主要疾病:" /></td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.illness}" /></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="病史:" /></td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.medhistory}" /></td>
+						</tr>
+
+						<tr>
+							<td class="hengbiaogeHeader1"><h:outputText value="性格心理:" /></td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.characters}" /></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="爱好:" /></td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.hobey}" /></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="特殊要求:" /></td>
+							<td class="hengbiaogedata"><p:inputText
+									value="#{livingApplyController.addPensionOlder.specailreq}" /></td>
+						</tr>
+						<tr>
+
+							<td class="hengbiaogeHeader1"><h:outputText value="饮食特点:" /></td>
+							<td class="hengbiaogedata"><p:inputTextarea style="width:140px"
+									value="#{livingApplyController.addPensionOlder.diet}" /></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="异常表现:" /></td>
+							<td class="hengbiaogedata"><p:inputTextarea colspan="3"
+									autoResize="true" rows="3" style="width:140px"
+									value="#{livingApplyController.addPensionOlder.abnormal}"></p:inputTextarea></td>
+							<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+							<td class="hengbiaogedata"><p:inputTextarea colspan="3"
+									style="width:140px"
+									value="#{livingApplyController.addPensionOlder.notes}"></p:inputTextarea></td>
+						</tr>
+					</table>
+				</div>
+				<h:panelGrid id="buttonGrid" columns="5" style="margin:0px auto">
+					<p:commandButton
+						onstart="return checkNulls('addForm','redfont',true);"
+						action="#{livingApplyController.saveAndSendApplication}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="提交" process="@this,:addForm"
+						update=":applicationForm:applicationTable,:addForm,:message,:maintainForm">
+					</p:commandButton>
+					<p:commandButton
+						onstart="return checkNulls('addForm','redfont',true);"
+						action="#{livingApplyController.saveApplication}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="保存" process="@this,:addForm"
+						update=":applicationForm:applicationTable,:addForm,:message,:maintainForm">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{livingApplyController.clearAddForm}"
+						update=":addForm" disabled="#{livingApplyController.clearFlag}" />
+					<p:commandButton onclick="addApplyDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<!--是否发送申请通知的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="申请通知"
+			widgetVar="confirmSendDialog" width="220">
+			<h:form id="confirmForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="是否发送入住申请通知？" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							actionListener="#{livingApplyController.sentMessage}"
+							oncomplete="addApplyDialog.hide();confirmSendDialog.hide();"
+							update=":message,:applicationForm:applicationTable,:addForm"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmSendDialog.hide();addApplyDialog.hide()"></p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<OBJECT id="HISPIDC"
+			classid="clsid:88C038FE-5484-474E-936E-D7CF4D9490ED" width="0"
+			height="0"> </OBJECT>
+		<script type="text/javascript">
+			function gatherInfo(typeName, assessId) {
+				//alert(typeName+"_"+assessId);
+				var insertStr = "";
+				jQuery(".notes_" + assessId).each(function() {
+					if (jQuery(this).val() != "") {
+						if (insertStr != "") {
+							insertStr += "、" + jQuery(this).val();
+						} else {
+							insertStr += jQuery(this).val();
+						}
+					}
+				});
+
+				var gInfo = jQuery(".notes_all").val();
+				if (gInfo == "") {
+					//直接加入内容
+					//alert("直接加入"+insertStr)
+					jQuery(".notes_all").val(typeName + ":【" + insertStr + "】")
+				} else {
+					if (gInfo.indexOf(typeName + ":") >= 0) {
+						reg = new RegExp("(" + typeName
+								+ ":【)([0-9A-z\u4e00-\u9fa5\\s《》”“。，、？;]*)(】)",
+								"gmi");
+						gInfo = gInfo.replace(reg, "$1" + insertStr + "$3");
+						jQuery(".notes_all").val(gInfo);
+						//alert("替换"+insertStr)
+					} else {
+						jQuery(".notes_all").val(
+								gInfo + "\n" + typeName + ":【" + insertStr
+										+ "】");
+						//alert("接入"+insertStr)
+					}
+				}
+				alert("汇总成功");
+
+			}
+
+			function RadioFillNotes(obj) {
+				//			alert(jQuery(obj).val());
+				//	alert(obj.checked);
+
+				selVal = obj.value;
+				str = jQuery(obj).parent().parent().parent().parent().parent()
+						.parent().parent().find("input[type='text']").val();
+				if (str != "") {
+					var jsonObj = eval('({' + str + '})');
+					var isFind = false;
+					for ( var x in jsonObj) {
+						if (selVal == x) {
+							isFind = true;
+							objTmp = jQuery(obj).parent().parent().parent()
+									.parent().parent().parent().parent().next()
+									.children();
+							objTmp.val(jsonObj[x]);
+						}
+					}
+					if (!isFind) {
+						jQuery(obj).parent().parent().parent().parent()
+								.parent().parent().parent().next().children()
+								.val("");
+					}
+
+				}
+
+			}
+
+			var isAuto = false;
+			function CheckboxFillNotes(obj) {
+				//alert(jQuery(obj).val());
+				//alert(obj.checked);
+				selVal = obj.value;
+				str = jQuery(obj).parent().parent().parent().parent().parent()
+						.parent().parent().find("input[type='text']").val();
+
+				if (str != "") {
+					var jsonObj = eval('({' + str + '})');
+					var isFind = false;
+					for ( var x in jsonObj) {
+						if (selVal == x) {
+							isFind = true;
+							if (obj.checked) {
+								objTmp = jQuery(obj).parent().parent().parent()
+										.parent().parent().parent().parent()
+										.next().children();
+								objTmp.val(objTmp.val() + jsonObj[x] + ";");
+							} else {
+								objTmp = jQuery(obj).parent().parent().parent()
+										.parent().parent().parent().parent()
+										.next().children();
+								objTmp.val(objTmp.val().replace(
+										jsonObj[x] + ";", ""));
+							}
+
+						}
+					}
+					if (!isFind) {
+						if (!isAuto) {
+							jQuery(obj).parent().parent().parent().parent()
+									.parent().parent().parent().next()
+									.children().val("");
+							jQuery(obj).parent().parent().parent().parent()
+									.parent().parent().parent().find(
+											"input[type='checkbox']")
+									.each(function() {
+										if (jQuery(this)[0].value != selVal) {
+											if (jQuery(this)[0].checked) {
+												jQuery(this)[0].click();
+											}
+										}
+									});
+						}
+					} else {
+						jQuery(obj).parent().parent().parent().parent()
+								.parent().parent().parent().find(
+										"input[type='checkbox']")
+								.each(function() {
+									vv = jQuery(this)[0].value
+									if (str != "") {
+										var jsonObj = eval('({' + str + '})');
+										var isFinds = false;
+										for ( var x in jsonObj) {
+											if (vv == x) {
+												isFinds = true;
+											}
+										}
+										if (!isFinds) {
+
+											if (jQuery(this)[0].checked) {
+												isAuto = true;
+												jQuery(this)[0].click();
+												isAuto = false;
+											}
+										}
+									}
+								});
+					}
+				}
+
+			}
+
+			function CheckboxSingleFillNotes(obj) {
+				//alert(jQuery(obj).val());
+				//alert(obj.checked);
+				selVal = obj.value;
+				str = jQuery(obj).parent().parent().parent().parent().parent()
+						.parent().parent().find("input[type='text']").val();
+
+				if (str != "") {
+					var jsonObj = eval('({' + str + '})');
+					var isFind = false;
+					for ( var x in jsonObj) {
+						if (selVal == x) {
+							isFind = true;
+							if (obj.checked) {
+								objTmp = jQuery(obj).parent().parent().parent()
+										.parent().parent().parent().parent()
+										.next().children();
+								objTmp.val(objTmp.val() + jsonObj[x] + ";");
+							} else {
+								objTmp = jQuery(obj).parent().parent().parent()
+										.parent().parent().parent().parent()
+										.next().children();
+								objTmp.val(objTmp.val().replace(
+										jsonObj[x] + ";", ""));
+							}
+						}
+					}
+					jQuery(obj).parent().parent().parent().parent().parent()
+							.parent().parent().find("input[type='checkbox']")
+							.each(function() {
+								var vl = jQuery(this)[0].value
+								if (selVal != vl) {
+									if (jQuery(this)[0].checked) {
+										jQuery(this)[0].click();
+									}
+								}
+							});
+				}
+			}
+
+			function fillNotes(obj, type) {
+				if (type == 1) {
+					//	alert(jQuery(obj).parent().find("input[type='text']").val());
+
+					str = jQuery(obj).parent().find("input[type='text']").val();//obj.nextSibling.value;
+					selVal = obj.value;
+					if (str != "") {
+						var jsonObj = eval('({' + str + '})');
+						var isFind = false;
+						for ( var x in jsonObj) {
+							if (selVal == x) {
+								isFind = true;
+								jQuery(obj.parentNode).next().children().val(
+										jsonObj[x]);
+							}
+						}
+						if (!isFind) {
+							jQuery(obj.parentNode).next().children().val("");
+						}
+					}
+				}
+
+			}
+
+			function addConfirm(xhr, status, args) {
+				if (args.edit) {
+					addApplyDialog.hide();
+				} else if (args.sendMessage) {
+					addApplyDialog.hide();
+				}
+			}
+			function addApplyDialogShow(xhr, status, args) {
+				if (args.show) {
+					addApplyDialog.show();
+				}
+			}
+			function confirmDelDialogShow(xhr, status, args) {
+				if (args.show) {
+					confirmDelDialog.show();
+				}
+			}
+			/*  取消滚动条
+			 */
+			jQuery(document).ready(function() {
+				cleanBar();
+			});
+
+			function HISPIDCinit() {
+				try {
+					document.getElementById("HISPIDC").opComm();
+					//alert(document.getElementById("addForm:tabView:0:readICDButton").style.display);
+					document.getElementById("addForm:tabView:0:readICDButton").style.display = "";
+				} catch (err) {
+					document.getElementById("addForm:tabView:0:readICDButton").style.display = "none";
+				}
+			}
+
+			function readHISPIDC() {
+				HISPIDCinit();
+				backStatus = document.getElementById("HISPIDC")
+						.PIDAuthenticate(); //认证
+				if (backStatus != 1) {
+					alert("身份证认证错误，\n 请将身份证放到读卡器上 \n 或请将身份证移开，重新放置");
+				} else {
+					str = document.getElementById("HISPIDC").readPIDC();
+					if (str != "") {
+						//alert(str)
+						arr = eval('(' + str + ')'); //字符串转换成json对象
+						//alert(arr.PeopleName);// 姓名：
+
+						//alert(arr.PeopleSex.indexOf("男"))
+						//alert(arr.PeopleSex.indexOf("男")>=0?1:2);
+						jQuery(".oldername").val(arr.PeopleName);
+						jQuery(".idcardnum").val(arr.PeopleIDCode);
+						jQuery(".oldersex").val(2);
+						jQuery(".birthday").val(arr.PeopleBirthday);
+						jQuery(".household").val(arr.PeopleAddress);
+
+						/*	alert(arr.PeopleIDCode);// 证号
+							alert(arr.PeopleAddress); // 地址
+							alert(arr.PeopleSex);// 性别
+							alert(arr.PeopleNation);// 民族
+							alert(arr.PeopleBirthday);// 生日
+							alert(arr.Department);// 发证机关
+						 */
+					} else {
+						alert("读取数据出错");
+					}
+				}
+
+				document.getElementById("HISPIDC").his_CloseComm();
+			}
+			function checkICD() {
+				setTimeout(function() {
+					HISPIDCinit();
+				}, 300);
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

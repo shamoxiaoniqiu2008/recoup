@@ -1,0 +1,385 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:outputText value="&nbsp;&nbsp;提交时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{moveApproveController.startDate}" />
+				<h:outputText value="至:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{moveApproveController.endDate}" />
+				<h:outputLabel value="老人姓名:" for="headForm:nameText" />
+				<h:panelGroup>
+					<p:inputText id="nameText" style="width:120px"
+						value="#{moveApproveController.olderName}" />
+					<his:IME for="headForm:nameText" fitcol="inputCode" resultcol="0"
+						lock="true" rawSQL="true"
+						SQL="#{moveApproveController.olderNameSql}"
+						SQLResult="老人姓名:0,大厦:1,楼层:2,房间:3,床位:4,老人Id:5:hide,输入码:6"
+						multiresult="headForm:olderIdHd;5" />
+					<h:inputHidden id="olderIdHd"
+						value="#{moveApproveController.olderId}" />
+				</h:panelGroup>
+				<h:outputLabel value="是否审批:" for="approveFlagText" />
+				<h:selectOneMenu value="#{moveApproveController.ensureFlag}"
+					id="approveFlagText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="0" />
+					<f:selectItem itemLabel="已审批" itemValue="1" />
+					<f:selectItem itemLabel="未审批" itemValue="2" />
+				</h:selectOneMenu>
+				<p:commandButton id="searchButton"
+					action="#{moveApproveController.selectMoveApplicationRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:moveApplicationTable,:maintainForm,:messages," />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{moveApproveController.clearSelectForm}"
+					update=":headForm,:messages" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="moveApplicationRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="moveApplicationTable" rowIndexVar="row"
+					value="#{moveApproveController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{moveApproveController.selectedRow}" paginator="true"
+					paginatorPosition="bottom" paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{moveApproveController.selectRecord}"
+						update=":dataTableForm,:maintainForm," />
+					<p:ajax event="rowUnselect"
+						listener="#{moveApproveController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm," />
+					<p:column headerText="姓名">
+						<h:outputText value="#{record.olderName}" />
+					</p:column>
+					<p:column headerText="大厦">
+						<h:outputText value="#{record.buildName}" />
+					</p:column>
+					<p:column headerText="楼层">
+						<h:outputText value="#{record.floorName}" />
+					</p:column>
+					<p:column headerText="房间">
+						<h:outputText value="#{record.roomName}" />
+					</p:column>
+					<p:column headerText="床位">
+						<h:outputText value="#{record.bedName}" />
+					</p:column>
+					<p:column headerText="搬家类别">
+						<h:outputText value="调房" rendered="#{record.moveType == 1}" />
+						<h:outputText value="更换家具" rendered="#{record.moveType == 2}" />
+					</p:column>
+					<p:column headerText="搬家明细">
+						<h:outputText value="#{record.moveDetail}" />
+					</p:column>
+					<p:column headerText="提交时间">
+						<h:outputText value="#{record.applyTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="审批结果">
+						<h:outputText value="同意" rendered="#{record.approvalResult == 1}" />
+						<h:outputText value="不同意" rendered="#{record.approvalResult == 2}" />
+						<h:outputText value="未审批"
+							rendered="#{record.approvalResult == null}" />
+					</p:column>
+					<p:column headerText="备注">
+						<h:outputText value="#{record.note}" />
+					</p:column>
+					<p:column headerText="确认人">
+						<h:outputText value="#{record.ensureEmpName}" />
+					</p:column>
+					<p:column headerText="详情" styleClass="width50">
+						<p:commandLink update=":viewForm,:messages"
+							action="#{moveApproveController.view(record.id)}"
+							oncomplete="showViewDiagnosis(xhr, status, args)" title="查看">
+							<p:graphicImage value="/images/search.png" style="border:0px;" />
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton value="同意" styleClass="commonbtn"
+					disabled="#{moveApproveController.disEnsureButton}"
+					action="#{moveApproveController.checkApprove}"
+					oncomplete="showChangeDiagnosis(xhr, status, args)"
+					update=":updateForm,:headForm,:dataTableForm,:maintainForm,:messages," />
+				<p:commandButton value="不同意" styleClass="commonbtn"
+					disabled="#{moveApproveController.disEnsureButton}"
+					action="#{moveApproveController.checkResult}"
+					oncomplete="checkRefuse(xhr, status, args)"
+					update=":resultForm,:messages" />
+			</div>
+		</h:form>
+
+		<p:dialog header="调房" widgetVar="updateRecordDialog" resizable="false"
+			appendTo="@(body)" position="top" modal="true">
+			<h:form id="updateForm">
+				<table class="hengbiaoge" width="100%" id="updateTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="老人姓名:"
+								for="nameText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="nameText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.olderName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="搬家类型:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px">
+							<p:inputText style="width:125px" readonly="true" value="调房" />
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="旧床位号:"
+								for="oldBedText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="oldBedText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.oldBedName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="新床位号:"
+								for="newBedText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><h:panelGroup>
+								<p:inputText id="newBedText" style="width:125px" required="true"
+									requiredMessage="请输入新的床位号!"
+									value="#{moveApproveController.selectedChangeRoomRow.newBedName}">
+									<p:ajax event="blur"
+										listener="#{moveApproveController.fillUpdateNewBedField}"
+										update=":updateForm" process="@this,newbedIdHd" />
+								</p:inputText>
+								<his:IME for="updateForm:newBedText" fitcol="newBedName"
+									resultcol="1" rawSQL="true"
+									SQL="#{moveApproveController.bedNameSql}"
+									SQLResult="床位ID:0:hide,床位:1,房间:3,楼层:5,大厦:7"
+									multiresult="updateForm:newbedIdHd;0,updateForm:newRoomText;2,updateForm:newFloorText;3,updateForm:newBuildingText;4">
+								</his:IME>
+								<h:inputHidden id="newbedIdHd"
+									value="#{moveApproveController.selectedChangeRoomRow.newbedId}" />
+							</h:panelGroup></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="旧房间:"
+								for="oldRoomText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="oldRoomText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.oldRoomName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="新房间:"
+								for="newRoomText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="newRoomText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.newRoomName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="旧楼层号:"
+								for="oldFloorText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="oldFloorText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.oldFloorName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="新楼层号:"
+								for="newFloorText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="newFloorText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.newFloorName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="旧大厦:"
+								for="oldBuildingText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="oldBuildingText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.oldBuildName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="新大厦:"
+								for="newBuildingText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="newBuildingText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.newBuildName}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{moveApproveController.approve}"
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":updateForm,:messages,:dataTableForm" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="updateRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="调房" widgetVar="viewDialog" resizable="false"
+			appendTo="@(body)" position="center" modal="true">
+			<h:form id="viewForm">
+				<table class="hengbiaoge" width="100%" id="updateTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="老人姓名:"
+								for="nameText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="nameText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.olderName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="搬家类型:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px">
+							<p:inputText style="width:125px" readonly="true" value="调房" />
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="旧床位号:"
+								for="oldBedText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="oldBedText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.oldBedName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="新床位号:"
+								for="newBedText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><h:panelGroup>
+								<p:inputText id="newBedText" style="width:125px" readonly="true"
+									value="#{moveApproveController.selectedChangeRoomRow.newBedName}">
+								</p:inputText>
+								<h:inputHidden id="newbedIdHd"
+									value="#{moveApproveController.selectedChangeRoomRow.newbedId}" />
+							</h:panelGroup></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="旧房间:"
+								for="oldRoomText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="oldRoomText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.oldRoomName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="新房间:"
+								for="newRoomText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="newRoomText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.newRoomName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="旧楼层号:"
+								for="oldFloorText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="oldFloorText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.oldFloorName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="新楼层号:"
+								for="newFloorText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="newFloorText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.newFloorName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="旧大厦:"
+								for="oldBuildingText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="oldBuildingText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.oldBuildName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="新大厦:"
+								for="newBuildingText" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="newBuildingText" style="width:125px" readonly="true"
+								value="#{moveApproveController.selectedChangeRoomRow.newBuildName}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="viewDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="原因" widgetVar="refuseDialog" resizable="false"
+			appendTo="@(body)" position="center" modal="true">
+			<h:form id="resultForm">
+				<table>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="原因:"
+								for="note" styleClass="redfont" /></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px">
+							<p:inputTextarea id="note" required="true"
+								requiredMessage="请填写不同意原因！"
+								value="#{moveApproveController.selectedRow.note}" />
+						</td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{moveApproveController.refuse}"
+						oncomplete="refuse(xhr, status, args)"
+						update=":dataTableForm,:messages">
+					</p:commandButton>
+					<p:commandButton type="button" styleClass="cancelbtn" value=""
+						onclick="refuseDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+	//清空 selectForm
+	function clearSelectForm(){
+		document.getElementById("headForm:startDate").value="";
+		document.getElementById("headForm:endDate").value="";
+		document.getElementById("headForm:nameText").value="";
+		return true;
+	}
+
+	function handleUpdateInit(xhr, status, args){
+		if(!args.validationFailed &amp;&amp; args.success) {
+			updateRecordDialog.show();
+        }	
+	}
+
+	function handleUpdateComplete(xhr, status, args){
+		if(!args.validationFailed &amp;&amp; args.success) {
+			updateRecordDialog.hide();
+        }	
+	}
+	function showChangeDiagnosis(xhr, status, args){
+		if(args.success) {
+			updateRecordDialog.show();
+        }	
+	}
+	function showViewDiagnosis(xhr, status, args){
+		if(args.success) {
+			viewDialog.show();
+        }	
+	}
+	function checkRefuse(xhr, status, args){
+		if(args.success) {
+			refuseDialog.show();
+        }	
+	}
+	function refuse(xhr, status, args){
+		if(args.success) {
+			refuseDialog.hide();
+        }	
+	}
+	</script>
+	</h:body>
+</f:view>
+</html>

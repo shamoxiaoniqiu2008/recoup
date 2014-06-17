@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.userManage}</title>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+
+
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">指纹类型:</td>
+					<td class="leftcell"><h:selectOneMenu
+							value="#{fingerRegistePaperController.type}" id="typeText"
+							onchange="clickSelectHiddenButton()"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemLabel="员工" itemValue="1" />
+							<f:selectItem itemLabel="老人" itemValue="2" />
+						</h:selectOneMenu> <p:commandButton value="更改布局" style="display:none" id="changeBtn"
+							actionListener="#{fingerRegistePaperController.changeSelectDialog}"
+							process="@this,:searchForm:typeText" update=":searchForm" /></td>
+					<td class="leftcell">#{fingerRegistePaperController.type==1?'员工':'老人'}姓名:</td>
+					<td><p:inputText id="employeeName"
+							value="#{fingerRegistePaperController.peopleName}"
+							rendered="#{fingerRegistePaperController.selectedEmployeeAndOlderRenderedFlag}" />
+						<his:IME for="searchForm:employeeName" fitcol="inputCode"
+							sortcol="id" resultcol="1" lock="true" rawSQL="true"
+							multiresult="searchForm:peopleId;0"
+							SQL="select pe.id,pe.name,pe.inputCode from pension_employee pe where pe.cleared = 2"
+							SQLResult="编号:0,姓名:1,输入码:2" /> <p:inputText id="olderName"
+							rendered="#{!fingerRegistePaperController.selectedEmployeeAndOlderRenderedFlag}" />
+						<his:IME for="searchForm:olderName" fitcol="inputCode"
+							sortcol="id" resultcol="1" lock="true" rawSQL="true"
+							multiresult="searchForm:peopleId;0"
+							SQL="select po.id,po.name,po.inputCode from pension_older po where po.cleared = 2"
+							SQLResult="编号:0,姓名:1,输入码:2" /> <h:inputHidden id="peopleId"
+							value="#{fingerRegistePaperController.peopleId}" /></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{fingerRegistePaperController.searchFingerRegRecords}"
+							update=":fingerRegForm" styleClass="searchbtn" value="" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="fingerRegForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="8" style="width:100%"
+							id="fingerRegTable" paginatorAlwaysVisible="false"
+							selection="#{fingerRegistePaperController.selectedRow}"
+							value="#{fingerRegistePaperController.fingerRegList}" rows="10"
+							paginatorPosition="bottom" rowKey="#{reg.id}" paginator="true"
+							selectionMode="single" var="reg" emptyMessage="没有相应记录">
+							<p:column headerText="登记姓名" style="width:160px">
+								<h:outputText value="#{reg.employeeName}" />
+							</p:column>
+							<p:column headerText="指纹类型" style="width:160px">
+								<h:outputText value="员工指纹" rendered="#{reg.type==1}" />
+								<h:outputText value="老人指纹" rendered="#{reg.type==2}" />
+							</p:column>
+							<p:column headerText="登记号码" style="width:160px">
+								<h:outputText value="#{reg.anSenrollNumber}" />
+							</p:column>
+							<p:column headerText="登记时间" style="width:160px">
+								<h:outputText value="#{reg.registeTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+
+			<div align="center">
+				<p:commandButton oncomplete="addDialog.show()" id="addButton"
+					actionListener="#{fingerRegistePaperController.showAddForm}"
+					update=":addForm" styleClass="addbtn" value=""></p:commandButton>
+				<p:commandButton oncomplete="editConfirm(xhr,status,args);"
+					id="editButton"
+					actionListener="#{fingerRegistePaperController.showEditForm}"
+					update=":message,:editForm" styleClass="modifybtn" value=""></p:commandButton>
+
+				<p:commandButton id="delButton"
+					oncomplete="delConfirm(xhr,status,args)" update=":message"
+					actionListener="#{fingerRegistePaperController.showEditForm}"
+					styleClass="deletebtn" value="">
+				</p:commandButton>
+			</div>
+
+		</h:form>
+
+
+		<!-- 指纹登记信息 -->
+		<p:dialog header="新增指纹登记" widgetVar="addDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="addForm">
+				<table class="hengbiaoge" width="300px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="regNo">指纹类型:</label></td>
+						<td class="hengbiaogedata"><h:selectOneMenu
+								value="#{fingerRegistePaperController.addFingerReg.type}"
+								id="typeText" onchange="clickHiddenButton()" style="width:150px"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+								<f:selectItem itemLabel="员工" itemValue="1" />
+								<f:selectItem itemLabel="老人" itemValue="2" />
+							</h:selectOneMenu> <p:commandButton value="更改布局" style="display:none"
+								id="changeBtn"
+								actionListener="#{fingerRegistePaperController.changeInsertDialog}"
+								process="@this,:addForm:typeText" update=":addForm" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont">#{fingerRegistePaperController.addFingerReg.type==1?'员工':'老人'}姓名:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="addEmployeeName"
+								rendered="#{fingerRegistePaperController.insertedEmployeeAndOlderRenderedFlag}"
+								value="#{fingerRegistePaperController.addFingerReg.employeeName}">
+							</p:inputText> <his:IME for="addForm:addEmployeeName" fitcol="inputCode"
+								sortcol="id" resultcol="1" lock="true" rawSQL="true"
+								multiresult="addForm:addPeopleId;0"
+								SQL="select pe.id,pe.name,pe.inputCode from pension_employee pe where pe.cleared = 2"
+								SQLResult="编号:0,姓名:1,输入码:2" /> <p:inputText id="addOlderName"
+								rendered="#{!fingerRegistePaperController.insertedEmployeeAndOlderRenderedFlag}"
+								value="#{fingerRegistePaperController.addFingerReg.employeeName}">
+							</p:inputText> <his:IME for="addForm:addOlderName" fitcol="inputCode"
+								sortcol="id" resultcol="1" lock="true" rawSQL="true"
+								multiresult="addForm:addPeopleId;0"
+								SQL="select po.id,po.name,po.inputCode from pension_older po where po.cleared = 2"
+								SQLResult="编号:0,姓名:1,输入码:2" /> <h:inputHidden id="addPeopleId"
+								value="#{fingerRegistePaperController.addFingerReg.peopleId}" />
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="regNo">登记号码:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="regNo"
+								value="#{fingerRegistePaperController.addFingerReg.anSenrollNumber}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="regTime_input">登记时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar id="regTime"
+								pattern="yyyy-MM-dd"
+								value="#{fingerRegistePaperController.addFingerReg.registeTime}"></p:calendar>
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						actionListener="#{fingerRegistePaperController.saveFingerReg}"
+						oncomplete="saveConfirm(xhr,status,args)" styleClass="submitbtn"
+						value="" onstart="return checkNulls('addForm','redfont',true);"
+						update=":message,:fingerRegForm">
+					</p:commandButton>
+					<p:commandButton onclick="addDialog.hide()" styleClass="cancelbtn"
+						value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+
+		<!-- 修改指纹登记信息 -->
+		<p:dialog header="修改指纹登记" widgetVar="editDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="editForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="300px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label>员工姓名:</label></td>
+						<td class="hengbiaogedata"><p:inputText disabled="true"
+								value="#{fingerRegistePaperController.addFingerReg.employeeName}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editRegNo">登记号码:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="editRegNo"
+								value="#{fingerRegistePaperController.addFingerReg.anSenrollNumber}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editRegTime_input">登记时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar id="editRegTime"
+								pattern="yyyy-MM-dd"
+								value="#{fingerRegistePaperController.addFingerReg.registeTime}">
+							</p:calendar></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						action="#{fingerRegistePaperController.updateFingerReg}"
+						oncomplete="updateConfirm(xhr,status,args)" styleClass="submitbtn"
+						value="" onstart="return checkNulls('editForm','redfont',true);"
+						update=":message,:fingerRegForm">
+					</p:commandButton>
+					<p:commandButton onclick="editDialog.hide()" styleClass="cancelbtn"
+						value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<!-- 删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="确认删除"
+			widgetVar="confirmDelDialog" width="220">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="您确定要删除该登记记录吗？" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{fingerRegistePaperController.delFingerReg}"
+							update=":fingerRegForm,:message"
+							oncomplete="confirmDelDialog.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();"></p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+	</h:body>
+</f:view>
+
+
+<script>
+	function editConfirm(xhr, status, args) {
+		if (args.edit) {
+			editDialog.show();
+		}
+	}
+
+	function delConfirm(xhr, status, args) {
+		if (args.edit) {
+			confirmDelDialog.show();
+		}
+	}
+	function saveConfirm(xhr, status, args) {
+		if (args.addSuccess) {
+			addDialog.hide();
+		}
+	}
+
+	function clickHiddenButton() {
+
+		document.getElementById("addForm:changeBtn").click();
+
+	}
+
+	function clickSelectHiddenButton() {
+		document.getElementById("searchForm:changeBtn").click();
+	}
+
+	function updateConfirm(xhr, status, args) {
+		if (args.editSuccess) {
+			editDialog.hide();
+		}
+	}
+
+	/*  取消滚动条*/
+	jQuery(document).ready(function() {
+		cleanBar();
+	});
+</script>
+
+
+</html>

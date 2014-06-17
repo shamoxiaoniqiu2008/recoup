@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facelet-taglib>
+    <namespace>http://centling.his.net/histag</namespace>
+
+<tag>
+   <tag-name>IME</tag-name>
+    <component>
+      <component-type>IME</component-type>
+    </component>
+    
+</tag>
+
+
+</facelet-taglib>

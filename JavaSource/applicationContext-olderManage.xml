@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-lazy-init="true"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						   http://www.springframework.org/schema/context
+						   http://www.springframework.org/schema/context/spring-context-3.0.xsd
+						   http://www.springframework.org/schema/tx
+						   http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+						   http://www.springframework.org/schema/aop 
+						   http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+						   http://www.springframework.org/schema/jee 
+						   http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+	<!-- 注入Controller实例，同时注入Controller的依赖Service实例 -->
+	<!-- author:tim,假期申请录入 controller -->
+	<bean id="entryVacationApplicationController"
+		class="controller.olderManage.EntryVacationApplicationController"
+		scope="view">
+		<property name="entryVacationApplicationService" ref="entryVacationApplicationService"></property>
+	</bean>
+	<!-- author:tim,请假审批controller -->
+	<bean id="ensureVacationApplicationController"
+		class="controller.olderManage.EnsureVacationApplicationController"
+		scope="view">
+		<property name="ensureVacationApplicationService" ref="ensureVacationApplicationService"></property>
+	</bean>
+	<!-- author:tim,查看假期审批信息controller -->
+	<bean id="viewVacationApprovalController" class="controller.olderManage.ViewVacationApprovalController"
+		scope="view">
+		<property name="viewVacationApprovalService" ref="viewVacationApprovalService"></property>
+	</bean>
+	<!-- author:tim,录入未按时回院老人信息controller -->
+	<bean id="entryLateOlderRecordController" class="controller.olderManage.EntryLateOlderRecordController"
+		scope="view">
+		<property name="entryLateOlderRecordService" ref="entryLateOlderRecordService"></property>
+	</bean>
+	<!-- author:tim,就医申请 controller -->
+	<bean id="medicalRegisterController" class="controller.olderManage.MedicalRegisterController"
+		scope="view">
+		<property name="medicalRegisterService" ref="medicalRegisterService"></property>
+		<property name="entryVacationApplicationService" ref="entryVacationApplicationService"></property>
+	</bean>
+	<!-- author:tim,就医分组管理 controller -->
+	<bean id="medicalGroupManageController" class="controller.olderManage.MedicalGroupManageController"
+		scope="view">
+		<property name="medicalGroupManageService" ref="medicalGroupManageService"></property>
+	</bean>
+	<!-- author:tim,就医项目统计 controller -->
+	<bean id="countMedicalItemController" class="controller.olderManage.CountMedicalItemController"
+		scope="view">
+		<property name="countMedicalItemService" ref="countMedicalItemService"></property>
+		<property name="medicalGroupManageService" ref="medicalGroupManageService"></property>
+		<property name="sendMedicalItemCountPaperService" ref="sendMedicalItemCountPaperService"></property>
+	</bean>
+	<!-- author:tim,就医登记单发送 controller -->
+	<bean id="sendOlderMedicalRegisterPaperController"
+		class="controller.olderManage.SendOlderMedicalRegisterPaperController"
+		scope="view">
+		<property name="sendOlderMedicalRegisterPaperService" ref="sendOlderMedicalRegisterPaperService"></property>
+	</bean>
+	<!-- author:tim,项目统计单发送 controller -->
+	<bean id="sendMedicalItemCountPaperController"
+		class="controller.olderManage.SendMedicalItemCountPaperController"
+		scope="view">
+		<property name="countMedicalItemService" ref="countMedicalItemService"></property>
+		<property name="sendMedicalItemCountPaperService" ref="sendMedicalItemCountPaperService"></property>
+		<property name="medicalGroupManageService" ref="medicalGroupManageService"></property>
+	</bean>
+	<!-- author:tim,就医登记单查看 controller -->
+	<bean id="viewMedicalRegisterPaperController"
+		class="controller.olderManage.ViewMedicalRegisterPaperController"
+		scope="view">
+		<property name="viewMedicalRegisterPaperService" ref="viewMedicalRegisterPaperService"></property>
+	</bean>
+	<!-- author:tim,项目统计单查看 controller -->
+	<bean id="viewItemCountPaperController" class="controller.olderManage.ViewItemCountPaperController"
+		scope="view">
+		<property name="countMedicalItemService" ref="countMedicalItemService"></property>
+		<property name="viewItemCountPaperService" ref="viewItemCountPaperService"></property>
+	</bean>
+	<!-- author:tim,查看探访记录controller -->
+	<bean id="viewVisitationRecordController" class="controller.olderManage.ViewVisitationRecordController"
+		scope="view">
+		<property name="viewVisitationRecordService" ref="viewVisitationRecordService"></property>
+	</bean>
+	<!-- author:tim,探访任务controller -->
+	<bean id="visitationHandleController" class="controller.olderManage.VisitationHandleController"
+		scope="view">
+		<property name="visitationHandleService" ref="visitationHandleService"></property>
+	</bean>
+	<!-- author:Mary 2013-9-11,发送配药单 controller -->
+	<bean id="sendDrugPaperController" class="controller.olderManage.SendDrugPaperController"
+		scope="view">
+		<property name="drugService" ref="drugService"></property>
+	</bean>
+	<!-- author:tim,核对配药单 controller -->
+	<bean id="checkDrugPaperController" class="controller.olderManage.CheckDrugPaperController"
+		scope="view">
+		<property name="drugService" ref="drugService"></property>
+	</bean>
+	
+	<!-- author:tim,未通过配药单 controller -->
+	<bean id="unPassDrugPaperController" class="controller.olderManage.UnPassDrugPaperController"
+		scope="view">
+		<property name="unPassDrugPaperService" ref="unPassDrugPaperService"></property>
+	</bean>
+	
+	<!-- author:tim,确认配药单 controller -->
+	<bean id="ensureDrugPaperController" class="controller.olderManage.EnsureDrugPaperController"
+		scope="view">
+		<property name="drugService" ref="drugService"></property>
+	</bean>
+	<!-- author:Mary,呼叫管理 controller -->
+	<bean id="ringRecordController" class="controller.olderManage.RingRecordController"
+		scope="view">
+		<property name="ringService" ref="ringService"></property>
+	</bean>
+	<!-- author:bill,老人离院申请controller -->
+	<bean id="departRegisterController" class="controller.olderManage.DepartRegisterController"
+		scope="view">
+		<property name="departRegisterService" ref="departRegisterService"></property>
+		<property name="departApproveService" ref="departApproveService"></property>
+		<property name="departApprovenofityService" ref="departApprovenofityService"></property>
+		<property name="dicEventService" ref="dicEventService"></property>
+	</bean>
+	<!-- author:wensy,入住管理 controller -->
+	<bean id="livingManageController" scope="view"
+		class="controller.olderManage.LivingManageController">
+		<property name="livingManageService" ref="livingManageService"></property>
+	</bean>
+	<bean id="livingNoticeController" scope="view"
+		class="controller.olderManage.LivingNoticeController">
+		<property name="livingNoticeService" ref="livingNoticeService"></property>
+	</bean>
+	<bean id="livingCheckController" scope="view"
+		class="controller.olderManage.LivingCheckController">
+		<property name="livingCheckService" ref="livingCheckService"></property>
+	</bean>
+	<bean id="paperManageController" scope="view"
+		class="controller.olderManage.PaperManageController">
+		<property name="paperManageService" ref="paperManageService"></property>
+	</bean>
+	<bean id="pensionDiagnoseController" scope="view"
+		class="controller.olderManage.PensionDiagnoseController">
+		<property name="pensionDiagnoseService" ref="pensionDiagnoseService"></property>
+	</bean>
+	<bean id="pensionRecureController" scope="view"
+		class="controller.olderManage.PensionRecureController">
+		<property name="pensionRecureService" ref="pensionRecureService"></property>
+	</bean>
+	<bean id="pensionRecureManagerController" scope="view"
+		class="controller.olderManage.PensionRecureManagerController">
+		<property name="pensionRecureManagerService" ref="pensionRecureManagerService"></property>
+	</bean>
+
+	<bean id="pensionRecureTaskController" scope="view"
+		class="controller.olderManage.PensionRecureTaskController">
+		<property name="pensionRecureTaskService" ref="pensionRecureTaskService"></property>
+	</bean>
+	<bean id="pensionAccidentController" scope="view"
+		class="controller.olderManage.PensionAccidentController">
+		<property name="pensionAccidentService" ref="pensionAccidentService"></property>
+	</bean>
+	<!-- author:wensy,输液申请 controller -->
+	<bean id="infusionApplyController" class="controller.olderManage.InfusionApplyController"
+		scope="view">
+		<property name="infusionApplyService" ref="infusionApplyService"></property>
+	</bean>
+	<!-- author:wensy,输液审核 controller -->
+	<bean id="infusionEvaluateController" class="controller.olderManage.InfusionEvaluateController"
+		scope="view">
+		<property name="infusionEvaluateService" ref="infusionEvaluateService"></property>
+	</bean>
+	<!-- author:wensy,输液确认controller -->
+	<bean id="infusionConfirmController" class="controller.olderManage.InfusionConfirmController"
+		scope="view">
+		<property name="infusionConfirmService" ref="infusionConfirmService"></property>
+	</bean>
+	<!-- author:wensy,药物接收申请controller -->
+	<bean id="drugReceiveApplyController" class="controller.olderManage.DrugReceiveApplyController"
+		scope="view">
+		<property name="drugReceiveApplyService" ref="drugReceiveApplyService"></property>
+	</bean>
+	<!-- author:wensy,药物接收审核controller -->
+	<bean id="drugReceiveEvaluateController" class="controller.olderManage.DrugReceiveEvaluateController"
+		scope="view">
+		<property name="drugReceiveEvaluateService" ref="drugReceiveEvaluateService"></property>
+	</bean>
+	<!-- author:wensy,药物提醒controller -->
+	<bean id="drugNoticeController" class="controller.olderManage.DrugNoticeController"
+		scope="view">
+		<property name="drugNoticeService" ref="drugNoticeService"></property>
+	</bean>
+	<!-- author:wensy,药物库存controller -->
+	<bean id="drugStorageController" class="controller.olderManage.DrugStorageController"
+		scope="view">
+		<property name="drugStorageService" ref="drugStorageService"></property>
+	</bean>
+	<!-- author:wensy,护理计划controller -->
+	<bean id="dayCarePlanController" class="controller.olderManage.DayCarePlanController"
+		scope="view">
+		<property name="dayCarePlanService" ref="dayCarePlanService"></property>
+	</bean>
+	<!-- author:wensy,日常护理controller -->
+	<bean id="dayCareController" class="controller.olderManage.DayCareController"
+		scope="view">
+		<property name="dayCareService" ref="dayCareService"></property>
+	</bean>
+	<!-- author:wensy,预约护理controller -->
+	<bean id="careAppointmentController" class="controller.olderManage.CareAppointmentController"
+		scope="view">
+		<property name="careAppointmentService" ref="careAppointmentService"></property>
+	</bean>
+	<!-- author:wensy,房间展示controller -->
+	<bean id="viewRoomController" class="controller.olderManage.ViewRoomController"
+		scope="view">
+		<property name="viewRoomService" ref="viewRoomService"></property>
+	</bean>
+	
+	<!-- author:wensy,居家入住管理 controller -->
+	<bean id="familyManageController" scope="view"
+		class="controller.familyPension.FamilyManageController">
+		<property name="livingManageService" ref="livingManageService"></property>
+	</bean>
+	<!-- author:wensy,社区养老入住管理 controller -->
+	<bean id="communityManageController" scope="view"
+		class="controller.communityPension.CommunityManageController">
+		<property name="livingManageService" ref="livingManageService"></property>
+	</bean>
+	<!-- author:wensy,房间拓扑controller -->
+	<bean id="viewRoomMapController" class="controller.olderManage.ViewRoomMapController"
+		scope="view">
+		<property name="viewRoomMapService" ref="viewRoomMapService"></property>
+	</bean>
+	<bean id="nurseWorkStationController" class="controller.olderManage.NurseWorkStationController"
+		scope="view">
+		<property name="nurseWorkStationService" ref="nurseWorkStationService"></property>
+	</bean>
+</beans>
+

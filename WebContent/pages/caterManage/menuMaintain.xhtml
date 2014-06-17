@@ -1,0 +1,473 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css">
+		</link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		</meta>
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<style>
+.overdiv {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: hidden;
+	height: 18px;
+	width: 200px;
+	border: 0px solid #e6e6e6;
+}
+
+.overdivscroll {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: auto;
+	height: 230px;
+	width: 150px;
+	border: 0px solid #e6e6e6;
+}
+
+.formDetail tr td {
+	vertical-align: top;
+}
+</style>
+	<p:growl id="msg" widgetVar="message"></p:growl>
+	<h:form id="menuForm" styleClass="formDetail">
+		<h:panelGroup id="searchGroup">
+			<h:outputText id="nameText" value="输入菜名:"></h:outputText>
+			<p:inputText id="nameInputText"
+				value="#{menuMaintainController.foodName}"></p:inputText>
+			<his:IME for="menuForm:nameInputText"
+				fitcol="#{menuMaintainController.fitcolFood}" resultcol="1"
+				lock="false" rawSQL="true" SQL="#{menuMaintainController.foodToSql}"
+				SQLResult="#{menuMaintainController.displaycolFood}"
+				multiresult="menuForm:nameInputTextHidden;0,menuForm:nameInputText;1" />
+			<h:inputHidden id="nameInputTextHidden"
+				value="#{menuMaintainController.foodId}"></h:inputHidden>
+			<h:outputText value="菜系:"></h:outputText>
+			<h:selectOneMenu value="#{menuMaintainController.cuisineId}"
+				class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+				<f:selectItem itemValue="0" itemLabel=" 全部"></f:selectItem>
+				<f:selectItems
+					value="#{menuMaintainController.pensionDicCuisineList}"
+					itemValue="#{cuisineList.id}"
+					itemLabel="#{cuisineList.cuisineName}" var="cuisineList"></f:selectItems>
+			</h:selectOneMenu>
+			<p:commandButton styleClass="searchbtn" value=""
+				action="#{menuMaintainController.searchRecordByCondition}"
+				update=":msg,:menuForm:menuTable"></p:commandButton>
+			<p:commandButton styleClass="blankbtn" value=""
+				action="#{menuMaintainController.initSearchParam}"
+				update=":msg,:menuForm"></p:commandButton>
+		</h:panelGroup>
+		<p:watermark value="调用输入法" for="nameInputText"></p:watermark>
+		<p:dataTable id="menuTable" emptyMessage="没有找到记录！" rows="8"
+			value="#{menuMaintainController.pensionFoodmenuList}"
+			selectionMode="single" var="foodMenuList" rowKey="#{foodMenuList.id}"
+			selection="#{menuMaintainController.selectedPensionFoodmenu}"
+			paginator="true" paginatorPosition="bottom"
+			paginatorAlwaysVisible="false"
+			paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+			<p:ajax event="rowSelect"
+				listener="#{menuMaintainController.setSelectedFlag}"
+				update=":menuForm:modifyButton,:menuForm:deleteButton" />
+			<p:ajax event="rowUnselect"
+				listener="#{menuMaintainController.setUnselectedFlag}"
+				update=":menuForm:modifyButton,:menuForm:deleteButton" />
+			<p:column headerText="菜名" width="100">
+				<h:outputText value="#{foodMenuList.name}"></h:outputText>
+			</p:column>
+			<p:column headerText="菜系" width="60">
+				<h:outputText value="#{foodMenuList.cuisineName}"></h:outputText>
+			</p:column>
+			<p:column headerText="菜品介绍" width="260">
+				<div title="more..." ondblclick="changeme(this);" class="overdiv">
+					#{foodMenuList.des}</div>
+			</p:column>
+			<p:column headerText="菜品图片" width="60">
+				<h:graphicImage value="#{foodMenuList.imageurl}" width="50"
+					height="30"></h:graphicImage>
+			</p:column>
+			<p:column headerText="价格" width="60">
+				<h:outputText value="#{foodMenuList.purse}">
+					<f:convertNumber pattern="#,###.00" type="number"></f:convertNumber>
+				</h:outputText>
+			</p:column>
+			<p:column headerText="备注">
+				<h:outputText value="#{foodMenuList.notes}"></h:outputText>
+			</p:column>
+		</p:dataTable>
+		<div align="center">
+			<h:panelGroup id="buttonGroup">
+				<p:commandButton id="addButton" styleClass="addbtn" value=""
+					disabled="#{menuMaintainController.addButtonEnableFlag}"
+					onclick="addDialog.show()"
+					action="#{menuMaintainController.initFoodMenu}" update=":addForm"></p:commandButton>
+				<p:commandButton id="modifyButton" styleClass="modifybtn" value=""
+					disabled="#{menuMaintainController.modifyButtonEnableFlag}"
+					update=":editForm,:editDetailForm" onclick="editDialog.show()"
+					action="#{menuMaintainController.editButtonPara}"></p:commandButton>
+				<p:commandButton id="deleteButton" styleClass="deletebtn" value=""
+					disabled="#{menuMaintainController.deleteButtonEnableFlag}"
+					onclick="delateDialog.show()"></p:commandButton>
+			</h:panelGroup>
+		</div>
+	</h:form>
+
+	<p:dialog id="addDialog" widgetVar="addDialog" appendTo="@(body)"
+		modal="true" header="新增菜品" position="center">
+		<h:form id="addForm" enctype="multipart/form-data">
+			<p:overlayPanel id="operatePanel" for="foodGraph" showEffect="clip"
+				hideEffect="clip" showEvent="mouseover" dismissable="true"
+				showCloseIcon="true">
+				<p:fileUpload required="true" requiredMessage="请上传图片！"
+					fileUploadListener="#{menuMaintainController.handleFileUpload}"
+					value="#{menuMaintainController.uploadedFile}" mode="advanced"
+					dragDropSupport="false" multiple="true"
+					update=":msg,:addForm:foodGraph" sizeLimit="1000000"
+					fileLimit="100" allowTypes="/(\.|\/)(gif|jpe?g|png)$/"
+					uploadLabel="上传" cancelLabel="取消" label="浏览"
+					fileLimitMessage="最大上传文件数量为1个！"
+					invalidFileMessage="上传文件必须为gif,jpe,jpg,png格式的图片！"
+					invalidSizeMessage="图片大小最大为1M！">
+				</p:fileUpload>
+			</p:overlayPanel>
+			<table class="hengbiaoge">
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="foodNameInputText">菜名:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="foodNameInputText" size="51"
+							value="#{menuMaintainController.pensionFoodmenu.name}">
+						</p:inputText></td>
+					<td colspan="2" rowspan="6"><h:graphicImage id="foodGraph"
+							value="#{menuMaintainController.pensionFoodmenu.imageurl}"
+							width="205" height="210"></h:graphicImage></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="foodPriceInputText">价格:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="foodPriceInputText" converterMessage="请输入正确的数字！" size="51"
+							value="#{menuMaintainController.pensionFoodmenu.purse}">
+							<!--数字：-->
+							<f:convertNumber pattern="#,###.00" type="number" />
+						</p:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="cuisineId">菜系:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><h:selectOneMenu
+							style="width:336px" id="cuisineId"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+							value="#{menuMaintainController.pensionFoodmenu.cuisineId}">
+							<f:selectItem itemLabel="  "></f:selectItem>
+							<f:selectItems
+								value="#{menuMaintainController.pensionDicCuisineList}"
+								itemValue="#{cuisineList.id}"
+								itemLabel="#{cuisineList.cuisineName}" var="cuisineList"></f:selectItems>
+						</h:selectOneMenu></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="foodDesInputTextArea">菜品介绍:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputTextarea
+							id="foodDesInputTextArea" cols="39" rows="4"
+							value="#{menuMaintainController.pensionFoodmenu.des}">
+						</p:inputTextarea></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="备注:"></h:outputText></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="foodRemarkInputText" size="51"
+							value="#{menuMaintainController.pensionFoodmenu.notes}"></p:inputText></td>
+				</tr>
+			</table>
+			<p:commandButton style="display:none;" id="hideBtn"
+				onstart="return checkNulls('addForm','redfont',true);"
+				actionListener="#{menuMaintainController.addMenu}"
+				update=":msg,:menuForm:menuTable,:addForm,:detailForm"
+				process="@this,addForm"></p:commandButton>
+		</h:form>
+		<h:form id="detailForm">
+			<table>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="itemIdText">食材名称:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="itemNameText" value="#{menuMaintainController.itemName}">
+						</p:inputText> <his:IME for="detailForm:itemNameText" fitcol="input_code"
+							resultcol="1" lock="true" rawSQL="true"
+							SQL="select p.id,p.item_name,p.input_code from pension_item_catalog p where p.cleared=2 and p.type_id=3"
+							SQLResult="编号:0,名称:1,输入码:2" multiresult="detailForm:itemIdText;0" />
+						<h:inputHidden id="itemIdText"
+							value="#{menuMaintainController.itemId}" /></td>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="itemQty">数量:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="itemQty" size="18" value="#{menuMaintainController.itemQty}"></p:inputText></td>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="unit">单位:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="unit" size="18" value="#{menuMaintainController.unit}"></p:inputText></td>
+					<td class="hengbiaogedata"><p:commandLink
+							onstart="return checkNulls('detailForm','redfont',true);"
+							process="@this,detailForm"
+							action="#{menuMaintainController.addFoodItem}"
+							update=":msg,:detailForm">
+							<p:graphicImage value="/images/plus_alt.png"
+								style="border:0px;;width: 20px;height: 20px;" />
+						</p:commandLink></td>
+				</tr>
+			</table>
+			<p:dataTable id="itemTable" emptyMessage="食材列表为空！" rows="2"
+				value="#{menuMaintainController.itemList}" selectionMode="single"
+				var="item" rowKey="#{item.itemId}"
+				selection="#{menuMaintainController.selectedItem}" paginator="true"
+				paginatorPosition="bottom" paginatorAlwaysVisible="false"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:ajax event="rowSelect"
+					listener="#{menuMaintainController.setSelectedFlag}" />
+				<p:ajax event="rowUnselect"
+					listener="#{menuMaintainController.setUnselectedFlag}" />
+				<p:column headerText="名称" width="80" style="text-align:center">
+					<h:outputText value="#{item.name}"></h:outputText>
+				</p:column>
+				<p:column headerText="数量" width="80" style="text-align:center">
+					<h:outputText value="#{item.ingredientQty}"></h:outputText>
+				</p:column>
+				<p:column headerText="单位" width="80" style="text-align:center">
+					<h:outputText value="#{item.qtyUnit}"></h:outputText>
+				</p:column>
+				<p:column headerText="操作" width="60" style="text-align:center">
+					<p:commandLink process="@this," ajax="true" rendered="true"
+						action="#{menuMaintainController.deleteFoodItem(item)}"
+						update=":msg,:detailForm">
+						<p:graphicImage value="/css/images/move_btn.jpg"
+							style="margin: 0px 0px 0px 0;border:0px;border-radius: 3px;width: 40px;height: 20px;"></p:graphicImage>
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+		<div align="center">
+			<h:panelGroup id="addFormButtons">
+				<p:commandButton id="okButton" styleClass="commonbtn" value="确定"
+					onclick="hideBtnClick()"></p:commandButton>
+				<p:commandButton id="cancelButton" styleClass="cancelbtn" value=""
+					onclick="addDialog.hide()"></p:commandButton>
+			</h:panelGroup>
+		</div>
+	</p:dialog>
+
+	<p:dialog id="editDialog" widgetVar="editDialog" appendTo="@(body)"
+		modal="true" header="修改菜品" position="top">
+		<h:form id="editForm" enctype="multipart/form-data">
+			<p:overlayPanel id="operatePanel" for="foodGraphEdit"
+				showEffect="clip" hideEffect="clip" showEvent="mouseover"
+				dismissable="true" showCloseIcon="true">
+				<p:fileUpload required="true" requiredMessage="请上传图片！"
+					fileUploadListener="#{menuMaintainController.handleFileUpload}"
+					mode="advanced" dragDropSupport="false" multiple="true"
+					update=":msg,:editForm:foodGraphEdit" sizeLimit="1000000"
+					fileLimit="100" allowTypes="/(\.|\/)(gif|jpe?g|png)$/"
+					uploadLabel="上传" cancelLabel="取消" label="浏览"
+					fileLimitMessage="最大上传文件数量为1个！"
+					invalidFileMessage="上传文件必须为gif,jpe,jpg,png格式的图片！"
+					invalidSizeMessage="图片大小最大为1M！">
+				</p:fileUpload>
+			</p:overlayPanel>
+			<table class="hengbiaoge">
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="foodNameInputTextEdit">菜名:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							size="51" id="foodNameInputTextEdit"
+							value="#{menuMaintainController.selectedPensionFoodmenu.name}">
+						</p:inputText></td>
+					<td colspan="2" rowspan="6"><h:graphicImage id="foodGraphEdit"
+							value="#{menuMaintainController.selectedPensionFoodmenu.imageurl}"
+							width="205" height="210"></h:graphicImage></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="foodPriceInputText">价格:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							size="51" id="foodPriceInputText" converterMessage="请输入正确的数字！"
+							value="#{menuMaintainController.selectedPensionFoodmenu.purse}">
+							<!--数字：-->
+							<f:convertNumber pattern="#,###.00" type="number" />
+						</p:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="editCuisineId">菜系:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><h:selectOneMenu
+							style="width:336px" id="editCuisineId"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+							value="#{menuMaintainController.selectedPensionFoodmenu.cuisineId}">
+							<f:selectItem itemLabel="  "></f:selectItem>
+							<f:selectItems
+								value="#{menuMaintainController.pensionDicCuisineList}"
+								itemValue="#{cuisineList.id}"
+								itemLabel="#{cuisineList.cuisineName}" var="cuisineList"></f:selectItems>
+						</h:selectOneMenu></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="foodDesInputTextAreaEdit">菜品介绍:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputTextarea
+							id="foodDesInputTextAreaEdit" cols="39" rows="4"
+							value="#{menuMaintainController.selectedPensionFoodmenu.des}">
+						</p:inputTextarea></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="备注:"></h:outputText></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							size="51" id="foodRemarkInputTextEdit"
+							value="#{menuMaintainController.selectedPensionFoodmenu.notes}"></p:inputText></td>
+				</tr>
+			</table>
+			<p:commandButton style="display:none;" id="hiddenBtn"
+				onstart="return checkNulls('editForm','redfont',true);"
+				action="#{menuMaintainController.editMenu}"
+				update=":msg,:editForm,:menuForm,:editDetailForm"
+				oncomplete="editDialogHide(xhr,status,args)"
+				process="@this,editForm"></p:commandButton>
+		</h:form>
+		<h:form id="editDetailForm">
+			<table>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="editItemNameText">食材名称:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="editItemNameText" value="#{menuMaintainController.itemName}">
+						</p:inputText> <his:IME for="editDetailForm:editItemNameText"
+							fitcol="input_code" resultcol="1" lock="true" rawSQL="true"
+							SQL="select p.id,p.item_name,p.input_code from pension_item_catalog p where p.cleared=2 and p.type_id=3"
+							SQLResult="编号:0,名称:1,输入码:2"
+							multiresult="editDetailForm:editItemIdText;0" /> <h:inputHidden
+							id="editItemIdText" value="#{menuMaintainController.itemId}" />
+
+					</td>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="editItemQty">数量:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="editItemQty" size="18"
+							value="#{menuMaintainController.itemQty}"></p:inputText></td>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="editUnit">单位:</label></td>
+					<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+							id="editUnit" size="18" value="#{menuMaintainController.unit}"></p:inputText></td>
+					<td class="hengbiaogedata"><p:commandLink ajax="true"
+							onstart="return checkNulls('editDetailForm','redfont',true);"
+							process="@this,editItemNameText,editItemIdText,editItemQty,editUnit"
+							action="#{menuMaintainController.addFoodItem}"
+							update=":msg,:editDetailForm">
+							<p:graphicImage value="/images/plus_alt.png"
+								style="border:0px;;width: 20px;height: 20px;" />
+						</p:commandLink></td>
+				</tr>
+			</table>
+			<p:dataTable id="itemTable" emptyMessage="食材列表为空！" rows="3"
+				value="#{menuMaintainController.itemList}" selectionMode="single"
+				var="item" rowKey="#{item.itemId}"
+				selection="#{menuMaintainController.selectedItem}" paginator="true"
+				paginatorPosition="bottom" paginatorAlwaysVisible="false"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:ajax event="rowSelect"
+					listener="#{menuMaintainController.setSelectedFlag}" />
+				<p:ajax event="rowUnselect"
+					listener="#{menuMaintainController.setUnselectedFlag}" />
+				<p:column headerText="名称" width="60">
+					<h:outputText value="#{item.name}"></h:outputText>
+				</p:column>
+				<p:column headerText="数量">
+					<h:outputText value="#{item.ingredientQty}"></h:outputText>
+				</p:column>
+				<p:column headerText="单位">
+					<h:outputText value="#{item.qtyUnit}"></h:outputText>
+				</p:column>
+				<p:column headerText="操作" width="60" style="text-align:center">
+					<p:commandLink process="@this," ajax="true" rendered="true"
+						action="#{menuMaintainController.deleteFoodItem(item)}"
+						update=":msg,:editDetailForm:itemTable">
+						<p:graphicImage value="/css/images/move_btn.jpg"
+							style="margin: 0px 0px 0px 0;border:0px;border-radius: 3px;width: 40px;height: 20px;"></p:graphicImage>
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+		<div align="center">
+			<h:panelGroup id="editFormButtons">
+				<p:commandButton id="saveButtonEdit" styleClass="savebtn" value=""
+					onclick="hiddenBtnClick()"></p:commandButton>
+				<p:commandButton id="cancelButtonEdit" styleClass="cancelbtn"
+					value="" onclick="editDialog.hide()"></p:commandButton>
+			</h:panelGroup>
+		</div>
+	</p:dialog>
+
+	<p:dialog id="delateDialog" widgetVar="delateDialog" appendTo="@(body)"
+		modal="true" header="删除菜品" position="center">
+		<h:form>
+			<h:outputText value="确定要删除该菜品吗？"></h:outputText>
+			<div align="center">
+				<h:panelGroup>
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{menuMaintainController.deleteMenu}"
+						update=":msg,:menuForm" oncomplete="delateDialog.hide()"></p:commandButton>
+					<p:commandButton styleClass="cancelbtn" value=""
+						onclick="delateDialog.hide()"></p:commandButton>
+				</h:panelGroup>
+			</div>
+		</h:form>
+	</p:dialog>
+
+	<script>
+		function changeme(obj) {
+			if (obj.className == "overdiv") {
+				obj.className = "overdivscroll";
+			} else {
+				obj.scrollTop = 0;
+				obj.className = "overdiv";
+			}
+		}
+
+		function editDialogHide(xhr, status, args) {
+			if (args.hide) {
+				editDialog.hide();
+			}
+		}
+
+		function hideBtnClick() {
+			jQuery("#addForm\\:hideBtn").click();
+		}
+		function hiddenBtnClick() {
+			jQuery("#editForm\\:hiddenBtn").click();
+		}
+	</script>
+</f:view>
+</html>

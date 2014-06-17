@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<f:view contectType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<style type="text/css">
+<!--
+* {
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	background-image: url(../images/login2.jpg);
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.hi {
+	margin: 0px auto;
+}
+
+.mi {
+	display: block;
+	color: #b90404;
+	width: 80px;
+	text-align: center;
+	margin-right: 10px;
+	float: left;
+	margin-top: 22px;
+	text-decoration: none;
+	font-family: "微软雅黑";
+	font-size: 14px;
+}
+
+.banquan {
+	font-size: 14px;
+	line-height: 30px;
+	text-align: center;
+}
+-->
+</style>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+		<h:form id="loginForm">
+			<p:growl id="messages" />
+			<table width="1004" height="578" border="0" align="center"
+				cellpadding="0" cellspacing="0" class="hi">
+				<tr>
+					<td width="656" height="321">&nbsp;</td>
+					<td width="16">&nbsp;</td>
+					<td width="332">&nbsp;</td>
+				</tr>
+				<tr>
+					<td height="33">&nbsp;</td>
+					<td>&nbsp;</td>
+					<td valign="bottom"><h:inputText
+							value="#{loginController.userName}" id="username"
+							style="border: none; outline: none; background-color: transparent; height:22px;"
+							size="20"></h:inputText></td>
+				</tr>
+				<tr>
+					<td height="32">&nbsp;</td>
+					<td>&nbsp;</td>
+					<td valign="bottom"><h:inputSecret id="paword"
+							value="#{loginController.passWord}"
+							style="border: none; outline: none; background-color: transparent;height:22px;"
+							size="20" /></td>
+				</tr>
+				<tr>
+					<td height="37">&nbsp;</td>
+					<td colspan="2" align="center"><p:commandButton id="cd"
+							onstart="return checkLogin()" update=":loginForm:messages"
+							action="#{loginController.fetchUser}" type="submit" value=""
+							oncomplete="handleComplete(xhr, status, args);"
+							style=" float:left; margin-left:49px;background:url(../images/login.jpg);
+background-repeat:no-repeat;
+margin-top:20px;
+height:24px;
+width:68px;
+border-top-width: 0px;
+border-right-width: 0px;
+border-bottom-width: 0px;
+border-left-width: 0px;
+border-top-style:solid;
+border-right-style: solid;
+border-bottom-style: solid;
+border-left-style:solid;
+cursor:pointer;">
+						</p:commandButton></td>
+
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				</tr>
+			</table>
+		</h:form>
+
+		<script>
+			jQuery(document).ready(function() {
+				resizeWindow();
+
+				if (top.window.location.href != window.location.href) {
+					top.window.location.href = window.location.href;
+				}
+
+				jQuery("#loginForm\\:username").focus();
+			})
+			function clean() {
+				jQuery("#loginForm\\:username").val('');
+				jQuery("#loginForm\\:paword").val('');
+				jQuery("#loginForm\\:username").focus();
+			}
+			jQuery(window).resize(function() {
+				resizeWindow();
+			});
+			function resizeWindow() {
+				tempWdith = (jQuery(document).width() - 1003) / 2;
+
+				var browser = navigator.appName
+				var b_version = navigator.appVersion
+				var trim_Version = b_version.replace(/[ ]/g, "");
+
+				if (browser == "Microsoft Internet Explorer")
+					if (trim_Version.indexOf('MSIE8') >= 0) {
+						tempWdith = (jQuery(document).width() - 1026) / 2;
+
+					}
+				if (browser == "Microsoft Internet Explorer")
+					if (trim_Version.indexOf('MSIE6') >= 0) {
+						jQuery("#showIE").show();
+						jQuery("#showIE").html("您的浏览器版本过低，请升级浏览器");
+					}
+
+				if (tempWdith > 0) {
+					jQuery(".login_border").show();
+					ht = jQuery(document).height();
+					if (browser == "Microsoft Internet Explorer")
+						if (trim_Version.indexOf('MSIE8') >= 0) {
+							if (ht > 790) {
+								ht = 1344;
+							} else {
+								ht = 768;
+							}
+						}
+					jQuery(".login_border").css({
+						width : tempWdith + "px",
+						height : ht + "px"
+					});
+				} else {
+					jQuery(".login_border").hide();
+				}
+			}
+
+			function checkLogin() {
+				if (jQuery("#loginForm\\:username").val() == "") {
+					jQuery("#loginForm\\:username").focus();
+					return false;
+				}
+				if (jQuery("#loginForm\\:paword").val() == "") {
+					jQuery("#loginForm\\:paword").focus();
+					return false;
+				}
+				return true;
+			}
+
+			function handleComplete(xhr, status, args) {
+				if (args.login == "success") {
+					if (document.all) {
+						var usrId = args.staffId;
+						location.replace('main.jsf');
+					} else {
+						//var usrId = args.staffId;
+						location.replace('main.jsf');
+					}
+				}
+				if (args.login == "fail") {
+				}
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

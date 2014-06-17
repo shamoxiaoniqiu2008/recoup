@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">车牌号:</td>
+					<td><p:inputText id="carNumberText" style="width:145px;"
+							value="#{carManageController.carNumber}">
+							<p:ajax event="blur" listener="#{carManageController.initSQL}"
+								update=":searchForm">
+							</p:ajax>
+						</p:inputText> <his:IME for="searchForm:carNumberText" fitcol="plate_number"
+							resultcol="0" rawSQL="true" SQL="#{carManageController.carSQL}"
+							SQLResult="车牌号:1,车辆类型:2,联系人:10">
+						</his:IME></td>
+
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value="" actionListener="#{carManageController.selectCarRecords}"
+							update=":form:car,:message,:maintainForm:modifybtn,:maintainForm:deletebtn" />
+					</td>
+					<td class="leftcell"><p:commandButton styleClass="blankbtn"
+							value="" process="@this"
+							actionListener="#{carManageController.clearSearchForm}"
+							update=":searchForm,:form:car,:message,:maintainForm:modifybtn,:maintainForm:deletebtn" />
+					</td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="form" style="width:100%">
+			<p:dataTable id="car" var="result" rowKey="#{result.id}"
+				value="#{carManageController.cars}"
+				selection="#{carManageController.selectedCar}"
+				selectionMode="single" cellspacing="8" rows="10"
+				style="white-space:nowrap;width:100%"
+				row="#{carManageController.setEnableFlag}" rowIndexVar="row"
+				emptyMessage="#{pageConfig.noRow}" paginator="true"
+				paginatorPosition="bottom" paginatorAlwaysVisible="false"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+
+				<p:ajax event="rowSelect"
+					listener="#{carManageController.setEnableFlag}"
+					update=":maintainForm:modifybtn,:maintainForm:deletebtn" />
+				<p:ajax event="rowUnselect"
+					listener="#{carManageController.setUnableFlag}"
+					update=":maintainForm:modifybtn,:maintainForm:deletebtn" />
+
+				<p:column headerText="车牌号" style="width=100%" sortBy="plateNumber">  
+		            #{result.plateNumber}   
+		        </p:column>
+
+				<p:column headerText="车辆类型" style="width=100%">  
+		            #{result.vehicleType}   
+		        </p:column>
+
+				<p:column headerText="容纳人数" style="width=100%" sortBy="holdPeoples">  
+		            #{result.holdPeoples}   
+		        </p:column>
+
+				<p:column headerText="联系人" style="width=100%">  
+		            #{result.employeeName}   
+		        </p:column>
+				<p:column headerText="剩余油量" style="width=100%" sortBy="remainFuel">  
+		            #{result.remainFuel}   
+		        </p:column>
+				<p:column headerText="当前公里数" style="width=100%">  
+		            #{result.currentKilometers}   
+		        </p:column>
+				<p:column headerText="可行公里数" style="width=100%"
+					sortBy="candriveKilometers">  
+		            #{result.candriveKilometers}   
+		        </p:column>
+
+				<p:column headerText="备注" style="width=100%">  
+		            #{result.note}   
+		        </p:column>
+
+			</p:dataTable>
+
+		</h:form>
+		<div align="center">
+			<h:form id="maintainForm">
+				<p:commandButton styleClass="addbtn" value=""
+					actionListener="#{carManageController.showAddForm}"
+					oncomplete="addDialog.show()" update=":addForm" />
+				<p:commandButton styleClass="modifybtn" value="" id="modifybtn"
+					actionListener="#{carManageController.showEditForm}"
+					disabled="#{carManageController.disabledFlag}"
+					oncomplete="addDialog.show()" update=":addForm" />
+				<p:commandButton styleClass="deletebtn" value="" id="deletebtn"
+					onclick="confirmDelDialog.show()"
+					disabled="#{carManageController.disabledFlag}" type="button" />
+			</h:form>
+		</div>
+		<p:dialog header="车辆信息" widgetVar="addDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="addForm">
+				<table class="hengbiaoge">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="plateNumber">车牌号:</label></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								required="true" requiredMessage="车牌号不能为空" maxlength="8"
+								id="plateNumber"
+								value="#{carManageController.selectedCar.plateNumber}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="vehicleType">车辆类型:</label></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								required="true" id="vehicleType" maxlength="10"
+								requiredMessage="车辆类型不能为空"
+								value="#{carManageController.selectedCar.vehicleType}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="holdPeoples">容纳人数:</label></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								maxlength="3" required="true" id="holdPeoples"
+								requiredMessage="容纳人数必须输入数字"
+								value="#{carManageController.holdPeoples}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="contacterName">联系人:</label></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								required="true" id="contacterName" requiredMessage="联系人不能为空"
+								value="#{carManageController.selectedCar.employeeName}">
+							</p:inputText> <his:IME for="addForm:contacterName" fitcol="name,inputCode"
+								resultcol="2" rawSQL="true" SQL="#{carManageController.empSQL}"
+								SQLResult="员工编号:0:hide,输入码:3,联系人姓名:1"
+								multiresult="addForm:contacterId;0">
+							</his:IME> <h:inputHidden id="contacterId"
+								value="#{carManageController.selectedCar.contacterId}">
+							</h:inputHidden></td>
+
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label for="remainFuel">剩余油量:</label></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								id="remainFuel" maxlength="10"
+								value="#{carManageController.remainFuel}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="currentKilometers">当前公里数:</label></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								id="currentKilometers" maxlength="10"
+								value="#{carManageController.currentKilometers}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="candriveKilometers">可行公里数:</label></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								id="candriveKilometers" maxlength="10"
+								value="#{carManageController.candriveKilometers}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								id="notes" value="#{carManageController.selectedCar.note}">
+							</p:inputText></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton action="#{carManageController.insertCarRecord}"
+						onstart="return checkNulls('addForm','redfont',true);"
+						process="@this,addForm" styleClass="submitbtn" value=""
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":form:car,:message,:maintainForm:modifybtn,:maintainForm:deletebtn">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{carManageController.clearAddForm}"
+						update=":addForm" />
+					<p:commandButton onclick="addDialog.hide()" process="@this"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="删除车辆记录"
+			widgetVar="confirmDelDialog" width="220">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="#{pageConfig.sureDelete}?"
+							style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{carManageController.deleteCarRecord}"
+							update=":form:car,:message,:maintainForm:modifybtn,:maintainForm:deletebtn"
+							oncomplete="confirmDelDialog.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();"
+							update=":form:car,:message,:maintainForm:modifybtn,:maintainForm:deletebtn">
+						</p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</h:body>
+	<script type="text/javascript">
+		function handleUpdateComplete(xhr, status, args) {
+			if (args.validate) {
+				addDialog.hide();
+			}
+
+		}
+	</script>
+
+</f:view>
+</html>

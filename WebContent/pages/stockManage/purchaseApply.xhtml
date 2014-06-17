@@ -1,0 +1,495 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css">
+		</link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		</meta>
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<body>
+	<p:growl id="message" widgetVar="message"></p:growl>
+	<h:form id="searchForm">
+		<table>
+			<tr>
+				<td class="leftcell">采购日期:</td>
+				<td><p:calendar value="#{purchaseApplyController.startDate}"
+					locale="zh_CN" style="width:145px;" pattern="yyyy-MM-dd"></p:calendar>
+				</td>
+				<td class="leftcell">至:</td>
+				<td><p:calendar value="#{purchaseApplyController.endDate}"
+					style="width:145px;" pattern="yyyy-MM-dd"></p:calendar></td>
+				<td class="leftcell">是否提交:</td>
+				<td><h:selectOneMenu value="#{purchaseApplyController.isSend}"
+					style="width:145px"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemValue="" itemLabel="全部" />
+					<f:selectItem itemValue="1" itemLabel="是" />
+					<f:selectItem itemValue="2" itemLabel="否" />
+				</h:selectOneMenu></td>
+				<td class="leftcell">审核结果:</td>
+				<td><h:selectOneMenu
+					value="#{purchaseApplyController.auditResult}" style="width:145px"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemValue="" itemLabel="全部" />
+					<f:selectItem itemValue="1" itemLabel="通过" />
+					<f:selectItem itemValue="2" itemLabel="不通过" />
+				</h:selectOneMenu></td>
+				<td class="leftcell"><p:commandButton styleClass="searchbtn"
+					value="" process="@this,searchForm"
+					actionListener="#{purchaseApplyController.searchApplyRecord}"
+					update=":applyForm,:message,:detailForm" /></td>
+				<td class="leftcell"><p:commandButton styleClass="blankbtn"
+					value="" actionListener="#{purchaseApplyController.clearSearch}"
+					update=":searchForm" /></td>
+			</tr>
+		</table>
+	</h:form>
+	<h:form id="applyForm">
+		<table width="100%">
+			<tr>
+				<td><p:dataTable cellspacing="2" rows="10" style="width:100%"
+					id="applyTable" selection="#{purchaseApplyController.selectedRow}"
+					value="#{purchaseApplyController.applyRecordList}" paginator="true"
+					paginatorPosition="bottom" paginatorAlwaysVisible="false"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					var="apply" rowKey="#{apply.id}" selectionMode="single"
+					emptyMessage="没有相应记录">
+
+					<p:ajax event="rowSelect" update=":detailForm"
+						listener="#{purchaseApplyController.selectApplyDetail}" />
+					<p:ajax event="rowUnselect" update=":detailForm"
+						listener="#{purchaseApplyController.clearApplyDetail}" />
+					<p:column headerText="采购单号">
+						<h:outputText value="#{apply.purchaseNo}" />
+					</p:column>
+					<p:column headerText="生成时间">
+						<h:outputText value="#{apply.generateTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+						</h:outputText>
+					</p:column>
+					<p:column headerText="录入员">
+						<h:outputText value="#{apply.purchaserName}" />
+					</p:column>
+					<p:column headerText="采购时间">
+						<h:outputText value="#{apply.purchaseTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+						</h:outputText>
+					</p:column>
+					<p:column headerText="已提交">
+						<h:outputText value="是" rendered="#{apply.sendFlag==1}" />
+						<h:outputText value="否" rendered="#{apply.sendFlag==2}" />
+					</p:column>
+					<p:column headerText="审核">
+						<h:outputText value="是" rendered="#{apply.approveFlag==1}" />
+						<h:outputText value="否" rendered="#{apply.approveFlag==2}" />
+					</p:column>
+					<p:column headerText="审核结果">
+						<h:outputText value="通过" rendered="#{apply.approveResult==1}" />
+						<h:outputText value="不通过" rendered="#{apply.approveResult==2}" />
+					</p:column>
+				</p:dataTable></td>
+			</tr>
+		</table>
+	</h:form>
+	<!-- 入库记录维护 -->
+	<h:form id="maintainForm">
+		<div align="center"><p:commandButton
+			oncomplete="addApplyDlg.show()" id="addButton"
+			actionListener="#{purchaseApplyController.initAddForm}"
+			styleClass="addbtn" value="" update=":addApplyForm"></p:commandButton>
+		<p:commandButton oncomplete="editApplyDlgShow(xhr,status,args)"
+			id="modifyButton"
+			actionListener="#{purchaseApplyController.initEditForm}"
+			styleClass="modifybtn" value="" update=":editApplyForm,:message"></p:commandButton>
+		<p:commandButton oncomplete="delApplyDlgShow(xhr,status,args)"
+			actionListener="#{purchaseApplyController.delApplyConfirm}"
+			styleClass="deletebtn" value="" update=":message"></p:commandButton>
+		<p:commandButton oncomplete="addApplyDlg.show()"
+			actionListener="#{purchaseApplyController.generateApply}"
+			update=":addApplyForm" styleClass="commonbtn" value="采购单生成"></p:commandButton>
+		<p:commandButton
+			actionListener="#{purchaseApplyController.sendMessage}"
+			update=":applyForm,:message" styleClass="commonbtn" value="提交"></p:commandButton></div>
+	</h:form>
+	<h:form id="detailForm">
+		<table width="100%">
+			<tr>
+				<td><p:dataTable cellspacing="2" rows="10" style="width:100%"
+					id="detailTable" value="#{purchaseApplyController.applyDetailList}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					var="detail" rowKey="#{detail.itemName}" selectionMode="single"
+					emptyMessage="没有相应记录">
+					<p:column headerText="物资名称" styleClass="width60">
+						<h:outputText value="#{detail.itemName}" />
+					</p:column>
+					<p:column headerText="物资类型" styleClass="width60">
+						<h:outputText value="#{detail.typeName}" />
+					</p:column>
+					<p:column headerText="采购数量" styleClass="width60">
+						<h:outputText value="#{detail.purchaseQty}" />
+					</p:column>
+					<p:column headerText="单位" styleClass="width60">
+						<h:outputText value="#{detail.unit}" />
+					</p:column>
+				</p:dataTable></td>
+			</tr>
+		</table>
+	</h:form>
+
+	<!-- 新增采购记录 -->
+	<p:dialog header="新增采购申请" widgetVar="addApplyDlg" resizable="false"
+		appendTo="@(body)" modal="true" position="top">
+		<h:form id="addApplyForm" styleClass="noDisable">
+			<table class="hengbiaoge" width="330px" align="center">
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="purchaseTime_input">采购时间:</label></td>
+					<td class="hengbiaogedata"><p:calendar id="purchaseTime"
+						value="#{purchaseApplyController.addApplyRecord.purchaseTime}"
+						pattern="yyyy-MM-dd HH:mm">
+						<p:ajax event="dateSelect" process="@this"></p:ajax>
+					</p:calendar></td>
+					<td class="hengbiaogeHeader1"><lable>采购单号:</lable></td>
+					<td class="hengbiaogedata"><p:inputText
+						value="#{purchaseApplyController.addApplyRecord.purchaseNo}"></p:inputText></td>
+				</tr>
+			</table>
+			<table class="hengbiaoge" width="430px" align="center">
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="addItemName">物资名称:</label></td>
+					<td class="hengbiaogedata"><p:inputText id="addItemName"
+						value="#{purchaseApplyController.addApplyDetail.itemName}">
+					</p:inputText> <his:IME for="addApplyForm:addItemName" rawSQL="true"
+						resultcol="1" SQLResult="编号:0,名称:1,输入码:2,物资类型:4,物资类型编号:3:hide"
+						sortcol="id"
+						SQL="select t.id,t.item_name,t.input_code,t.type_id,pd.item_name as typeName from pension_item_catalog t,pension_dic_itemtype pd where t.type_id=pd.id and  t.cleared=2"
+						fitcol="input_code" lock="true"
+						multiresult="addApplyForm:addItemId;0,addApplyForm:typeId;4,addApplyForm:typeName;3" />
+					<h:inputHidden
+						value="#{purchaseApplyController.addApplyDetail.itemId}"
+						id="addItemId" /></td>
+					<td class="hengbiaogeHeader1">物资类型:</td>
+					<td class="hengbiaogedata"><p:inputText id="typeName"
+						value="#{purchaseApplyController.addApplyDetail.typeName}"></p:inputText>
+					<h:inputHidden
+						value="#{purchaseApplyController.addApplyDetail.typeId}"
+						id="typeId" /></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="purchaseQty">采购数量:</label></td>
+					<td class="hengbiaogedata"><p:inputText id="purchaseQty"
+						value="#{purchaseApplyController.purchaseQty}">
+					</p:inputText></td>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="purchaseUnit">单位:</label></td>
+					<td class="hengbiaogedata"><p:inputText id="purchaseUnit"
+						value="#{purchaseApplyController.addApplyDetail.unit}">
+					</p:inputText> <his:IME for="addApplyForm:purchaseUnit" rawSQL="true"
+						resultcol="1" SQLResult="编号:0,单位:1,输入码:2" sortcol="id"
+						SQL="select t.id,t.unit_name,t.input_code from pension_purchase_unit t"
+						fitcol="input_code" lock="true"
+						multiresult="addApplyForm:addUnitId;0" /></td>
+				</tr>
+				<tr>
+					<td><p:commandButton process="@this,addApplyForm"
+						onstart="return checkNulls('addApplyForm','redfont',true);"
+						actionListener="#{purchaseApplyController.addApplyDetail}"
+						styleClass="commonbtn" value="添加"
+						oncomplete="focusOnItemName(xhr,status,args)"
+						update=":addApplyForm,:message">
+					</p:commandButton></td>
+					<td><p:commandButton
+						oncomplete="delDetailShow(xhr,status,args)"
+						actionListener="#{purchaseApplyController.delDetailConfirm}"
+						styleClass="deletebtn" value="" update=":message">
+					</p:commandButton></td>
+				</tr>
+			</table>
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="4" style="width:100%"
+						id="itemDetailTable"
+						selection="#{purchaseApplyController.selectedItemDetail}"
+						value="#{purchaseApplyController.addApplyDetailList}"
+						paginator="true" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false"
+						paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						var="detail" rowKey="#{detail.itemName}" selectionMode="single"
+						emptyMessage="没有相应记录">
+
+						<p:ajax event="rowSelect"
+							listener="#{purchaseApplyController.setEnableFlag}" />
+						<p:ajax event="rowUnselect"
+							listener="#{purchaseApplyController.setUnableFlag}" />
+						<p:column headerText="物资名称" styleClass="width60">
+							<h:outputText value="#{detail.itemName}" />
+						</p:column>
+						<p:column headerText="物资类型" styleClass="width60">
+							<h:outputText value="#{detail.typeName}" />
+						</p:column>
+
+						<p:column headerText="采购数量" styleClass="width60">
+							<h:outputText value="#{detail.purchaseQty}" />
+						</p:column>
+						<p:column headerText="单位" styleClass="width60">
+							<h:outputText value="#{detail.unit}" />
+						</p:column>
+					</p:dataTable></td>
+				</tr>
+			</table>
+			<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+				<p:commandButton process="@this"
+					actionListener="#{purchaseApplyController.saveAndSendApplyRecord}"
+					oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+					value="提交" update=":applyForm,:message">
+				</p:commandButton>
+				<p:commandButton process="@this"
+					actionListener="#{purchaseApplyController.saveApplyRecord}"
+					oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+					value="保存" update=":applyForm,:message">
+				</p:commandButton>
+				<p:commandButton onclick="addApplyDlg.hide()" type="button"
+					styleClass="commonbtn" value="关闭" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<!-- 修改购申请 -->
+	<p:dialog header="修改采购申请" widgetVar="editApplyDlg" resizable="false"
+		appendTo="@(body)" modal="true" position="top">
+		<h:form id="editApplyForm" styleClass="noDisable">
+			<table class="hengbiaoge" width="330px" align="center">
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="editPurchaseTime_input">采购时间:</label></td>
+					<td class="hengbiaogedata"><p:calendar id="editPurchaseTime"
+						value="#{purchaseApplyController.addApplyRecord.purchaseTime}"
+						pattern="yyyy-MM-dd HH:mm">
+						<p:ajax event="dateSelect" procss="@this"></p:ajax>
+					</p:calendar></td>
+					<td class="hengbiaogeHeader1"><label>采购单号:</label></td>
+					<td class="hengbiaogedata"><p:inputText
+						value="#{purchaseApplyController.addApplyRecord.purchaseNo}"
+						disabled="true"></p:inputText></td>
+				</tr>
+			</table>
+			<table class="hengbiaoge" width="430px" align="center">
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="editItemName">物资名称:</label></td>
+					<td class="hengbiaogedata"><p:inputText id="editItemName"
+						value="#{purchaseApplyController.addApplyDetail.itemName}">
+					</p:inputText> <his:IME for="editApplyForm:editItemName" rawSQL="true"
+						resultcol="1" SQLResult="编号:0,名称:1,输入码:2,物资类型:4,物资类型编号:3:hide"
+						sortcol="id"
+						SQL="select t.id,t.item_name,t.input_code,t.type_id,pd.item_name as typeName from pension_item_catalog t,pension_dic_itemtype pd where t.type_id=pd.id and  t.cleared=2"
+						fitcol="input_code" lock="true"
+						multiresult="editApplyForm:editItemId;0,editApplyForm:editTypeId;4,editApplyForm:editTypeName;3" />
+					<h:inputHidden
+						value="#{purchaseApplyController.addApplyDetail.itemId}"
+						id="editItemId" /></td>
+					<td class="hengbiaogeHeader1">物资类型:</td>
+					<td class="hengbiaogedata"><p:inputText id="editTypeName"
+						value="#{purchaseApplyController.addApplyDetail.typeName}"></p:inputText>
+					<h:inputHidden
+						value="#{purchaseApplyController.addApplyDetail.typeId}"
+						id="editTypeId" /></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="editPurchaseQty">采购数量:</label></td>
+					<td class="hengbiaogedata"><p:inputText id="editPurchaseQty"
+						value="#{purchaseApplyController.purchaseQty}">
+					</p:inputText></td>
+					<td class="hengbiaogeHeader1"><label class="redfont"
+						for="editPurchaseUnit">单位:</label></td>
+					<td class="hengbiaogedata"><p:inputText id="editPurchaseUnit"
+						value="#{purchaseApplyController.addApplyDetail.unit}">
+					</p:inputText> <his:IME for="editApplyForm:editPurchaseUnit" rawSQL="true"
+						resultcol="1" SQLResult="编号:0,单位:1,输入码:2" sortcol="id"
+						SQL="select t.id,t.unit_name,t.input_code from pension_purchase_unit t"
+						fitcol="input_code" lock="true"
+						multiresult="editApplyForm:editUnitId;0" /></td>
+				</tr>
+				<tr>
+					<td><p:commandButton process="@this,editApplyForm"
+						onstart="return checkNulls('editApplyForm','redfont',true);"
+						actionListener="#{purchaseApplyController.addApplyDetail}"
+						styleClass="commonbtn" value="添加"
+						oncomplete="focusEditItemName(xhr,status,args)"
+						update=":editApplyForm,:message">
+					</p:commandButton></td>
+					<td><p:commandButton
+						oncomplete="delDetailShow(xhr,status,args)"
+						actionListener="#{purchaseApplyController.delDetailConfirm}"
+						styleClass="deletebtn" value="" update=":message">
+					</p:commandButton></td>
+				</tr>
+			</table>
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="4" style="width:100%"
+						id="editItemDetailTable"
+						selection="#{purchaseApplyController.selectedItemDetail}"
+						value="#{purchaseApplyController.addApplyDetailList}"
+						paginator="true" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false"
+						paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						var="detail" rowKey="#{detail.itemName}" selectionMode="single"
+						emptyMessage="没有相应记录">
+
+						<p:ajax event="rowSelect"
+							listener="#{purchaseApplyController.setEnableFlag}" />
+						<p:ajax event="rowUnselect"
+							listener="#{purchaseApplyController.setUnableFlag}" />
+						<p:column headerText="物资名称" styleClass="width60">
+							<h:outputText value="#{detail.itemName}" />
+						</p:column>
+						<p:column headerText="物资类型" styleClass="width60">
+							<h:outputText value="#{detail.typeName}" />
+						</p:column>
+						<p:column headerText="采购数量" styleClass="width60">
+							<h:outputText value="#{detail.purchaseQty}" />
+						</p:column>
+						<p:column headerText="单位" styleClass="width60">
+							<h:outputText value="#{detail.unit}" />
+						</p:column>
+					</p:dataTable></td>
+				</tr>
+			</table>
+			<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+				<p:commandButton process="@this"
+					actionListener="#{purchaseApplyController.updateAndSendApplyRecord}"
+					oncomplete="editApplyDlgHide(xhr,status,args)"
+					styleClass="commonbtn" value="提交"
+					update=":applyForm,:message,:detailForm">
+				</p:commandButton>
+				<p:commandButton process="@this"
+					actionListener="#{purchaseApplyController.updateApplyRecord}"
+					oncomplete="editApplyDlgHide(xhr,status,args)"
+					styleClass="commonbtn" value="保存"
+					update=":applyForm,:message,:detailForm">
+				</p:commandButton>
+				<p:commandButton onclick="editApplyDlg.hide()" type="button"
+					styleClass="commonbtn" value="关闭" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+	<!-- 删除物资明细的dialog -->
+	<p:dialog appendTo="@(body)" modal="true" header="删除明细确认"
+		widgetVar="confirmDelDetailDlg" width="220">
+		<h:form id="confirmDelDetailForm">
+			<h:panelGrid>
+				<f:facet name="header">
+					<h:outputText value="确定删除该物资明细？" style="font-weight:bold;" />
+				</f:facet>
+				<f:facet name="footer">
+					<p:commandButton styleClass="submitbtn" value=""
+						actionListener="#{purchaseApplyController.deleteItemDetail}"
+						update=":addApplyForm,:message,:editApplyForm,"
+						oncomplete="confirmDelDetailDlg.hide()"></p:commandButton>
+					<p:commandButton styleClass="cancelbtn" value="" type="button"
+						onclick="confirmDelDetailDlg.hide();"></p:commandButton>
+				</f:facet>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+	<!-- 删除物资主记录的dialog -->
+	<p:dialog appendTo="@(body)" modal="true" header="删除物资申请确认"
+		widgetVar="delRecordDlg" width="220">
+		<h:form id="delRecordForm">
+			<h:panelGrid>
+				<f:facet name="header">
+					<h:outputText value="确定删除该物资申请？" style="font-weight:bold;" />
+				</f:facet>
+				<f:facet name="footer">
+					<p:commandButton styleClass="submitbtn" value=""
+						actionListener="#{purchaseApplyController.deleteApply}"
+						update=":message,:applyForm,:detailForm"
+						oncomplete="delRecordDlg.hide()"></p:commandButton>
+					<p:commandButton styleClass="cancelbtn" value="" type="button"
+						onclick="delRecordDlg.hide();"></p:commandButton>
+				</f:facet>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<script type="text/javascript">
+//隐藏新增物资记录对话框
+function addConfirm(xhr, status, args) {
+	if (args.addHide) {
+		addApplyDlg.hide();
+	}
+	}
+//删除明细时，显示确认删除对话框
+function delDetailShow(xhr, status, args) {
+	if (args.confirmDel) {
+		confirmDelDetailDlg.show();
+	}
+	}
+//新增，新增一条物资明细后，焦点定位到物资名称输入框
+function focusOnItemName(xhr,status,args){
+	if(args.addDetail){
+		jQuery("#addApplyForm\\:addItemName").focus();
+		}
+	}
+//修改，新增一条物资明细后，焦点定位到物资名称输入框
+function focusEditItemName(xhr,status,args){
+	if(args.addDetai){
+		jQuery("#editApplyForm\\:editItemName").focus();
+		}
+}
+	//显示修改物资申请对话框
+	function editApplyDlgShow(xhr,status,args){
+		if (args.editshow) {
+			editApplyDlg.show();
+		}
+		}
+	//隐藏修改物资申请对话框
+	function editApplyDlgHide(xhr,status,args){
+		if (args.edithide) {
+			editApplyDlg.hide();
+		}
+		}
+	//确认删除主记录确认
+	function delApplyDlgShow(xhr,status,args){
+		if (args.delRecord) {
+			delRecordDlg.show();
+		}
+		}
+    /*  取消滚动条
+     */
+ 	jQuery(document).ready(function(){ 
+ 		 cleanBar();
+ 	}); 
+</script>
+	</body>
+</f:view>
+</html>

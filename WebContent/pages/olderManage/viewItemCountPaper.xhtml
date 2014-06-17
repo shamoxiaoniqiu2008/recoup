@@ -1,0 +1,404 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<style>
+.old {
+	background-color: #99FF99;
+	background-image: none !important;
+	color: #000000 !important;
+}
+
+.overdiv {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: hidden;
+	height: 18px;
+	width: 90px;
+	border: 0px solid #e6e6e6;
+}
+
+.overdivscroll {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: auto;
+	height: 230px;
+	width: 90px;
+	border: 0px solid #e6e6e6;
+}
+
+.alignTop tr td {
+	vertical-align: top;
+}
+</style>
+	<h:body>
+		<p:growl id="message"></p:growl>
+
+		<h:form id="GroupHeadForm">
+			<table>
+				<tr>
+					<td class="leftcell">分组负责人:</td>
+					<td><p:inputText id="nameText" style="width:120px" /> <his:IME
+							for="GroupHeadForm:nameText" fitcol="inputCode" resultcol="0"
+							lock="true" rawSQL="true"
+							SQL="#{medicalRegisterController.groupSql}"
+							SQLResult="负责人:0,车牌号:1,出发时间:2,返回时间:3,分组id:4:hide,输入码:6"
+							multiresult="GroupHeadForm:groupIdHd;4" /> <h:inputHidden
+							id="groupIdHd" value="#{viewItemCountPaperController.groupId}" />
+					</td>
+					<td class="leftcell">出发日期:</td>
+					<td><p:calendar
+							value="#{viewItemCountPaperController.startDate}" size="9"
+							pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar
+							value="#{viewItemCountPaperController.endDate}" size="9"
+							pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell"><p:commandButton
+							action="#{viewItemCountPaperController.selectLastMonth}"
+							styleClass="commonbtn" value="上月"
+							update=":GroupHeadForm,:message" /></td>
+					<td class="leftcell"><p:commandButton
+							action="#{viewItemCountPaperController.selectNextMonth}"
+							styleClass="commonbtn" value="下月"
+							update=":GroupHeadForm,:message" /></td>
+					<td class="leftcell"><p:commandButton id="searchButton"
+							action="#{viewItemCountPaperController.selectGroupRecords}"
+							styleClass="searchbtn" value="" process="@this,GroupHeadForm"
+							update=":GroupDataTableForm,:groupMaintainForm,:message" /></td>
+					<td class="leftcell"><p:commandButton id="searchButtonfff"
+							action="#{viewItemCountPaperController.clearSelectForm}"
+							styleClass="blankbtn" value="" oncomplete="clearSelectForm()"
+							update=":GroupDataTableForm,:groupMaintainForm,:message,:GroupHeadForm" />
+					</td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="GroupDataTableForm">
+			<h:panelGrid id="medicalGroupRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="medicalRegisterTable" rowIndexVar="row"
+					value="#{viewItemCountPaperController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{viewItemCountPaperController.selectedGroupRow}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{viewItemCountPaperController.selectRecord}"
+						update=":GroupDataTableForm,:groupMaintainForm" />
+					<p:ajax event="rowUnselect"
+						listener="#{viewItemCountPaperController.unSelectRecord}"
+						update=":GroupDataTableForm,:groupMaintainForm" />
+					<p:column headerText="负责人">
+						<h:outputText value="#{record.managerName}" />
+					</p:column>
+					<p:column headerText="车牌号">
+						<h:outputText value="#{record.carnumber}" />
+					</p:column>
+					<p:column headerText="出发时间">
+						<h:outputText value="#{record.leavetime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="返回时间">
+						<h:outputText value="#{record.backtime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+						</h:outputText>
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="groupMaintainForm" style="margin-top:20px;">
+			<b>#{viewItemCountPaperController.groupCollectionInfo}</b>
+			<p:dataTable cellspacing="8" rows="5" style="width:100%"
+				styleClass="alignTop" id="medicalRegisterTable" rowIndexVar="row"
+				value="#{viewItemCountPaperController.oneGroupOlder}"
+				selection="#{viewItemCountPaperController.selectedRows}"
+				selectionMode="single" var="record" rowKey="#{record.id}"
+				paginatorAlwaysVisible="false" emptyMessage="没有相应记录"
+				paginator="true" paginatorPosition="bottom"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:ajax event="rowSelect"
+					listener="#{viewItemCountPaperController.selecRegtRecord}"
+					update=":groupMaintainForm" />
+				<p:ajax event="rowUnselect"
+					listener="#{viewItemCountPaperController.unSelectRegRecord}"
+					update=":groupMaintainForm" />
+
+				<p:column headerText="姓名" styleClass="width50">
+					<h:outputText value="#{record.olderName}" />
+				</p:column>
+				<p:column headerText="就医日期" styleClass="width80">
+					<h:outputText value="#{record.hospitalizetime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="就医类型" styleClass="width60">
+					<h:outputText value="#{record.type}" />
+				</p:column>
+				<p:column headerText="就医事项">
+					<div title="more..."
+						onDblClick="clickChageHeight(this,'overdiv','overdivscroll');"
+						onselectstart="return false" class="overdiv">
+						#{record.hospitalizeissue}</div>
+				</p:column>
+				<p:column headerText="预交金" styleClass="width50">
+					<h:outputText value="#{record.advance}" />
+				</p:column>
+
+				<p:column headerText="返还金" styleClass="width50">
+					<h:outputText value="#{record.backmoney}" />
+				</p:column>
+				<p:column headerText="交付物品">
+					<div title="more..."
+						onDblClick="clickChageHeight(this,'overdiv','overdivscroll');"
+						onselectstart="return false" class="overdiv">
+						#{record.things}</div>
+				</p:column>
+				<p:column headerText="返院登记" styleClass="width60">
+					<h:outputText value="已登记" rendered="#{record.isback == 1}" />
+					<h:outputText value="未登记" rendered="#{record.isback== null}" />
+				</p:column>
+				<p:column headerText="出发时间" styleClass="width80">
+					<h:outputText value="#{record.leaveTime}">
+						<f:convertDateTime pattern="HH:mm:ss" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="返院时间" styleClass="width80">
+					<h:outputText value="#{record.backtime}" styleClass="width80">
+						<f:convertDateTime pattern="HH:mm:ss" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="负责人" styleClass="width50">
+					<h:outputText value="#{record.managerName}" />
+				</p:column>
+
+			</p:dataTable>
+			<div align="center">
+				<p:commandButton styleClass="commonbtn" value="返院登记"
+					rendered="false"
+					disabled="#{viewItemCountPaperController.disUpdateButton}"
+					action="#{viewItemCountPaperController.copyRecordUpdatedRow}"
+					oncomplete="handleBackRegisiterDialogInit(xhr, status, args)"
+					update=":backedRegisterForm,:message" />
+			</div>
+		</h:form>
+
+		<p:dialog header="返院登记" widgetVar="backedRegisterDialog"
+			resizable="false" appendTo="@(body)" position="center" modal="true">
+			<h:form id="backedRegisterForm">
+				<table class="hengbiaoge" width="100%" id="updateTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="老人姓名:"
+								for="nameText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="nameText"
+								style="width:120px" readonly="true"
+								value="#{viewItemCountPaperController.updatedRow.olderName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="大厦:"
+								for="buildingText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="buildingText"
+								style="width:120px" readonly="true"
+								value="#{viewItemCountPaperController.updatedRow.buildName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="房间:"
+								for="roomText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="roomText"
+								style="width:120px" readonly="true"
+								value="#{viewItemCountPaperController.updatedRow.roomName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="床位号:"
+								for="bedNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="bedNoText"
+								style="width:120px" readonly="true"
+								value="#{viewItemCountPaperController.updatedRow.bedName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="就医日期:"
+								for="medicalDate" /></td>
+						<td class="hengbiaogedata"><p:calendar id="medicalDate"
+								pattern="yyyy-MM-dd" readonly="true" size="16"
+								value="#{viewItemCountPaperController.updatedRow.hospitalizetime}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="就医事项:"
+								for="medicalIssueText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="medicalIssueText"
+								style="width:120px" readonly="true"
+								value="#{viewItemCountPaperController.updatedRow.hospitalizeissue}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="预交金:"
+								for="advanceText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="advanceText"
+								style="width:120px" readonly="true"
+								value="#{viewItemCountPaperController.updatedRow.advance}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="返回时间:"
+								for="backtime" /></td>
+						<td class="hengbiaogedata"><p:calendar id="backtime"
+								pattern="yyyy-MM-dd HH:mm" required="true" size="16"
+								requiredMessage="请输返回时间!"
+								value="#{viewItemCountPaperController.updatedRow.backtime}" /></td>
+					</tr>
+
+
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="返还金额:"
+								for="backMoneyText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText id="backMoneyText"
+								style="width:120px" required="true"
+								requiredMessage="返还金额不能为空!且必须为两位小数!如:100.12"
+								converterMessage="返还金额必须为两位正小数!如:100.12"
+								validatorMessage="返还金额必须为两位正小数!如:100.12"
+								value="#{viewItemCountPaperController.updatedRow.backmoney}">
+								<f:validateDoubleRange for="backedRegisterDialog:backMoneyText" />
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="交付物品:"
+								for="thingsText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea id="thingsText"
+								style="width:120px" required="true" requiredMessage="请填写交付物品"
+								value="#{viewItemCountPaperController.updatedRow.things}" /></td>
+					</tr>
+
+
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{viewItemCountPaperController.backedRegister}"
+						oncomplete="handleDialogComplete(xhr, status, args)"
+						update=":backedRegisterForm,:groupMaintainForm,:message" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="backedRegisterDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+
+
+		<p:dialog header="项目统计" widgetVar="itemDialog" appendTo="@(body)"
+			position="center" modal="true">
+			<h:form id="itemDataTableForm">
+				<h:panelGrid id="itemRecord" style="width:100%">
+					<p:dataTable cellspacing="8" rows="10" style="width:100%"
+						id="itemTable" rowIndexVar="row"
+						value="#{viewItemCountPaperController.itemRecords}"
+						selection="#{viewItemCountPaperController.selectedItemCountRow}"
+						var="record" rowKey="#{record.id}" selectionMode="single"
+						emptyMessage="没有相应记录" paginator="true" paginatorPosition="bottom"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+						<p:ajax event="rowSelect"
+							listener="#{viewItemCountPaperController.selectDetail}"
+							update=":itemDetailForm" />
+						<p:ajax event="rowUnselect"
+							listener="#{viewItemCountPaperController.unSelectDetail}"
+							update=":itemDetailForm" />
+						<p:column headerText="项目名">
+							<h:outputText value="#{record.itemName}" />
+						</p:column>
+						<p:column headerText="人数">
+							<h:outputText value="#{record.number}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</h:form>
+			<h:form id="itemDetailForm">
+				<p:fieldset legend="详情">
+					<h:panelGrid id="itemDetailRecord" style="width:100%">
+						<p:dataTable cellspacing="8" rows="10" style="width:100%"
+							id="itemDetailTable" rowIndexVar="row"
+							value="#{viewItemCountPaperController.itemDetails}" var="detail"
+							rowKey="#{detail.id}" emptyMessage="没有相应记录" paginator="true"
+							paginatorPosition="bottom"
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+							<p:column headerText="就医类型">
+								<h:outputText value="#{detail.type}" />
+							</p:column>
+							<p:column headerText="就医事项">
+								<h:outputText value="#{detail.hospitalizeissue}" />
+							</p:column>
+							<p:column headerText="姓名">
+								<h:outputText value="#{detail.olderName}" />
+							</p:column>
+							<p:column headerText="大厦">
+								<h:outputText value="#{detail.buildName}" />
+							</p:column>
+							<p:column headerText="房间">
+								<h:outputText value="#{detail.roomName}" />
+							</p:column>
+							<p:column headerText="床位">
+								<h:outputText value="#{detail.bedName}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</p:fieldset>
+			</h:form>
+			<h:form id="itemMaintainForm">
+				<div align="center"></div>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			function handleDialogComplete(xhr, status, args) {
+				if (args.success) {
+					backedRegisterDialog.hide();
+
+				}
+
+			}
+
+			function handleBackRegisiterDialogInit(xhr, status, args) {
+				if (args.success) {
+					backedRegisterDialog.show();
+				}
+			}
+			function handleUpdateComplete(xhr, status, args) {
+				if (!args.validationFailed) {
+					updateRecordDialog.hide();
+				}
+
+			}
+			//清空 selectForm
+			function clearSelectForm() {
+				jQuery("#GroupHeadForm\\:nameText").val("");
+				//document.getElementById("GroupHeadForm:nameText").value="";
+
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

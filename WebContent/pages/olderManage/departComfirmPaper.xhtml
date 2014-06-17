@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:inputHidden value="#{departRegisterController.olderId}"
+					id="olderId" />
+				<h:outputText value="&nbsp;&nbsp;老人姓名" />
+				<p:inputText value="#{departRegisterController.olderName}"
+					id="olderName" />
+				<his:IME for="headForm:olderName" fitcol="oldName,inputCode"
+					resultcol="1" lock="true" rawSQL="true"
+					SQL="#{departRegisterController.olderNameSql}"
+					SQLResult="编号:6:hide,姓名:0,性别:5,大厦:1,楼层:2,房间:3,床位:4"
+					multiresult="headForm:olderId;0,headForm:bedName;6" />
+				<h:outputText value="&nbsp;&nbsp;预计离院时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{departRegisterController.startDate}" />
+				<h:outputText value="至:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{departRegisterController.endDate}" />
+				<p:commandButton id="searchButton"
+					action="#{departRegisterController.search}" styleClass="searchbtn"
+					value=""
+					update=":dataTableForm,:maintainForm,:approveTableForm,:messages" />
+				<p:commandButton styleClass="blankbtn" value=""
+					action="#{departRegisterController.clearSelectForm}"
+					update=":dataTableForm:list,:headForm" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<p:dataTable id="list"
+				value="#{departRegisterController.pensionDepartcheck}"
+				var="pensionDepartregister" rowKey="#{pensionDepartregister.id}"
+				emptyMessage="没有相应记录"
+				selection="#{departRegisterController.selectPensionDepartcheck}"
+				selectionMode="single" paginator="true"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+				rows="10" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+
+				<p:ajax event="rowSelect"
+					listener="#{departRegisterController.setEnableFlag}"
+					update=":approveTableForm,:maintainForm:confirmApplyButton" />
+
+				<p:ajax event="rowUnselect"
+					listener="#{departRegisterController.setUnableFlag}"
+					update=":approveTableForm,:maintainForm:confirmApplyButton" />
+
+				<p:column headerText="合同号">
+					<h:outputText value="#{pensionDepartregister.contractNum}" />
+				</p:column>
+				<p:column headerText="姓名">
+					<h:outputText value="#{pensionDepartregister.name}" />
+				</p:column>
+				<p:column headerText="大厦">
+					<h:outputText value="#{pensionDepartregister.building_name}" />
+				</p:column>
+				<p:column headerText="楼层">
+					<h:outputText value="#{pensionDepartregister.floor_name}" />
+				</p:column>
+				<p:column headerText="房间">
+					<h:outputText value="#{pensionDepartregister.room_name}" />
+				</p:column>
+				<p:column headerText="床位">
+					<h:outputText value="#{pensionDepartregister.bed_name}" />
+				</p:column>
+				<p:column headerText="入住时间">
+					<h:outputText value="#{pensionDepartregister.visitTime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="预计离院时间">
+					<h:outputText value="#{pensionDepartregister.leavetime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="离院原因">
+					<h:outputText value="#{pensionDepartregister.leavereason}" />
+				</p:column>
+				<p:column headerText="审批状态">
+					<h:outputText value="待离院"
+						rendered="#{pensionDepartregister.isagree == 5}" />
+				</p:column>
+			</p:dataTable>
+		</h:form>
+
+		<div style="margin-top: 20px">
+			<h:form id="approveTableForm">
+				<p:dataTable id="list"
+					value="#{departRegisterController.pensionDepartnofityListCheck}"
+					selection="#{departRegisterController.selectPensionDepartnofity}"
+					var="pensionDepartregister" rowKey="#{pensionDepartregister.id}"
+					emptyMessage="没有相应记录" selectionMode="single" paginator="true"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					rows="10" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+
+					<p:ajax event="rowSelect"
+						listener="#{departRegisterController.setEnableFlag}" />
+
+					<p:ajax event="rowUnselect"
+						listener="#{departRegisterController.setUnableFlag}" />
+
+					<p:column headerText="处理事件">
+						<h:outputText value="#{pensionDepartregister.eventName}" />
+					</p:column>
+
+					<p:column headerText="处理部门">
+						<h:outputText value="#{pensionDepartregister.deptName}" />
+					</p:column>
+					<p:column headerText="处理人">
+						<h:outputText value="#{pensionDepartregister.handlerName}" />
+					</p:column>
+					<p:column headerText="处理结果">
+						<h:outputText value="完成"
+							rendered="#{pensionDepartregister.handleresult == 1}" />
+						<h:outputText value="未完成"
+							rendered="#{pensionDepartregister.handleresult == 2}" />
+					</p:column>
+					<p:column headerText="处理时间">
+						<h:outputText value="#{pensionDepartregister.handetime}">
+							<f:convertDateTime pattern="yyyy-MM-dd" />
+						</h:outputText>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+
+			<h:form id="maintainForm">
+				<div align="center">
+					<p:commandButton id="confirmApplyButton" value="离院确认"
+						onclick="confirmAppDialog.show()" styleClass="commonbtn"
+						update=":approveTableForm"
+						disabled="#{departRegisterController.departComfirmDisableFrom}">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</div>
+		<p:dialog appendTo="@(body)" modal="true" header="离院确认"
+			widgetVar="confirmAppDialog" width="260">
+			<h:form>
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="确认老人正式离院，并完成物品清点?" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<div align="center">
+							<p:commandButton styleClass="submitbtn" value=""
+								oncomplete="confirmAppDialog.hide();confirmAppDialog2.show()">
+							</p:commandButton>
+							<p:commandButton styleClass="cancelbtn" value="" type="button"
+								onclick="confirmAppDialog.hide();">
+							</p:commandButton>
+						</div>
+					</f:facet>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+		<p:dialog appendTo="@(body)" modal="true" header="离院确认"
+			widgetVar="confirmAppDialog2" width="260">
+			<h:form>
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="请再次确认老人正式离院，完成之后将无法撤消?"
+							style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<div align="center">
+							<p:commandButton styleClass="submitbtn" value=""
+								actionListener="#{departRegisterController.departComfirm}"
+								update=":approveTableForm,:dataTableForm,:maintainForm,:messages"
+								oncomplete="confirmAppDialog2.hide();">
+							</p:commandButton>
+							<p:commandButton styleClass="cancelbtn" value="" type="button"
+								onclick="confirmAppDialog2.hide();">
+							</p:commandButton>
+						</div>
+					</f:facet>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+		<script type="text/javascript">
+			// 聚焦到项目编号文本框 
+			function focusNameText() {
+				jQuery("#insertForm\\:nameText").focus();
+			}
+			function handleUpdateComplete(xhr, status, args) {
+				if (!args.validationFailed) {
+					insertRecordDialog.hide();
+					updateRecordDialog.hide();
+				}
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

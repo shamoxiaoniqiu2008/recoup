@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+
+	<!-- 驱动类 -->
+   <classPathEntry location="D:\workspace\pension\WebContent\WEB-INF\lib\mysql-connector-java-5.1.7-bin.jar"/>
+
+
+  <context id="context1" >
+  	
+  	 <!-- 生成equals和hashcode的插件 -->
+	  <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />
+	   <plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+   
+  	<!-- 数据库连接的配置 -->
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://192.168.208.211:3306/pension_db_amj" userId="root" password="root" />
+   
+   <!-- domain 和example 的配置 -->
+   <!-- targetProject指定生成在哪个工程下，在eclipse中必须指定 -->
+   <!-- targetPackage指定生成在哪个包下，在eclipse中必须指定 -->
+    <javaModelGenerator targetPackage="domain.financeManage" targetProject="pension/JavaSource" >
+    	<!-- 如果某个表在某个schema中，那么类会在package  domain.schema中，而不是domain中 -->
+    	<property name="enableSubPackages" value="true"/>
+    	<!-- 从数据库返回数据时，是否trim数据 对于char类型的比较有用 -->
+    	<property name="trimStrings" value="true" />
+    	
+    </javaModelGenerator>
+    
+    <!-- mapper.xml  -->
+    <sqlMapGenerator targetPackage="persistence.financeManage" targetProject="pension/JavaSource" >
+    	 <property name="enableSubPackages" value="true" />
+    </sqlMapGenerator>
+    
+    <!-- mapper.java -->
+    <javaClientGenerator targetPackage="persistence.financeManage" targetProject="pension/JavaSource" type="XMLMAPPER" >
+    	<property name="enableSubPackages" value="true" />
+    </javaClientGenerator>
+    
+    <!-- table的配置 -->
+
+	
+	<!-- 日常缴费记录主表 -->
+	<table tableName="pension_older_itempurse" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="olderId" property="olderId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="itempurse_id" property="itempurseId" javaType = "java.lang.Long"></columnOverride>
+	</table>
+	
+  </context>
+</generatorConfiguration>

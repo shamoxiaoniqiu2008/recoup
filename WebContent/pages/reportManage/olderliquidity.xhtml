@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+
+<style>
+.ui-panel .ui-panel-content {
+	padding: 0em !important;
+}
+.reportlevel1 {
+	width: 80px;
+	border: 1px solid;
+	text-align: center;
+	font-family: simsun;
+	font-size: 16px;
+	font-weight:bold;
+	
+}
+.reportlevel2 {
+	border: 1px solid;
+	text-align: center;
+	font-family: simsun;
+	font-size: 12px;
+	
+
+</style>
+
+	<h:head>
+		<title>#{pageConfig.olderLiquidity}</title>
+
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+<script type="text/javascript">
+		</script>
+
+
+	<h:body>
+	<p:growl id="message" widgetVar="message"></p:growl>
+		<p:growl id="messages"></p:growl>
+		<h:form id="searchForm" style="display: inline">
+		<h:outputText value="起始时间:" style="text-align:right" />
+		<p:calendar id="startDate" pattern="yyyy-MM-dd HH:mm"  
+			value="#{olderLiquidityController.startDate}"  >
+		</p:calendar>
+		<h:outputText value="结束时间:" style="text-align:right" />
+		<p:calendar id="endDate" pattern="yyyy-MM-dd HH:mm"  
+			value="#{olderLiquidityController.endDate}"  >
+		</p:calendar>
+		<p:commandButton styleClass="commonbtn" value="查询"
+			action="#{olderLiquidityController.selectOlderLiquidity}"
+			update=":reportForm,:messages" 
+			process="@this,startDate,endDate" ></p:commandButton>
+		</h:form>
+		<h:form id="reportForm">
+		<table>
+		<tr>
+		<td valign="top" style="padding-left:0px">
+			<font style="font-size:20pt;font-weight:bold">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;老人在院情况一览</font>
+			<br></br>
+			<br></br>
+			<table>
+				<tr>
+					<td style="visiable: hidden;width:60px"></td>
+					<td class="reportlevel1">项目</td>
+					<ui:repeat value="#{olderLiquidityController.buildings}" var="building">
+					<td class="reportlevel1">#{building.name}</td>
+					</ui:repeat>
+				</tr>
+				<tr>
+					<td style="visiable: hidden;width:60px"></td>
+					<td class="reportlevel1">开始日期</td>
+					<ui:repeat value="#{olderLiquidityController.startBulidings}" var="building" >
+					<td class="reportlevel2">#{building.oldernumber}</td>
+					</ui:repeat>
+				</tr>
+				<tr>
+					<td style="visiable: hidden;width:60px"></td>
+					<td class="reportlevel1">结束日期</td>
+					<ui:repeat value="#{olderLiquidityController.endBulidings}" var="building" >
+					<td class="reportlevel2">#{building.oldernumber}</td>
+					</ui:repeat>
+				</tr>
+			</table>
+		</td>
+		<td valign="top" style="padding-left:50px;padding-top:49px">
+			<p:barChart id="bar" value="#{olderLiquidityController.bar}" 
+				style="height:300px;width: 500px"  
+				legendPosition="ne"
+				legendRows="#{fn:length(olderLiquidityController.bar.series)}"
+	            min="0" max="#{olderLiquidityController.legendCols}"
+	            shadow="false"
+	            animate="true"/>  
+		</td>
+		</tr>
+		</table>
+		</h:form>
+	</h:body>
+</f:view>
+</html>

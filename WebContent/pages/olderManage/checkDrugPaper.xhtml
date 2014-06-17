@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.checkDrugPaper}</title>
+
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+		<p:growl id="messages"></p:growl>
+
+		<h:form id="searchForm">
+			<!-- 输入起始时间和截止时间 -->
+			<table>
+				<tr>
+					<td class="leftcell">配药时间:</td>
+					<td><p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+							value="#{checkDrugPaperController.startDate}" /></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+							value="#{checkDrugPaperController.endDate}" /></td>
+					<td class="leftcell"><p:commandButton id="searchButton"
+							action="#{checkDrugPaperController.search}"
+							styleClass="searchbtn" value=""
+							update=":listForm,:showForm,:messages" /></td>
+					<td class="leftcell"><p:commandButton
+							action="#{checkDrugPaperController.clearSearchForm}"
+							styleClass="commonbtn" value="清空" update=":searchForm,:messages" />
+						<h:inputHidden value="checkSearchDate" id="checkSearchDate"
+							validator="#{checkDrugPaperController.checkSearchDate}" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="listForm">
+			<p:dataTable rows="10" style="white-space:nowrap;width:100%"
+				id="listTable" value="#{checkDrugPaperController.dosages}"
+				var="dosage" rowKey="#{dosage.id}" selectionMode="single"
+				emptyMessage="没有相应记录" paginatorAlwaysVisible="false"
+				selection="#{checkDrugPaperController.selectDosage}"
+				paginator="true" paginatorPosition="bottom"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:ajax event="rowSelect"
+					listener="#{checkDrugPaperController.onDosageSelect}"
+					update=":showForm,:messages" />
+				<p:ajax event="rowUnselect"
+					listener="#{checkDrugPaperController.onDosageUnselect}"
+					update=":showForm,:messages" />
+				<p:column headerText="配送分组" style="text-align:center;">
+					<h:outputText value="#{dosage.deliveryname}" />
+				</p:column>
+				<p:column headerText="护理部" style="text-align:center;">
+					<h:outputText value="#{dosage.nursedeptname}" />
+				</p:column>
+				<p:column headerText="负责人" style="text-align:center;">
+					<h:outputText value="#{dosage.chartername}" />
+				</p:column>
+				<p:column headerText="配药人" style="text-align:center;">
+					<h:outputText value="#{dosage.senderName}" />
+				</p:column>
+				<p:column headerText="配药时间" style="text-align:center;">
+					<h:outputText value="#{dosage.sendtime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="备注" style="text-align:center;">
+					<h:outputText value="#{dosage.notes}" />
+				</p:column>
+			</p:dataTable>
+		</h:form>
+		<div style="margin-top: 30px">
+			<h:form id="showForm">
+				<p:dataTable style="white-space:nowrap;width:100%" id="showTable"
+					value="#{checkDrugPaperController.dosageDetails}"
+					var="dosageDetail" rowKey="#{dosageDetail.id}"
+					selection="#{checkDrugPaperController.checkDosageDetail}"
+					emptyMessage="没有相应记录" paginator="true" paginatorPosition="bottom"
+					rows="4" paginatorAlwaysVisible="false" selectionMode="single"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:column headerText="老人姓名" style="text-align:center;">
+						<h:outputText value="#{dosageDetail.olderName}" />
+					</p:column>
+					<p:column headerText="护理部" style="text-align:center;">
+						<h:outputText value="#{dosageDetail.deptName}" />
+					</p:column>
+					<p:column headerText="药品名称" style="text-align:center;">
+						<h:outputText value="#{dosageDetail.drugName}" />
+					</p:column>
+					<p:column headerText="单次剂量" style="text-align:center;">
+						<h:outputText value="#{dosageDetail.singleDose}" />
+					</p:column>
+					<p:column headerText="单位" style="text-align:center;">
+						<h:outputText value="#{dosageDetail.unit}" />
+					</p:column>
+					<p:column headerText="服药日期" style="text-align:center;">
+						<h:outputText value="#{dosageDetail.eattime}">
+							<f:convertDateTime pattern="yyyy-MM-dd" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="时段" style="text-align:center;">
+						<h:outputText value="早上" rendered="#{dosageDetail.period == 1}" />
+						<h:outputText value="中午" rendered="#{dosageDetail.period == 2}" />
+						<h:outputText value="晚上" rendered="#{dosageDetail.period == 3}" />
+					</p:column>
+					<p:column headerText="饭前/后" style="text-align:center;">
+						<h:outputText value="饭前" rendered="#{dosageDetail.iseatfood == 1}" />
+						<h:outputText value="饭后" rendered="#{dosageDetail.iseatfood == 2}" />
+						<h:outputText value="均可"
+							rendered="#{dosageDetail.iseatfood != 1 and dosageDetail.iseatfood != 2}" />
+					</p:column>
+					<p:column headerText="是否核对" style="text-align:center;">
+						<h:outputText value="是" rendered="#{dosageDetail.ischeck == 1}" />
+						<h:outputText value="否" rendered="#{dosageDetail.ischeck != 1}" />
+					</p:column>
+					<p:column headerText="核对结果" style="text-align:center;">
+						<h:outputText value="通过" rendered="#{dosageDetail.checkresult==1}" />
+						<h:outputText value="不通过"
+							rendered="#{dosageDetail.checkresult==2}" />
+					</p:column>
+					<p:column headerText="备注" style="text-align:center;">
+						<h:outputText value="#{dosageDetail.notes}" />
+					</p:column>
+					<p:column headerText="服药确认" style="text-align:center;">
+						<h:outputText value="已确认" rendered="#{dosageDetail.isensure == 1}" />
+						<h:outputText value="未确认" rendered="#{dosageDetail.isensure == 2}" />
+					</p:column>
+				</p:dataTable>
+				<div align="center">
+					<p:commandButton value="通过" styleClass="commonbtn"
+						action="#{checkDrugPaperController.check}"
+						oncomplete="onClickCheck(xhr,status,args)"
+						update=":checkForm,:messages" />
+					<p:commandButton value="不通过" styleClass="commonbtn"
+						action="#{checkDrugPaperController.check}"
+						oncomplete="optionDialogShow(xhr,status,args)"
+						update=":optionForm,:messages" />
+				</div>
+			</h:form>
+		</div>
+		<p:dialog widgetVar="checkConfirm" appendTo="@(body)" resizable="true"
+			header="核对确认" modal="true">
+			<h:form id="checkForm">
+				<div align="center">
+					<h1 style="font-size: 18px; font-weight: bold">
+						确认&nbsp;&nbsp; <font color="red">通过&nbsp;&nbsp;</font> 该配药单信息？
+					</h1>
+				</div>
+				<p:commandButton styleClass="submitbtn" value=""
+					style="margin-left:80px;"
+					actionListener="#{checkDrugPaperController.saveCheck}"
+					update=":showForm,:messages" ajax="true"
+					oncomplete="checkConfirm.hide()" />
+				<p:commandButton styleClass="cancelbtn" value=""
+					onclick="checkConfirm.hide()" type="button" />
+			</h:form>
+		</p:dialog>
+		<p:dialog header="备注" widgetVar="optionDialog" resizable="false"
+			appendToBody="true" modal="true">
+			<h:form id="optionForm">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea required="true"
+								requiredMessage="备注不可为空！" autoResize="true" cols="40" rows="3"
+								value="#{checkDrugPaperController.checkDosageDetail.notes}"></p:inputTextarea>
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="2" style="margin:0px auto">
+					<p:commandButton process="@this,optionForm"
+						actionListener="#{checkDrugPaperController.unEvaluateDosage}"
+						oncomplete="optionDialogHide(xhr,status,args)"
+						styleClass="commonbtn" value="保存" update=":showForm,:messages">
+					</p:commandButton>
+					<p:commandButton onclick="optionDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			function onClickCheck(xhr, status, args) {
+				if (args.validate) {
+					checkConfirm.show();
+				}
+			}
+			function optionDialogShow(xhr, status, args) {
+				if (args.validate) {
+					optionDialog.show();
+				}
+			}
+			function optionDialogHide(xhr, status, args) {
+				if (args.success) {
+					optionDialog.hide();
+				}
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

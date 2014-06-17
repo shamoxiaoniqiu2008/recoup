@@ -1,0 +1,434 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	</h:head>
+	<style>
+.overdiv {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: hidden;
+	height: 18px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+
+.overdivscroll {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: auto;
+	height: 90px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+</style>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:outputText value="&nbsp;&nbsp;排查时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{investigateController.startDate}" />
+				<h:outputText value="至:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{investigateController.endDate}" />
+				<h:outputLabel value="房间:" for="headForm:roomNameText" />
+				<h:panelGroup>
+					<p:inputText id="roomNameText" style="width:145px;" />
+					<his:IME for="headForm:roomNameText" fitcol="roomName"
+						resultcol="1" rawSQL="true"
+						SQL="#{sumRepairCountController.roomSQL}"
+						SQLResult="房间ID:0:hide,房间:1,楼层:2,大厦:3"
+						multiresult="headForm:roomIdHd;0">
+					</his:IME>
+					<h:inputHidden id="roomIdHd"
+						value="#{investigateController.roomId}" />
+				</h:panelGroup>
+				<h:outputLabel value="是否提交:" for="sendFlagText" />
+				<h:selectOneMenu value="#{investigateController.applysendFlag}"
+					id="sendFlagText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="0" />
+					<f:selectItem itemLabel="已提交" itemValue="1" />
+					<f:selectItem itemLabel="未提交" itemValue="2" />
+				</h:selectOneMenu>
+				<h:outputLabel value="是否需维修:" for="needrepairFlagText" />
+				<h:selectOneMenu value="#{investigateController.needrepairFlag}"
+					id="needrepairFlagText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="0" />
+					<f:selectItem itemLabel="需要" itemValue="1" />
+					<f:selectItem itemLabel="不需要" itemValue="2" />
+				</h:selectOneMenu>
+				<h:outputLabel value="排查类型:" for="checkTypeText" />
+				<h:selectOneMenu value="#{investigateController.checkType}"
+					id="checkTypeText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="0" />
+					<f:selectItem itemLabel="入住排查" itemValue="1" />
+					<f:selectItem itemLabel="日常排查" itemValue="2" />
+				</h:selectOneMenu>
+				<p:commandButton id="searchButton"
+					action="#{investigateController.selectRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:repairApplicationTable,:maintainForm,:messages,:deptEvaluateForm" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{investigateController.clearSelectForm}"
+					update=":headForm,:messages" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="repairAppalicationRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="8" style="width:100%"
+					id="repairApplicationTable" rowIndexVar="row"
+					value="#{investigateController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{investigateController.selectedRow}" paginator="true"
+					paginatorPosition="bottom" paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{investigateController.selectRecord}"
+						update=":dataTableForm,:maintainForm:,:deptEvaluateForm" />
+					<p:ajax event="rowUnselect"
+						listener="#{investigateController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm,:deptEvaluateForm" />
+
+					<p:column headerText="大厦" styleClass="width40">
+						<h:outputText value="#{record.buildName}" />
+					</p:column>
+					<p:column headerText="楼层" styleClass="width40">
+						<h:outputText value="#{record.floorName}" />
+					</p:column>
+					<p:column headerText="房间" styleClass="width40">
+						<h:outputText value="#{record.roomName}" />
+					</p:column>
+					<p:column headerText="排查时间" styleClass="width60">
+						<h:outputText value="#{record.checkTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="排查结果" styleClass="width80">
+						<div title="点击查看更多" onDblClick="changeme(this);"
+							onselectstart="return false" class="overdiv">
+							#{record.checkResult}</div>
+					</p:column>
+					<p:column headerText="是否需修" styleClass="width60">
+						<h:outputText value="需要" rendered="#{record.needrepairFlag== 1}" />
+						<h:outputText value="不需要" rendered="#{record.needrepairFlag!= 1}" />
+					</p:column>
+					<p:column headerText="维修内容" styleClass="width80">
+						<div title="点击查看更多" onDblClick="changeme(this);"
+							onselectstart="return false" class="overdiv">
+							#{record.repairDetail}</div>
+					</p:column>
+					<p:column headerText="是否提交" styleClass="width60">
+						<h:outputText value="已提交" rendered="#{record.applysendFlag== 1}" />
+						<h:outputText value="未提交" rendered="#{record.applysendFlag!= 1}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton styleClass="addbtn" value=""
+					action="#{investigateController.clearInsertForm}"
+					oncomplete="insertRecordDialog.show()" update=":insertForm" />
+				<p:commandButton styleClass="deletebtn" value=""
+					disabled="#{investigateController.disDeleteAndSubmitButton}"
+					action="#{investigateController.checkDeletedRow}"
+					oncomplete="handleDeleteInit(xhr, status, args)" update=":messages" />
+				<p:commandButton styleClass="modifybtn" value=""
+					disabled="#{investigateController.disUpdateButton}"
+					action="#{investigateController.copyRecordUpdatedRow}"
+					oncomplete="handleUpdateInit(xhr, status, args)"
+					update=":updateForm,:messages" />
+				<p:commandButton value="确认提交" styleClass="commonbtn"
+					disabled="#{investigateController.disDeleteAndSubmitButton}"
+					action="#{investigateController.submitRecord}"
+					update=":dataTableForm,:maintainForm,:messages" />
+			</div>
+		</h:form>
+		<p:dialog header="新增" widgetVar="insertRecordDialog" resizable="false"
+			appendToBody="true" position="300,100" modal="true">
+			<h:form id="insertForm">
+				<table class="hengbiaoge" width="100%" id="insertTable">
+					<tr>
+						<td class="hengbiaogeHeader1" width="20%"><h:outputLabel
+								value="房间:" for="roomText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata" width="30%"><h:panelGroup>
+								<p:inputText id="roomText" style="width:125px;" required="true"
+									requiredMessage="请输入房间"
+									value="#{investigateController.insertedRow.roomName}">
+									<p:ajax event="blur"
+										listener="#{investigateController.fillField}"
+										update=":insertForm" process="@this,:insertForm:roomIdHd" />
+								</p:inputText>
+								<his:IME for="insertForm:roomText" fitcol="roomName"
+									resultcol="1" rawSQL="true"
+									SQL="#{sumRepairCountController.roomSQL}"
+									SQLResult="房间ID:0:hide,房间:1,楼层:2,大厦:3"
+									multiresult="insertForm:roomIdHd;0,insertForm:floorText;2,insertForm:buildingText;3">
+								</his:IME>
+								<h:inputHidden id="roomIdHd"
+									value="#{investigateController.insertedRow.roomId}" />
+							</h:panelGroup></td>
+						<td class="hengbiaogeHeader1" width="20%"><h:outputLabel
+								value="排查类型" for="checkTypeText" /></td>
+						<td class="hengbiaogedata" width="30%"><h:selectOneMenu
+								value="#{investigateController.insertedRow.checkType}"
+								id="checkTypeText"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+								<f:selectItem itemLabel="日常排查" itemValue="0" />
+								<f:selectItem itemLabel="入住排查" itemValue="1" />
+							</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="大厦:"
+								for="buildingText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="buildingText"
+								style="width:125px" readonly="true"
+								value="#{investigateController.insertedRow.buildName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="是否需维修"
+								for="needrepairFlagText" /></td>
+						<td class="hengbiaogedata"><p:selectOneRadio
+								value="#{investigateController.insertedRow.needrepairFlag}"
+								id="needrepairFlagText" onchange="clickHiddenButton()">
+								<f:selectItem itemLabel="需要" itemValue="1" />
+								<f:selectItem itemLabel="不需要" itemValue="2" />
+							</p:selectOneRadio> <p:commandButton value="更改布局" style="display:none"
+								id="changeBtn"
+								actionListener="#{investigateController.changeInsertDialog}"
+								process="@this,:insertForm:needrepairFlagText"
+								update=":insertForm" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="排查结果:"
+								for="checkResultText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea
+								id="checkResultText" style="width:125px" required="true"
+								requiredMessage="请输入排查结果!"
+								value="#{investigateController.insertedRow.checkResult}">
+								<p:ajax event="blur" update=":insertForm" process="@this" />
+							</p:inputTextarea></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="维修内容:"
+								for="repairDetailText" styleClass="redfont"
+								rendered="#{investigateController.repairDetailRenderedAndRequredFlag}" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea
+								id="repairDetailText" style="width:125px"
+								required="#{investigateController.repairDetailRenderedAndRequredFlag}"
+								rendered="#{investigateController.repairDetailRenderedAndRequredFlag}"
+								requiredMessage="请输入维修内容!"
+								value="#{investigateController.insertedRow.repairDetail}">
+							</p:inputTextarea></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="commonbtn" value="提交"
+						action="#{investigateController.insertAndSubmitRecord}"
+						rendered="#{investigateController.disOkAndSubmitButton}"
+						update=":insertForm,:dataTableForm,:messages,:maintainForm"
+						oncomplete="handleInsertComplete(xhr, status, args)" />
+					<p:commandButton styleClass="commonbtn" value="保存"
+						action="#{investigateController.insertRecord}"
+						update=":insertForm,:dataTableForm,:messages,:maintainForm"
+						oncomplete="handleInsertComplete(xhr, status, args)" />
+					<p:commandButton type="reset" styleClass="commonbtn" value="关闭"
+						onclick="insertRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="修改" widgetVar="updateRecordDialog" resizable="false"
+			appendToBody="true" position="center" modal="true">
+			<h:form id="updateForm">
+				<table class="hengbiaoge" width="100%" id="updateTable">
+
+					<tr>
+						<td class="hengbiaogeHeader1" width="20%"><h:outputLabel
+								value="房间:" for="roomText" /></td>
+						<td class="hengbiaogedata" width="30%"><p:inputText
+								id="roomText" style="width:125px" readonly="true"
+								value="#{investigateController.updatedRow.roomName}" /></td>
+						<td class="hengbiaogeHeader1" width="20%"><h:outputLabel
+								value="是否需维修" for="needrepairFlagText" /></td>
+						<td class="hengbiaogedata" width="30%"><p:selectOneRadio
+								value="#{investigateController.updatedRow.needrepairFlag}"
+								id="needrepairFlagText" onchange="clickUpdateHiddenButton()">
+								<f:selectItem itemLabel="需要" itemValue="1" />
+								<f:selectItem itemLabel="不需要" itemValue="2" />
+							</p:selectOneRadio> <p:commandButton value="更改布局" style="display:none"
+								id="changeBtn"
+								actionListener="#{investigateController.changeUpdateDialog}"
+								process="@this,:updateForm:needrepairFlagText"
+								update=":updateForm" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="排查结果:"
+								for="checkResultText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea
+								id="checkResultText" style="width:125px" required="true"
+								requiredMessage="请输入排查结果!"
+								value="#{investigateController.updatedRow.checkResult}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="维修内容:"
+								for="repairDetailText" styleClass="redfont"
+								rendered="#{investigateController.updateDetailRenderedAndRequredFlag}" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea
+								id="repairDetailText" style="width:125px"
+								required="#{investigateController.updateDetailRenderedAndRequredFlag}"
+								rendered="#{investigateController.updateDetailRenderedAndRequredFlag}"
+								requiredMessage="请输入维修内容!"
+								value="#{investigateController.updatedRow.repairDetail}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{investigateController.updateRecord}"
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":updateForm,:dataTableForm,:messages,:maintainForm" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="updateRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:confirmDialog modal="true" appendToBody="true"
+			widgetVar="confirmDialog" message="确定要删除该申请记录？">
+			<h:form>
+				<p:commandButton styleClass="commonbtn" value="确定"
+					action="#{investigateController.deleteRecord}"
+					update=":dataTableForm,:maintainForm,:messages"
+					oncomplete="confirmDialog.hide();">
+				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="取消" type="reset"
+					onclick="confirmDialog.hide();"></p:commandButton>
+			</h:form>
+		</p:confirmDialog>
+		<h:form id="deptEvaluateForm" style="margin-top: 20px">
+			<h:panelGrid style="width:100%">
+				<p:dataTable cellspacing="8" rows="4" style="width:100%"
+					id="deptEvaluateTable" paginatorAlwaysVisible="false"
+					value="#{investigateController.approves}" paginator="true"
+					paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					var="evaluate" rowKey="#{evaluate.id}" emptyMessage="没有相应记录">
+					<p:column headerText="部门" style="width:50px">
+						<h:outputText value="#{evaluate.deptName}" />
+					</p:column>
+					<p:column headerText="审批人" style="width:50px">
+						<h:outputText value="#{evaluate.approverName}" />
+					</p:column>
+					<p:column headerText="审批类别" style="width:50px">
+						<h:outputText rendered="#{evaluate.approveType == 1}" value="是否需修" />
+						<h:outputText rendered="#{evaluate.approveType == 2}" value="维修明细" />
+					</p:column>
+					<p:column headerText="审批时间" style="width:120px">
+						<h:outputText value="#{evaluate.approveTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="审批结果" style="width:50px">
+						<h:outputText rendered="#{evaluate.approveResult == 1}" value="同意" />
+						<h:outputText rendered="#{evaluate.approveResult == 2}"
+							value="不同意" />
+						<h:outputText rendered="#{evaluate.approveResult == null}"
+							value="未审核" />
+					</p:column>
+					<p:column headerText="不同意原因" style="width:50px">
+						<h:outputText value="#{evaluate.refuseReason}" />
+					</p:column>
+				</p:dataTable>
+				<h:outputText value="&nbsp;"></h:outputText>
+			</h:panelGrid>
+		</h:form>
+		<script type="text/javascript">
+		//清空 selectForm
+		function clearSelectForm(){
+			document.getElementById("headForm:startDate").value="";
+			document.getElementById("headForm:endDate").value="";
+			document.getElementById("headForm:roomNameText").value="";
+			
+			return true;
+		}
+		
+		function clickHiddenButton(){
+			
+			document.getElementById("insertForm:changeBtn").click(); 
+			
+		}
+
+		function clickUpdateHiddenButton()
+		{
+			
+			document.getElementById("updateForm:changeBtn").click(); 
+			
+		}
+		
+		function handleInsertComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				insertRecordDialog.hide();
+            }	
+		}
+		function handleDeleteComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				confirmDialog.show();
+            }	
+		}
+
+		function handleDeleteInit(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				confirmDialog.show();
+            }	
+		}
+		
+		function handleUpdateInit(xhr, status, args){
+			if(args.success) {
+				updateRecordDialog.show();
+            }	
+		}
+		function handleUpdateComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				updateRecordDialog.hide();
+            }	
+		}
+	 	function changeme(obj){
+   			if(obj.className=="overdiv"){
+   				obj.className="overdivscroll";
+   				obj.title="点击关闭";
+   				//nowheightflage=true;
+   			}else{
+   				obj.scrollTop=0;
+   				obj.className="overdiv";
+   				obj.title="点击查看更多";
+   			//	nowheightflage=false;
+   			}
+   		}
+			
+	</script>
+	</h:body>
+</f:view>
+</html>

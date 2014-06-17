@@ -1,0 +1,165 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+
+	<style>
+.ui-panel .ui-panel-content {
+	padding: 0em !important;
+}
+</style>
+
+	<h:head>
+		<title>#{pageConfig.unpaidReport}</title>
+
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<script type="text/javascript">
+		
+	</script>
+
+
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<p:growl id="messages"></p:growl>
+		<h:form id="searchForm" style="display: inline">
+			<h:outputText value="开始时间:" style="text-align:right" />
+			<p:calendar id="startDate" pattern="yyyy-MM-dd HH:mm"
+				value="#{unpaidReportController.startDate}">
+			</p:calendar>
+			<h:outputText value="截止时间:" style="text-align:right" />
+			<p:calendar id="endDate" pattern="yyyy-MM-dd HH:mm"
+				value="#{unpaidReportController.endDate}">
+			</p:calendar>
+			<p:commandButton styleClass="commonbtn" value="查询"
+				action="#{unpaidReportController.selectPaidReport}"
+				update=":paidReportForm,:messages" process="@this,startDate,endDate"></p:commandButton>
+			<p:commandButton value="导出" styleClass="commonbtn" update=":messages"
+				ajax="false">
+				<p:dataExporter type="xls" target=":paidReportForm:paidReport"
+					fileName="unpaidReport" />
+			</p:commandButton>
+		</h:form>
+		<h:form id="paidReportForm">
+			<p:dataTable id="paidReport"
+				value="#{unpaidReportController.unpaidReports}" var="paidReport"
+				emptyMessage="没有记录" scrollable="true" scrollHeight="400">
+				<p:column headerText="详情" styleClass="width50">
+					<p:commandLink update=":detailForm,:message"
+						oncomplete="detailDig.show()" title="查看"
+						action="#{unpaidReportController.selectUnpaidRecordDetail(paidReport.olderId)}">
+						<p:graphicImage value="/images/search.png" style="border:0px;" />
+					</p:commandLink>
+				</p:column>
+				<p:column id="olderName">
+					<f:facet name="header">
+						<h:outputText value="老人姓名"></h:outputText>
+					</f:facet>
+					<h:outputText value="#{paidReport.olderName}"></h:outputText>
+				</p:column>
+				<p:column id="olderSex">
+					<f:facet name="header">
+						<h:outputText value="性别"></h:outputText>
+					</f:facet>
+					<h:outputText value="#{paidReport.olderSex}"></h:outputText>
+				</p:column>
+				<p:column id="olderAge" style="width: 30px">
+					<f:facet name="header">
+						<h:outputText value="年龄"></h:outputText>
+					</f:facet>
+					<h:outputText value="#{paidReport.olderAge}"></h:outputText>
+				</p:column>
+				<p:column id="totalFees">
+					<f:facet name="header">
+						<h:outputText value="项目总费用"></h:outputText>
+					</f:facet>
+					<h:outputText value="#{paidReport.totalFees}">
+						<f:convertNumber pattern="0.00" />
+					</h:outputText>
+				</p:column>
+				<p:column id="olderStatus">
+					<f:facet name="header">
+						<h:outputText value="老人状态"></h:outputText>
+					</f:facet>
+					<h:outputText value="#{paidReport.olderStatus}"></h:outputText>
+				</p:column>
+
+			</p:dataTable>
+		</h:form>
+		<p:dialog widgetVar="detailDig" appendTo="@(body)" resizable="true"
+			header="老人欠费明细" modal="true">
+			<h:form id="detailForm">
+				<p:dataTable id="detailReport" style="width:850px"
+					value="#{unpaidReportController.unpaidReportDetails}"
+					var="detailReport" emptyMessage="没有记录" sortBy="itemName"
+					scrollable="true" scrollHeight="350" scrollWidth="835px">
+					<p:column headerText="项目名称" styleClass="width60">
+						<h:outputText value="#{detailReport.itemName}" />
+					</p:column>
+					<p:column headerText="项目收费" styleClass="width60">
+						<h:outputText value="#{detailReport.itemFees}">
+							<f:convertNumber pattern="0.00" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="数量" styleClass="width50">
+						<h:outputText value="#{detailReport.itemNum}">
+						</h:outputText>
+					</p:column>
+					<p:column headerText="项目总费用" styleClass="width70">
+						<h:outputText value="#{detailReport.totalFees}">
+							<f:convertNumber pattern="0.00" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="开单时间" styleClass="width80">
+						<h:outputText value="#{detailReport.genetateTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+						</h:outputText>
+					</p:column>
+					<p:summaryRow
+						listener="#{unpaidReportController.calculateTotal(detailReport.itemId,detailReport.source)}">
+						<p:column colspan="3" style="text-align:right">
+							<h:outputText value="总费用:"></h:outputText>
+						</p:column>
+						<p:column>
+							<h:outputText value="#{unpaidReportController.total}￥"></h:outputText>
+						</p:column>
+						<p:column>
+						</p:column>
+					</p:summaryRow>
+				</p:dataTable>
+			</h:form>
+			<div align="center">
+				<p:commandButton styleClass="closebtn" value="" type="button"
+					onclick="detailDig.hide()"></p:commandButton>
+			</div>
+		</p:dialog>
+		<script type="text/javascript">
+			
+		</script>
+	</h:body>
+</f:view>
+</html>

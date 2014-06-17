@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">#{pageConfig.buildName}:</td>
+					<td><p:inputText id="buildNameText" style="width:145px;"
+							value="#{builderManageController.buildName}">
+							<p:ajax event="blur"
+								listener="#{builderManageController.initSQL}"
+								update=":searchForm">
+							</p:ajax>
+						</p:inputText> <his:IME for="searchForm:buildNameText" fitcol="name"
+							resultcol="0" rawSQL="true"
+							SQL="#{builderManageController.buildSQL}"
+							SQLResult="#{pageConfig.buildName}:2">
+						</his:IME></td>
+
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value=""
+							actionListener="#{builderManageController.selectBuildRecords}"
+							update=":form:build,:message,:maintainForm:modifybtn,:maintainForm:deletebtn" />
+					</td>
+					<td class="leftcell"><p:commandButton styleClass="blankbtn"
+							value="" process="@this"
+							actionListener="#{builderManageController.clearSearchForm}"
+							update=":searchForm,:form:build,:message,:maintainForm:modifybtn,:maintainForm:deletebtn" />
+					</td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="form" style="width:100%">
+			<p:dataTable id="build" var="result" rowKey="#{result.id}"
+				value="#{builderManageController.builds}"
+				selection="#{builderManageController.selectedBuild}"
+				selectionMode="single" cellspacing="8" rows="10"
+				style="white-space:nowrap;width:100%"
+				row="#{builderManageController.setEnableFlag}" rowIndexVar="row"
+				paginatorAlwaysVisible="false" emptyMessage="#{pageConfig.noRow}"
+				paginator="true" paginatorPosition="bottom"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+
+				<p:ajax event="rowSelect"
+					listener="#{builderManageController.setEnableFlag}"
+					update=":maintainForm:modifybtn,:maintainForm:deletebtn" />
+				<p:ajax event="rowUnselect"
+					listener="#{builderManageController.setUnableFlag}"
+					update=":maintainForm:modifybtn,:maintainForm:deletebtn" />
+				<p:column headerText="大厦类别" style="width=100%">
+					<h:outputText value="机构养老"
+						rendered="#{result.buildingCategary==1}"></h:outputText>
+					<h:outputText value="社区养老"
+						rendered="#{result.buildingCategary==2}"></h:outputText>
+					<h:outputText value="居家养老"
+						rendered="#{result.buildingCategary==3}"></h:outputText>
+				</p:column>
+				<p:column headerText="#{pageConfig.buildName}" style="width=100%">  
+		            #{result.name}   
+		        </p:column>
+
+				<p:column headerText="#{pageConfig.floorNumber}" style="width=100%">  
+		            #{result.floornumber}   
+		        </p:column>
+
+				<p:column headerText="#{pageConfig.roomNumber}" style="width=100%">  
+		            #{result.roomnumber}   
+		        </p:column>
+
+				<p:column headerText="#{pageConfig.bedNumber}" style="width=100%">  
+		            #{result.bednumber}   
+		        </p:column>
+
+				<p:column headerText="#{pageConfig.olderNumber}" style="width=100%">  
+		            #{result.oldernumber}   
+		        </p:column>
+				<p:column headerText="#{pageConfig.notes}" style="width=100%">  
+		            #{result.notes}   
+		        </p:column>
+
+			</p:dataTable>
+
+		</h:form>
+		<div align="center">
+			<h:form id="maintainForm">
+				<p:commandButton styleClass="addbtn" value=""
+					actionListener="#{builderManageController.showAddForm}"
+					oncomplete="addDialog.show()" update=":addForm" />
+				<p:commandButton styleClass="modifybtn" value="" id="modifybtn"
+					actionListener="#{builderManageController.showEditForm}"
+					disabled="#{builderManageController.disabledFlag}"
+					oncomplete="updateDialog.show()" update=":updateForm" />
+				<p:commandButton styleClass="deletebtn" value="" id="deletebtn"
+					onclick="confirmDelDialog.show()"
+					disabled="#{builderManageController.disabledFlag}" type="button" />
+			</h:form>
+		</div>
+		<p:dialog header="新增" widgetVar="addDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="addForm">
+				<table class="hengbiaoge">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="大厦类别:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><h:selectOneMenu
+								value="#{builderManageController.selectedBuild.buildingCategary}"
+								style="width:230px "
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+								<f:selectItem itemValue="1" itemLabel="机构养老" />
+								<f:selectItem itemValue="2" itemLabel="社区养老" />
+								<f:selectItem itemValue="3" itemLabel="居家养老" />
+							</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText
+								value="#{pageConfig.buildName}:" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								required="true"
+								requiredMessage="#{pageConfig.buildName}#{pageConfig.notBeEmpty}"
+								id="applyName"
+								value="#{builderManageController.selectedBuild.name}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText
+								value="#{pageConfig.notes}:" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								required="true" id="notes"
+								requiredMessage="#{pageConfig.notes}#{pageConfig.notBeEmpty}"
+								value="#{builderManageController.selectedBuild.notes}">
+							</p:inputText></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						action="#{builderManageController.insertBuildRecord}"
+						styleClass="submitbtn" value=""
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":form:build,:message,:maintainForm:modifybtn,:maintainForm:deletebtn">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{builderManageController.clearAddForm}"
+						update=":addForm" />
+					<p:commandButton onclick="addDialog.hide()" process="@this"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="修改" widgetVar="updateDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="updateForm">
+				<table class="hengbiaoge">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="大厦类别:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><h:selectOneMenu
+								value="#{builderManageController.selectedBuild.buildingCategary}"
+								style="width:230px "
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+								<f:selectItem itemValue="1" itemLabel="机构养老" />
+								<f:selectItem itemValue="2" itemLabel="社区养老" />
+								<f:selectItem itemValue="3" itemLabel="居家养老" />
+							</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText
+								value="#{pageConfig.buildName}:" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								required="true"
+								requiredMessage="#{pageConfig.buildName}#{pageConfig.notBeEmpty}"
+								id="applyName"
+								value="#{builderManageController.selectedBuild.name}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText
+								value="#{pageConfig.notes}:" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								required="true" id="notes"
+								requiredMessage="#{pageConfig.notes}#{pageConfig.notBeEmpty}"
+								value="#{builderManageController.selectedBuild.notes}">
+							</p:inputText></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						action="#{builderManageController.insertBuildRecord}"
+						styleClass="submitbtn" value=""
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":form:build,:message,:maintainForm:modifybtn,:maintainForm:deletebtn">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{builderManageController.clearAddForm}"
+						update=":updateForm" />
+					<p:commandButton onclick="updateDialog.hide()"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<!-- 删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true"
+			header="#{pageConfig.deleteRow}" widgetVar="confirmDelDialog"
+			width="220">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="#{pageConfig.sureDelete}?"
+							style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{builderManageController.deleteBuildRecord}"
+							update=":form:build,:message,:maintainForm:modifybtn,:maintainForm:deletebtn"
+							oncomplete="confirmDelDialog.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();"
+							update=":form:build,:message,:maintainForm:modifybtn,:maintainForm:deletebtn">
+						</p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</h:body>
+	<script type="text/javascript">
+		function handleUpdateComplete(xhr, status, args) {
+			if (!args.validationFailed) {
+				addDialog.hide();
+				updateDialog.hide();
+			}
+
+		}
+	</script>
+
+</f:view>
+</html>

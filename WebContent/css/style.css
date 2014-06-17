@@ -1,0 +1,97 @@
+/*重置样式*/
+@import url("reset.css");
+/*主要样式*/
+@import url("master.css");
+
+
+
+#message_container{
+/*	width: 0px;
+	height: 0px;
+	display: none; */
+}
+
+
+ui-growl-image ui-growl-image-info
+.ui-growl-image {
+/* width: 32px; */
+/* height: 32px; */
+float: left;
+margin: 0;
+padding: 0;
+
+/* display: block; */
+}
+
+.ui-growl-image-info {
+	/* background-position: 0 -264px; */
+	
+	width: 0px;
+	height: 0px;
+	float: left;
+	margin: 0;
+	padding: 0;
+	display: none;
+	background:none;
+}
+
+.ui-growl-title {
+	font-weight: normal;
+	padding: 0 0 1px 0;
+	display:inherit !important;
+}
+
+
+.ui-growl-message {
+	padding: 0 0 0px 0 !important;
+	width:auto !important;
+	float: left;
+}
+
+.ui-growl {
+	position: fixed;
+	top: 0px;
+	right: 0px;
+	width:auto;
+	filter:alpha(opacity=30); 
+	-moz-opacity:0.3; 
+	opacity:0.3;
+}
+.ui-growl:HOVER {
+	position: fixed;
+	top: 0px;
+	right: 0px;
+	width:auto;
+	filter:alpha(opacity=1); 
+	-moz-opacity:1; 
+	opacity:1;
+}
+
+
+.ui-growl-image {
+float: left;
+margin: 0;
+padding: 0;
+background:none;
+
+}
+
+.ui-growl-item {
+	display: block;
+	padding: 1px 1px;
+}
+
+/* ui-growl-item-container ui-state-highlight ui-corner-all ui-helper-hidden  */
+#message_container .ui-shadow {
+	-webkit-box-shadow: 0px 0px 0px rgba(0,0,0,0); 
+	box-shadow: 0px 0px 0px rgba(0,0,0,0);
+}
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
+	border: 1px solid #E9E8E3;
+	background: #F3F2EE !important;
+	color: #363636;
+}
+
+
+
+

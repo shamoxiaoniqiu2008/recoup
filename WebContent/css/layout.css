@@ -1,0 +1,58 @@
+.ui-widget {
+		/* font-size: 75%; */
+}
+
+.themeMenu {
+	overflow: auto;
+	height: 300px;
+	width: 200px;
+}
+
+.ui-layout-north {
+	z-index: 20 !important;
+	overflow: visible;
+	background-color: red;
+}
+
+.ui-layout-north .ui-layout-unit-content {
+	overflow: visible;
+}
+.width120 span{
+	width:120px; 
+	display:block;
+}
+.width110 span{
+	width:110px; 
+	display:block;
+}
+.width100 span{
+	width:100px; 
+	display:block;
+}
+.width90 span{
+	width:90px; 
+	display:block;
+}
+
+.width80 span{
+	width:80px; 
+	display:block;
+}
+.width70 span{
+	width:70px; 
+	display:block;
+}
+.width60 span{
+	width:60px; 
+	display:block;
+}
+.width50 span{
+	width:50px; 
+	display:block;
+}
+
+.noDisable input{
+color:#000000;
+font-weight:normal !important;
+opacity:100 !important;
+}

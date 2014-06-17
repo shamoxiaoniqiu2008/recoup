@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.userManage}</title>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">房间:</td>
+					<td><p:inputText id="searchRoomName" /> <his:IME
+						for="searchForm:searchRoomName" rawSQL="true" fitcol="name"
+						SQL="select pr.id,pr.name,pr.floorName,pr.buildName from pension_room pr where pr.cleared=2"
+						SQLResult="编号:0,房间:1,分楼层:2,大厦:3" resultcol="1" lock="true"
+						multiresult="searchForm:searchRoomId;0" /> <h:inputHidden
+						id="searchRoomId" value="#{fingerPrintManageController.roomId}">
+					</h:inputHidden></td>
+					<td class="leftcell"><p:commandButton id="searchButton"
+						actionListener="#{fingerPrintManageController.searchFingerPrints}"
+						styleClass="searchbtn" value="" update=":fingerPrintForm,:message" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="fingerPrintForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="8" style="width:100%"
+						id="fingerPrintTable" paginatorAlwaysVisible="false"
+						selection="#{fingerPrintManageController.selectedRow}"
+						value="#{fingerPrintManageController.fingerPrintList}" rows="10"
+						paginatorPosition="bottom" rowKey="#{finger.id}" paginator="true"
+						selectionMode="single" var="finger" emptyMessage="没有相应记录">
+						<p:column headerText="序列号" style="width:160px">
+							<h:outputText value="#{finger.astrSerialNo}" />
+						</p:column>
+
+						<p:column headerText="指纹机IP" style="width:160px">
+							<h:outputText value="#{finger.astrDeviceIp}" />
+						</p:column>
+						<p:column headerText="指纹机编号" style="width:160px">
+							<h:outputText value="#{finger.anDeviceId}" />
+						</p:column>
+						<p:column headerText="房间" style="width:160px">
+							<h:outputText value="#{finger.roomName}" />
+						</p:column>
+					</p:dataTable></td>
+				</tr>
+			</table>
+			<div align="center"><p:commandButton
+				oncomplete="editConfirm(xhr,status,args);" id="editButton"
+				actionListener="#{fingerPrintManageController.showEditForm}"
+				update=":message,:editForm" styleClass="modifybtn" value=""></p:commandButton></div>
+		</h:form>
+
+
+		<!-- 修改指纹机 -->
+		<p:dialog header="修改指纹机" widgetVar="editDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="editForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="300px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label>序列号:</label></td>
+						<td class="hengbiaogedata"><p:inputText disabled="true"
+							value="#{fingerPrintManageController.editFingerPrint.astrSerialNo}">
+						</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label>指纹机IP:</label></td>
+						<td class="hengbiaogedata"><p:inputText disabled="true"
+							value="#{fingerPrintManageController.editFingerPrint.astrDeviceIp}">
+						</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label>指纹机编号:</label></td>
+						<td class="hengbiaogedata"><p:inputText disabled="true"
+							value="#{fingerPrintManageController.editFingerPrint.anDeviceId}">
+						</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="roomName">房间:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="roomName"
+							value="#{fingerPrintManageController.editFingerPrint.roomName}">
+						</p:inputText> <his:IME for="editForm:roomName" fitcol="name" sortcol="id"
+							resultcol="1" lock="true" rawSQL="true"
+							multiresult="editForm:roomId;0"
+							SQL="select pr.id,pr.name,pr.floorName,pr.buildName from pension_room pr where pr.cleared=2"
+							SQLResult="编号:0,房间:1,分楼层:2,大厦:3" /> <h:inputHidden id="roomId"
+							value="#{fingerPrintManageController.editFingerPrint.roomId}">
+						</h:inputHidden></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						action="#{fingerPrintManageController.updateFingerPrint}"
+						oncomplete="updateConfirm(xhr,status,args)" styleClass="submitbtn"
+						value="" onstart="return checkNulls('editForm','redfont',true);"
+						update=":message,:fingerPrintForm">
+					</p:commandButton>
+					<p:commandButton onclick="editDialog.hide()" styleClass="cancelbtn"
+						value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</h:body>
+</f:view>
+
+
+<script>
+	
+	function editConfirm(xhr,status,args){
+		if(args.edit)
+		{
+			editDialog.show();
+		}
+	}
+
+	function updateConfirm(xhr,status,args){
+		if(args.editSuccess)
+		{
+			editDialog.hide();
+		}
+		}
+	
+	/*  取消滚动条*/
+	jQuery(document).ready(function(){ 
+		 cleanBar();
+	}); 
+	</script>
+
+
+</html>

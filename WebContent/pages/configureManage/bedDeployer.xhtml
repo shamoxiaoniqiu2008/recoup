@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<style type="text/css">
+.haveP {
+	background-color: #09F !important;
+	color: #000 !important;
+	background-image: none !important;
+}
+
+.haveN {
+	background-color: #F69 !important;
+	color: #000 !important;
+	background-image: none !important;
+}
+</style>
+
+	</h:head>
+	<h:body>
+		<p:growl id="message"></p:growl>
+		<h:form id="topology"
+			style="width:100%;height:100%; float: left; overflow: auto;">
+			<!-- <p:contextMenu for="sectiontree">  
+			     <p:menuitem value="新增" update=":topology:sectiontree" oncomplete="handleComplete(xhr, status, args)" icon="ui-icon-check"/>  
+			</p:contextMenu> -->
+			<p:tree id="sectiontree" value="#{bedManageController.root}"
+				animate="true" orientation="horizontal" var="node"
+				rowKey="#{node.name}" width="100%" selectionMode="single"
+				selection="#{bedManageController.selectedNode}"
+				style="width:100%;height:100%;">
+				<p:ajax event="select" onstart="startSelectNode()" update=":form"
+					listener="#{bedManageController.onNodeSelect}"
+					oncomplete="handleComplete(xhr,status,args)" />
+
+				<p:treeNode id="root" icon="ui-topology_pension"
+					expandedIcon="ui-icon-folder-open"
+					collapsedIcon="ui-icon-folder-collapsed">
+					<h:outputText style="line-height:48px;" value="#{node}" />
+				</p:treeNode>
+				<p:treeNode type="build" icon="ui-topology_build">
+					<h:outputText title="老人数：#{node.oldernumber}"
+						style="line-height:48px;"
+						value="[#{node.name}](#{node.oldernumber}人)" />
+				</p:treeNode>
+				<p:treeNode type="floor" icon="ui-topology_floor">
+					<h:outputText title="老人数：#{node.oldernumber}"
+						style="line-height:36px;"
+						value="[#{node.name}](#{node.oldernumber}人)" />
+				</p:treeNode>
+				<p:treeNode type="room" icon="ui-topology_room">
+					<h:outputText title="老人数：#{node.oldernumber}"
+						style="line-height:24px;"
+						value="[#{node.name}](#{node.oldernumber}人)" />
+				</p:treeNode>
+				<p:treeNode type="bed" icon="ui-topology_bed">
+					<h:outputText title="老人数：#{node.oldernumber}"
+						style="line-height:18px;"
+						value="[#{node.name}](#{node.oldernumber}人)" />
+				</p:treeNode>
+			</p:tree>
+			<p:blockUI block="sectiontree" trigger="sectiontree"></p:blockUI>
+		</h:form>
+		<p:dialog appendTo="@(body)" modal="true" header="老人列表信息"
+			resizable="false" widgetVar="selectOlderDialog" width="700"
+			position="top">
+			<h:form id="form" style="width:100%">
+				<p:dataTable id="bed" var="record" rowKey="#{result.id}"
+					value="#{bedManageController.older}"
+					selection="#{bedManageController.selectedBed}" cellspacing="8"
+					rows="10" style="white-space:nowrap;width:100%" rowIndexVar="row"
+					rowStyleClass="#{record.sex  ==  2 ? 'female':'male'}"
+					emptyMessage="#{pageConfig.noRow}" paginatorAlwaysVisible="false"
+					paginator="true" paginatorPosition="bottom"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:column headerText="老人姓名" style="width=100%">  
+		            #{record.name}   
+		        </p:column>
+
+					<p:column headerText="生日" style="width=100%">
+						<h:outputText value="#{record.birthday}">
+							<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="性别">
+						<h:outputText value="男" rendered="#{record.sex==1}" />
+						<h:outputText value="女" rendered="#{record.sex==2}" />
+					</p:column>
+
+					<p:column headerText="状态">
+						<h:outputText value="在院" rendered="#{record.statuses==3}" />
+						<h:outputText value="请假" rendered="#{record.statuses==4}" />
+					</p:column>
+
+					<p:column headerText="联系方式" style="width=100%">  
+		            #{record.phone}   
+		        </p:column>
+
+				</p:dataTable>
+
+			</h:form>
+
+		</p:dialog>
+	</h:body>
+
+	<script type="text/javascript">
+		function handleComplete(xhr, status, args) {
+
+			var type = args.type;
+			selectOlderDialog.show();
+		}
+		//选择节点
+		function startSelectNode() {
+			// 		alert("selected");
+			return true;
+		}
+
+		//选择完节点后
+		function handleSelectNode(xhr, status, args) {
+			// 		alert("unselected");
+		}
+	</script>
+</f:view>
+</html>

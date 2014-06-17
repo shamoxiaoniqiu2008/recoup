@@ -1,0 +1,450 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.tempPay}</title>
+
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="searchForm">
+			<h:outputText value="&nbsp;&nbsp;录入日期:" style="width:80" />
+			<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+				value="#{tempPayController.searchStartDate}" />
+			<h:outputText value="至:" style="width:80" />
+			<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+				value="#{tempPayController.searchEndDate}" />
+			<h:outputText value="&nbsp;&nbsp;老人姓名:" style="text-align:right" />
+			<h:inputHidden value="#{tempPayController.orderId}" id="orderId" />
+			<p:inputText value="#{tempPayController.orderName}" id="orderName" />
+			<his:IME for="searchForm:orderName" fitcol="id,inputCode"
+				resultcol="1" lock="true" rawSQL="true"
+				SQL="#{tempPayController.selectSQL}"
+				SQLResult="编号:0,姓名:1,输入码:2:hide性别:3,大厦:4,楼层:5,房间:6,床位:7"
+				multiresult="searchForm:orderId;0,searchForm:orderName;1,searchForm:bedName;6" />
+			<h:outputText value="床号:" style="text-align:right" />
+			<p:inputText value="#{tempPayController.orderBedName}" id="bedName"
+				readonly="true" />
+			<h:outputText value="已收费:" style="text-align:right" />
+			<h:selectOneMenu value="#{tempPayController.paidFlag}" id="paidFlag"
+				class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+				<f:selectItem itemLabel="全部" />
+				<f:selectItem itemValue="1" itemLabel="是" />
+				<f:selectItem itemValue="2" itemLabel="否" />
+			</h:selectOneMenu>
+			<p:commandButton styleClass="searchbtn" value=""
+				action="#{tempPayController.search}" update=":payListForm,:messages">
+			</p:commandButton>
+			<p:commandButton styleClass="commonbtn" value="清空"
+				action="#{tempPayController.initDate}"
+				oncomplete="clearSearchForm()" update=":searchForm,:messages">
+			</p:commandButton>
+		</h:form>
+
+		<h:form id="payListForm">
+			<p:dataTable id="list" value="#{tempPayController.tempPayments}"
+				var="tempPayment" rowKey="#{tempPayment.id}" emptyMessage="当前无内容"
+				selectionMode="single"
+				selection="#{tempPayController.selectTempPayment}" rows="10"
+				paginatorAlwaysVisible="true" paginatorPosition="bottom"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+				paginator="true">
+				<p:ajax event="rowSelect"
+					listener="#{tempPayController.onTempPaymentSelect}"
+					update=":messages" />
+				<p:ajax event="rowUnselect"
+					listener="#{tempPayController.onTempPaymentUnselect}"
+					update=":messages" />
+				<p:column headerText="老人姓名" style="text-align:center">
+					<h:outputText value="#{tempPayment.name}" />
+				</p:column>
+				<p:column headerText="性别" style="text-align:center">
+					<h:outputText value="#{tempPayment.sex}" />
+				</p:column>
+				<p:column headerText="总费用" style="text-align:center">
+					<h:outputText value="#{tempPayment.totalfees}">
+						<f:convertNumber pattern="0.00" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="开始时间" style="text-align:center">
+					<h:outputText value="#{tempPayment.starttime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="结束时间" style="text-align:center">
+					<h:outputText value="#{tempPayment.endtime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="录入员" style="text-align:center">
+					<h:outputText value="#{tempPayment.generatorName}" />
+				</p:column>
+				<p:column headerText="录入日期" style="text-align:center">
+					<h:outputText value="#{tempPayment.generatetime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="已收费" style="text-align:center">
+					<h:outputText value="#{tempPayment.ispay eq 1?'是':'否'}" />
+				</p:column>
+				<p:column headerText="收费员" style="text-align:center">
+					<h:outputText value="#{tempPayment.payeeName}" />
+				</p:column>
+				<p:column headerText="收费日期" style="text-align:center">
+					<h:outputText value="#{tempPayment.paytime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="已结算" style="text-align:center">
+					<h:outputText value="#{tempPayment.isclosed eq 1?'是':'否'}" />
+				</p:column>
+				<p:column headerText="结算员" style="text-align:center">
+					<h:outputText value="#{tempPayment.closedName}" />
+				</p:column>
+				<p:column headerText="结算日期" style="text-align:center">
+					<h:outputText value="#{tempPayment.closedtime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+			<div align="center">
+				<p:commandButton styleClass="addbtn" value="" ajax="true"
+					process="@this" action="#{tempPayController.add}"
+					oncomplete="addDig.show(),onClickAdd()"
+					update=":infoForm,:infoForm,:detailListForm,:operateForm,:messages">
+				</p:commandButton>
+				<p:commandButton styleClass="modifybtn" value="" ajax="true"
+					process="@this,payListForm:checkSelectData"
+					action="#{tempPayController.modify}"
+					oncomplete="checkmodifyData(xhr,status,args)"
+					update=":infoForm,:infoForm,:detailListForm,:operateForm,:messages">
+				</p:commandButton>
+				<p:commandButton styleClass="deletebtn" value="" ajax="true"
+					process="@this,payListForm:checkSelectData"
+					oncomplete="checkDeleteData(xhr,status,args)" update=":messages">
+				</p:commandButton>
+				<p:commandButton styleClass="modifybtn" value=""
+					style="visibility:hidden" id="hiddenBtn" ajax="true"
+					process="@this" action="#{tempPayController.checkInit}"
+					oncomplete="afterCheckInit(xhr,status,args)"
+					update=":infoForm,:infoForm,:detailListForm,:operateForm,:messages">
+				</p:commandButton>
+				<h:inputHidden value="checkSelectData" id="checkSelectData"
+					validator="#{tempPayController.checkSelectData}" />
+			</div>
+		</h:form>
+		<p:confirmDialog message="是否确认删除该临时项目缴费记录？" severity="alert"
+			widgetVar="deleteConfirm" appendTo="@(body)">
+			<h:form>
+				<p:commandButton styleClass="submitbtn" value=""
+					style="margin-left:80px;"
+					actionListener="#{tempPayController.delete}"
+					update=":payListForm,:messages" ajax="true"
+					oncomplete="deleteConfirm.hide()" />
+				<p:commandButton styleClass="cancelbtn" value=""
+					onclick="deleteConfirm.hide()" type="button" />
+			</h:form>
+		</p:confirmDialog>
+		<p:dialog widgetVar="addDig" header="临时缴费项目" resizable="true"
+			modal="true" position="top">
+			<h:form id="infoForm">
+				<table>
+					<tr>
+						<td class="hengbiaogeHeader1 redfont"><h:outputText
+								value="老人姓名:" style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><h:inputHidden
+								value="#{tempPayController.selectTempPayment.olderId}" id="id" />
+							<h:inputHidden
+								value="#{tempPayController.selectTempPayment.birthDay}"
+								id="birthday" /> <p:inputText
+								value="#{tempPayController.selectTempPayment.name}"
+								id="olderName" required="true" requiredMessage="请填写老人姓名!"
+								disabled="#{!tempPayController.nameFlag}">
+								<p:ajax event="blur"
+									process="@this,infoForm:id,infoForm:olderName"
+									listener="#{tempPayController.selectInfo}" update=":infoForm"></p:ajax>
+							</p:inputText> <his:IME for="infoForm:olderName" rawSQL="true"
+								SQL="#{tempPayController.addSQL}" fitcol="id,inputCode"
+								SQLResult="编号:0,姓名:1,性别:2,大厦:3,楼层:4,房间:5,床位:6,护理等级:7:hide,床位登记:8:hide,入住时间:9:hide,输入码:10:hide,性别input:11:hide,生日:12:hide"
+								resultcol="1" lock="true"
+								multiresult="infoForm:id;0,infoForm:olderName;1,infoForm:sex;2,infoForm:buildingName;3,infoForm:floorName;4,infoForm:roomName;5,infoForm:bedName;6,infoForm:nurseLevel;7,infoForm:bedLevel;8,infoForm:beginDate;9,infoForm:birthDay;12" />
+						</td>
+						<td class="hengbiaogeHeader1"><h:outputText value="护理等级:"
+								style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								value="#{tempPayController.selectTempPayment.nurseLevel}"
+								id="nurseLevel" readonly="true" /></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="床位等级:"
+								style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								value="#{tempPayController.selectTempPayment.bedLevel}"
+								id="bedLevel" readonly="true" /></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="入住时间:"
+								style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								value="#{tempPayController.selectTempPayment.beginDate}"
+								id="beginDate" readonly="true">
+								<f:convertDateTime pattern="yyyy-MM-dd" />
+							</p:inputText></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1 redfont"><h:outputText
+								value="项目名:" style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><h:inputHidden
+								value="#{tempPayController.projectId}" id="projectId" /> <h:inputHidden
+								value="#{tempPayController.projectFees}" id="projectFees" /> <p:inputText
+								value="#{tempPayController.projectName}" id="projectName"
+								required="true" requiredMessage="请填写项目名!">
+								<p:ajax event="blur"
+									process="@this,projectId,projectFees,projectName,projectRemark"
+									update=":infoForm">
+								</p:ajax>
+							</p:inputText> <his:IME for="infoForm:projectName" rawSQL="true"
+								SQL="#{tempPayController.addDetailSQL}" fitcol="id,inputCode"
+								SQLResult="编号:0,名称:1,单位:2,价格:3,备注:4,输入码:5:hide" resultcol="1"
+								lock="true"
+								multiresult="infoForm:projectId;0,infoForm:projectName;1,infoForm:projectFees;3,infoForm:projectRemark;4" />
+						</td>
+						<td class="hengbiaogeHeader1 redfont"><h:outputText
+								value="数量:" style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								value="#{tempPayController.projectNum}" id="projectNum"
+								required="true" requiredMessage="请填写数量!"
+								onkeyup="checkNum(this)" onblur="checkNum(this)">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:"
+								style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								value="#{tempPayController.projectRemark}" id="projectRemark" />
+						</td>
+						<td class="hengbiaogeHeader1 redfont">
+							<div style="display: block; width: 90px;">
+								<h:outputText value="退费类型:"
+									style="padding-top:0px; display:none;" id="refundTypeText" />
+							</div>
+						</td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0;">
+							<table
+								style="padding: 0 0 0 0; width: 100%; height: 100%; border: 0px">
+								<tr>
+									<td>
+										<div style="display: inline; width: 100px;">
+											<h:selectOneMenu
+												value="#{tempPayController.selectRefundTypeId}"
+												style="text-align:top;display:none;"
+												class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+												id="refundType">
+												<f:selectItem itemLabel=" " />
+												<f:selectItems value="#{tempPayController.refundTypes}"
+													var="refundType" rowKey="#{refundType.id}"
+													itemValue="#{refundType.id}"
+													itemLabel="#{refundType.refundtypeName}" />
+											</h:selectOneMenu>
+											&nbsp;
+										</div>
+									</td>
+									<td style="text-align: right; padding-right: 4px"><p:commandLink
+											ajax="true"
+											process="@this,projectId,projectFees,projectName,projectNum,projectRemark,refundType"
+											action="#{tempPayController.addDetail}"
+											oncomplete="afterAddDetail(xhr,status,args)"
+											update=":operateForm,:detailListForm,:infoForm,:messages">
+											<p:graphicImage value="/images/plus_alt.png"
+												style="border:0px;;width: 20px;height: 20px;" />
+										</p:commandLink></td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</h:form>
+			<h:form id="detailListForm">
+				<p:dataTable id="detailList"
+					value="#{tempPayController.tempPaymentDetails}"
+					var="tempPaymentDetail" rowKey="#{tempPaymentDetail.id}"
+					emptyMessage="当前无信息" paginator="true" rows="5"
+					paginatorAlwaysVisible="false" paginatorPosition="bottom">
+					<p:column headerText="项目名称">
+						<h:outputText value="#{tempPaymentDetail.itemName}" />
+					</p:column>
+					<p:column headerText="单价">
+						<h:outputText value="#{tempPaymentDetail.itemlfees}" />
+					</p:column>
+					<p:column headerText="数量">
+						<h:outputText value="#{tempPaymentDetail.number}">
+							<f:convertNumber pattern="0.00" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="总额">
+						<h:outputText value="#{tempPaymentDetail.totalfees}">
+							<f:convertNumber pattern="0.00" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="备注">
+						<h:outputText value="#{tempPaymentDetail.notes}" />
+					</p:column>
+					<p:column headerText="退费类型">
+						<h:outputText value="#{tempPaymentDetail.refundType}" />
+					</p:column>
+					<p:column headerText="操作">
+						<p:commandLink process="@this," ajax="true" rendered="true"
+							action="#{tempPayController.deleteTempPaymentDetail(tempPaymentDetail)}"
+							update=":operateForm,:detailListForm,:messages">
+							<p:graphicImage value="/images/minus_alt.png"
+								style="border:0px;width: 20px;height: 20px;" />
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+			<h:form id="operateForm">
+				<table>
+					<tr>
+						<td class="hengbiaogeHeader1 redfont"><h:outputText
+								value="开始日期:" style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0;"><p:calendar
+								id="starttime" pattern="yyyy-MM-dd" required="true"
+								requiredMessage="请填写开始日期！"
+								value="#{tempPayController.selectTempPayment.starttime}" /></td>
+						<td class="hengbiaogeHeader1 redfont"><h:outputText
+								value="结束日期:" style="text-align:right" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0;"><p:calendar
+								id="endtime" pattern="yyyy-MM-dd" required="true"
+								requiredMessage="请填写结束日期！"
+								value="#{tempPayController.selectTempPayment.endtime}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="合计金额:"
+								style="text-align:right;font-weight: bold;color: red" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0;"><p:inputText
+								value="#{tempPayController.selectTempPayment.totalfees}"
+								style="text-align:left;font-weight: bold;color: red"
+								id="totaFees" required="true" requiredMessage="合计金额不能为空!"
+								readonly="true">
+								<f:convertNumber pattern="0.00" />
+							</p:inputText></td>
+						<td class="hengbiaogedata"><p:commandButton
+								styleClass="submitbtn" value="" style="width:53px;height:25px"
+								action="#{tempPayController.saveTempPayment}"
+								oncomplete="afterSave(xhr,status,args)"
+								update=":payListForm,:messages"></p:commandButton> <p:commandButton
+								styleClass="closebtn" value="" type="button"
+								style="width:53px;height:25px" onclick="addDig.hide()" update=""></p:commandButton>
+						</td>
+					</tr>
+				</table>
+
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			jQuery(document).ready(function() {
+				jQuery("#payListForm\\:hiddenBtn").click();
+			});
+			function afterCheckInit(xhr, status, args) {
+				if (args.validate) {
+					addDig.show();
+					jQuery("#infoForm\\:projectName").focus();
+				}
+			}
+
+			function afterSave(xhr, status, args) {
+				if (args.validate) {
+					addDig.hide();
+				}
+			}
+			function checkmodifyData(xhr, status, args) {
+				if (args.validate) {
+					addDig.show();
+					jQuery("#infoForm\\:refundType").hide();
+					jQuery("#infoForm\\:refundTypeText").hide();
+				}
+			}
+			function checkDeleteData(xhr, status, args) {
+				if (args.validate) {
+					deleteConfirm.show();
+				}
+			}
+			function onClickAdd() {
+				jQuery("#infoForm\\:name").focus();
+			}
+			function afterAddDetail(xhr, status, args) {
+				if (args.validate) {
+					jQuery("#infoForm\\:refundType").hide();
+					jQuery("#infoForm\\:refundTypeText").hide();
+					jQuery("#infoForm\\:projectName").focus();
+				} else {
+					jQuery("#infoForm\\:refundType").show();
+					jQuery("#infoForm\\:refundTypeText").show();
+					jQuery("#infoForm\\:refundType").focus();
+				}
+			}
+
+			function clearSearchForm() {
+				jQuery("#searchForm\\:orderName").val("");
+				jQuery("#searchForm\\:bedName").val("");
+				jQuery("#searchForm\\:paidFlag").val("");
+				jQuery("#searchForm\\:startDate").val("");
+				jQuery("#searchForm\\:endDate").val("");
+			}
+			function checkNum(obj) {
+				var projectNum = obj.value;//jQuery("#infoForm\\:projectNum").val();
+				//alert(projectNum);
+				if (projectNum != "") {
+
+					if (projectNum == "-") {
+						//alert("复就好")
+						jQuery("#infoForm\\:refundType").show();
+						jQuery("#infoForm\\:refundTypeText").show();
+					} else {
+						projectNum = projectNum - 0;
+						if (0 > projectNum) {
+							//	alert("复苏")
+							jQuery("#infoForm\\:refundType").show();
+							jQuery("#infoForm\\:refundTypeText").show();
+						} else {
+							//	alert("证书")
+							jQuery("#infoForm\\:refundType").hide();
+							jQuery("#infoForm\\:refundTypeText").hide();
+						}
+					}
+
+				} else {
+					jQuery("#infoForm\\:refundType").hide();
+					jQuery("#infoForm\\:refundTypeText").hide();
+					//alert("kong")
+				}
+			}
+		</script>
+
+
+	</h:body>
+</f:view>
+
+
+
+
+
+</html>

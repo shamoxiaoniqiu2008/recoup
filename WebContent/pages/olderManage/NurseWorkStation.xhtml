@@ -1,0 +1,609 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<style>
+.B1 {
+	background-color: green
+}
+
+.B2 {
+	background-color: red
+}
+</style>
+	<h:body>
+		<p:growl id="message"></p:growl>
+
+		<h:form id="roomForm">
+			<p:tabView id="buildTabView" var="build" dynamic="true"
+				value="#{nurseWorkStationController.buildList}" style="height:950px">
+				<p:tab id="playerTab" title="#{build.name}">
+					<ui:repeat var="floor" value="#{build.floorList}"
+						varStatus="varStatus">
+						<table width="800px">
+							<tr>
+								<td><h:outputText value="#{floor.name}" /></td>
+							</tr>
+							<tr>
+								<td><ui:repeat var="northRoom"
+									value="#{floor.northRoomList}" varStatus="varStatus">
+									<table class="biaoge" width="120" border="0" cellpadding="0"
+										cellspacing="0"
+										style="float: left; height: 130px; margin-left: 1px; margin-top: 1px; border-collapse: collapse">
+										<tr>
+											<td colspan="2" class="rightHeadingCell1"
+												style="#{varStatus.even?'background: url(../../images/yilankabtn1.gif)':'background: url(../../images/yilankabtn4.jpg)'}">
+											<table width="100%" border="0" cellspacing="0"
+												cellpadding="0"
+												style="color: #000000; font-size: 15px; font-weight: bold;">
+												<tr>
+													<td width="15%" align="center" title="顺序号">#{northRoom.sortid}</td>
+													<td width="21%" align="right" class="blue"><p:commandLink
+														value="查看" process="@this,:roomForm"
+														oncomplete="hiddenbtnClick()"
+														rendered="#{!(northRoom.bednumber ==0)}">
+														<f:setPropertyActionListener value="#{northRoom}"
+															target="#{nurseWorkStationController.selectedRoom}" />
+													</p:commandLink></td>
+												</tr>
+											</table>
+											</td>
+										</tr>
+										<tr>
+											<td align="center" class="hengbiaogeHeader1" title="房间号">#{northRoom.name}</td>
+											<td class="hengbiaogedata" title="朝向">#{northRoom.way}</td>
+										</tr>
+										<tr>
+											<td align="center" class="hengbiaogeHeader1">老人数</td>
+											<td class="hengbiaogedata"><h:outputText
+												value=" #{northRoom.oldernumber}" /></td>
+										</tr>
+										<tr>
+											<td align="center" class="hengbiaogeHeader1">床位数</td>
+											<td class="hengbiaogedata"><h:outputText
+												value=" #{northRoom.bednumber}" /></td>
+										</tr>
+
+										<tr>
+											<td align="center" class="hengbiaogeHeader1">电话</td>
+											<td class="hengbiaogedata"><h:outputText
+												value=" #{northRoom.phone}" /></td>
+										</tr>
+									</table>
+								</ui:repeat></td>
+							</tr>
+
+
+							<tr>
+								<td><ui:repeat var="southRoom"
+									value="#{floor.southRoomList}" varStatus="varStatus">
+									<table class="biaoge" width="120" border="0" cellpadding="0"
+										cellspacing="0"
+										style="float: left; height: 130px; margin-left: 1px; margin-top: 1px; border-collapse: collapse">
+										<tr>
+											<td colspan="2" class="rightHeadingCell1"
+												style="#{varStatus.even?'background: url(../../images/yilankabtn1.gif)':'background: url(../../images/yilankabtn4.jpg)'}">
+											<table width="100%" border="0" cellspacing="0"
+												cellpadding="0"
+												style="color: #000000; font-size: 15px; font-weight: bold;">
+												<tr>
+													<td width="15%" align="center" title="顺序号">#{southRoom.sortid}</td>
+													<td width="21%" align="right" class="blue"><p:commandLink
+														value="查看" process="@this,:roomForm"
+														oncomplete="hiddenbtnClick()"
+														rendered="#{!(southRoom.bednumber ==0)}">
+														<f:setPropertyActionListener value="#{southRoom}"
+															target="#{nurseWorkStationController.selectedRoom}" />
+													</p:commandLink></td>
+												</tr>
+											</table>
+											</td>
+										</tr>
+										<tr>
+											<td align="center" class="hengbiaogeHeader1" title="房间号">#{southRoom.name}</td>
+											<td class="hengbiaogedata" title="朝向">#{southRoom.way}</td>
+										</tr>
+										<tr>
+											<td align="center" class="hengbiaogeHeader1">老人数</td>
+											<td class="hengbiaogedata"><h:outputText
+												value=" #{southRoom.oldernumber}" /></td>
+										</tr>
+										<tr>
+											<td align="center" class="hengbiaogeHeader1">床位数</td>
+											<td class="hengbiaogedata"><h:outputText
+												value=" #{southRoom.bednumber}" /></td>
+										</tr>
+
+										<tr>
+											<td align="center" class="hengbiaogeHeader1">电话</td>
+											<td class="hengbiaogedata"><h:outputText
+												value=" #{southRoom.phone}" /></td>
+										</tr>
+									</table>
+								</ui:repeat></td>
+							</tr>
+						</table>
+					</ui:repeat>
+				</p:tab>
+			</p:tabView>
+			<p:commandButton id="hiddenbtn" style="display:none;"
+				update=":bedForm,:message"
+				actionListener="#{nurseWorkStationController.selectBedList}"
+				oncomplete="bedDialog.show()">
+			</p:commandButton>
+		</h:form>
+
+		<!--床位的dialog-->
+		<p:dialog appendTo="@(body)" modal="true" header="床位一览"
+			widgetVar="bedDialog" width="450" height="300" resizable="true">
+			<h:form id="bedForm">
+				<ui:repeat var="bed" value="#{nurseWorkStationController.bedList}"
+					varStatus="varStatus">
+					<table class="biaoge" width="117" border="0" cellpadding="0"
+						cellspacing="0"
+						style="float: left; height: 130px; margin-left: 1px; margin-top: 1px; border-collapse: collapse">
+						<tr>
+							<td colspan="2" class="rightHeadingCell1"
+								style="#{varStatus.even?'background: url(../../images/yilankabtn1.gif)':'background: url(../../images/yilankabtn4.jpg)'}">
+							<table width="100%" border="0" cellspacing="0" cellpadding="0"
+								style="color: #000000; font-size: 15px; font-weight: bold;">
+								<tr>
+									<td align="center" width="15%"
+										style="background-color: #{bed.oldernumber== 2?'red':null} #{bed.oldernumber == 1?'hotpink':null} #{bed.oldernumber  == 0?'cornflowerblue':null}">
+									#{bed.sortid}</td>
+									<td width="21%" align="right" class="blue"></td>
+								</tr>
+							</table>
+							</td>
+						</tr>
+						<tr>
+							<td align="center" class="hengbiaogeHeader1" title="房间号">#{bed.roomname}</td>
+							<td class="hengbiaogedata" title="床位号"><h:outputText
+								value=" #{bed.name}" /></td>
+						</tr>
+						<tr>
+							<td align="center" class="hengbiaogeHeader1">床位类型</td>
+							<td class="hengbiaogedata"><h:outputText
+								value=" #{bed.typename}" /></td>
+						</tr>
+						<tr>
+							<td align="center" class="hengbiaogeHeader1">老人数</td>
+							<td class="hengbiaogedata"><h:outputText
+								value=" #{bed.oldernumber}" /></td>
+						</tr>
+						<tr>
+							<td align="center" class="hengbiaogeHeader1">老人姓名</td>
+							<td class="hengbiaogedata"><ui:repeat var="older"
+								value="#{bed.olderList}">
+								<h:outputText value="#{older.name}" />
+								<p:commandLink
+									update=":message,:tabView:olderInfoForm,:tabView:normalPayForm:normalPayTable,:tabView:tempPayForm:tempPayTable,:tabView:familyForm"
+									oncomplete="olderInfoDig.show();" title="信息"
+									action="#{nurseWorkStationController.showSelectedolderInfo}">
+									<p:graphicImage value="/images/search.png" style="border:0px;" />
+									<f:setPropertyActionListener value="#{older}"
+										target="#{nurseWorkStationController.selectedOlder}" />
+								</p:commandLink>
+							</ui:repeat></td>
+						</tr>
+					</table>
+				</ui:repeat>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="olderInfoDig" header="老人档案" appendTo="@(body)"
+			resizable="true" modal="true">
+			<p:tabView id="tabView"
+				tabChangeListener="#{nurseWorkStationController.onChangeTab}">
+				<p:tab title="老人基本信息" id="olderInfo">
+					<div align="center" style="height:400px;width:700px;overflow: auto;"><h:form id="olderInfoForm"
+						styleClass="noDisable">
+						<table class="hengbiaoge" align="center">
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="申请人姓名:" /></td>
+								<td class="hengbiaogedata"><h:outputText id="applyName"
+									value="#{nurseWorkStationController.viewPensionOlder.applyName}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="申请人性別:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.applySexStr}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="关系: " /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.relationShip}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="联系方式:"
+									styleClass="redfont" /></td>
+								<td class="hengbiaogedata"><h:outputText id="applyPhone"
+									value="#{nurseWorkStationController.viewPensionOlder.phoneNum}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="老人姓名:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.name}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="输入码:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.inputcode}"
+									id="olderInputCode">
+								</h:outputText></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="状态:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.olderState}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="身份证号:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.idcardnum}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="性别:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.oldSex}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="出生日期:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.birthday}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="信仰:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.faith}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="手机:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.phone}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="民族:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.nationName}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="政治面貌:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.politicName}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="老人类型:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.oldType}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="本人成分:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.jobs}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="户籍:" /></td>
+								<td class="hengbiaogedata"><h:outputText id="olderAdress"
+									value="#{nurseWorkStationController.viewPensionOlder.household}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="脉搏:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.pluse}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="收缩压:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.systolicpres}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="舒张压:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.diastolicpre}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="主治医院:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.hospital}">
+								</h:outputText></td>
+							</tr>
+
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="主治医生:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.doctor}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="医院电话:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.hospitalphone}">
+								</h:outputText></td>
+
+								<td class="hengbiaogeHeader1"><h:outputText value="过敏药物:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.sensitives}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+
+								<td class="hengbiaogeHeader1"><h:outputText value="主要疾病:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.illness}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="病史:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.medhistory}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="饮食特点:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.diet}">
+								</h:outputText></td>
+							</tr>
+
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="性格心理:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.characters}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="爱好:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.hobey}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="特殊要求:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.specailreq}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="异常表现:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.abnormal}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="合同号:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.contractNum}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="入住日期:" /></td>
+								<td class="hengbiaogedata"><p:calendar disabled="true"
+									value="#{nurseWorkStationController.viewPensionOlder.visitTime}"
+									pattern="yyyy-MM-dd"></p:calendar></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="医疗保险:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.insurance}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="护理级别:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.nurseType}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="护理员:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.nurseName}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+
+								<td class="hengbiaogeHeader1"><h:outputText value="大厦:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.buildName}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="楼层:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.floorName}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="房间:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.roomName}">
+								</h:outputText></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="床位:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.bedName}">
+								</h:outputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="床位标准:" /></td>
+								<td class="hengbiaogedata"><h:outputText
+									value="#{nurseWorkStationController.viewPensionOlder.bedType}">
+								</h:outputText></td>
+
+							</tr>
+						</table>
+					</h:form></div>
+				</p:tab>
+				<p:tab title="老人收费信息" id="payRecord">
+				<div  style="height:400px;width:800px;overflow: auto;">
+					<p:fieldset legend="日常收费">
+						<h:form id="normalPayForm">
+							<table width="100%">
+								<tr>
+									<td><p:dataTable cellspacing="2" rows="4"
+										style="width:100%" id="normalPayTable"
+										value="#{nurseWorkStationController.normalPayList}"
+										paginator="true" paginatorPosition="bottom"
+										paginatorAlwaysVisible="false"
+										paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+										var="normal" rowKey="#{normal.id}" selectionMode="single"
+										emptyMessage="没有相应记录">
+										<p:column headerText="总费用" styleClass="width60">
+											<h:outputText value="#{normal.totalfees}" />
+										</p:column>
+										<p:column headerText="项目名称" styleClass="width60">
+											<h:outputText value="#{normal.itemName}" />
+										</p:column>
+										<p:column headerText="项目费用" styleClass="width60">
+											<h:outputText value="#{normal.itemFees}" />
+										</p:column>
+										<p:column headerText="项目数量" styleClass="width60">
+											<h:outputText value="#{normal.number}" />
+										</p:column>
+										<p:column headerText="开单时间" styleClass="width60">
+											<h:outputText value="#{normal.generatetime}">
+												<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+											</h:outputText>
+										</p:column>
+										<p:column headerText="是否缴费" styleClass="width60">
+											<h:outputText value="是" rendered="#{normal.ispay==1}" />
+											<h:outputText value="否" rendered="#{normal.ispay==2}" />
+										</p:column>
+										<p:column headerText="缴费时间" styleClass="width60">
+											<h:outputText value="#{normal.paytime}">
+												<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+											</h:outputText>
+										</p:column>
+										<p:column headerText="是否结算" styleClass="width60">
+											<h:outputText value="是" rendered="#{normal.isclosed==1}" />
+											<h:outputText value="否" rendered="#{normal.isclosed==2}" />
+										</p:column>
+										<p:column headerText="结算时间" styleClass="width60">
+											<h:outputText value="#{normal.closedName}">
+												<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+											</h:outputText>
+										</p:column>
+									</p:dataTable></td>
+								</tr>
+							</table>
+						</h:form>
+					</p:fieldset>
+					<p:fieldset legend="临时收费">
+						<h:form id="tempPayForm">
+							<table width="100%">
+								<tr>
+									<td><p:dataTable cellspacing="2" rows="4"
+										style="width:100%" id="tempPayTable"
+										value="#{nurseWorkStationController.tempPayList}"
+										paginator="true" paginatorPosition="bottom"
+										paginatorAlwaysVisible="false"
+										paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+										var="temp" rowKey="#{temp.id}" selectionMode="single"
+										emptyMessage="没有相应记录">
+										<p:column headerText="总费用" styleClass="width60">
+											<h:outputText value="#{temp.totalfees}" />
+										</p:column>
+										<p:column headerText="项目名称" styleClass="width90">
+											<h:outputText value="#{temp.itemName}" />
+										</p:column>
+										<p:column headerText="项目费用" styleClass="width60">
+											<h:outputText value="#{temp.itemFees}" />
+										</p:column>
+										<p:column headerText="项目数量" styleClass="width60">
+											<h:outputText value="#{temp.number}" />
+										</p:column>
+										<p:column headerText="开单时间" styleClass="width60">
+											<h:outputText value="#{temp.generatetime}">
+												<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+											</h:outputText>
+										</p:column>
+										<p:column headerText="是否缴费" styleClass="width60">
+											<h:outputText value="是" rendered="#{temp.ispay==1}" />
+											<h:outputText value="否" rendered="#{temp.ispay==2}" />
+										</p:column>
+										<p:column headerText="缴费时间" styleClass="width70">
+											<h:outputText value="#{temp.paytime}">
+												<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+											</h:outputText>
+										</p:column>
+										<p:column headerText="是否结算" styleClass="width60">
+											<h:outputText value="是" rendered="#{temp.isclosed==1}" />
+											<h:outputText value="否" rendered="#{temp.isclosed==2}" />
+										</p:column>
+										<p:column headerText="结算时间" styleClass="width60">
+											<h:outputText value="#{temp.closedName}">
+												<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+											</h:outputText>
+										</p:column>
+									</p:dataTable></td>
+								</tr>
+							</table>
+						</h:form>
+					</p:fieldset>
+					</div>
+				</p:tab>
+				<p:tab title="老人家属信息" id="familyRecord">
+					<h:form id="familyForm">
+						<table width="100%">
+							<tr>
+								<td><p:dataTable cellspacing="2" rows="7"
+									style="width:100%" id="familyTable"
+									value="#{nurseWorkStationController.familyList}"
+									paginator="true" paginatorPosition="bottom"
+									paginatorAlwaysVisible="false"
+									paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+									var="family" rowKey="#{family.id}" selectionMode="single"
+									emptyMessage="没有相应记录">
+									<p:column headerText="姓名" styleClass="width50">
+										<h:outputText value="#{family.name}">
+										</h:outputText>
+									</p:column>
+									<p:column headerText="性别" styleClass="width50">
+										<h:outputText value="男" rendered="#{family.sex==1}" />
+										<h:outputText value="女" rendered="#{family.sex==2}" />
+									</p:column>
+									<p:column headerText="关系" styleClass="width50">
+										<h:outputText value="#{family.relationShipStr}" />
+									</p:column>
+									<p:column headerText="联系电话1" styleClass="width70">
+										<h:outputText value="#{family.phonenum1}">
+										</h:outputText>
+									</p:column>
+									<p:column headerText="联系电话2" styleClass="width70">
+										<h:outputText value="#{family.phonenum2}">
+										</h:outputText>
+									</p:column>
+									<p:column headerText="身份证号" styleClass="width60">
+										<h:outputText value="#{family.idcard}">
+										</h:outputText>
+									</p:column>
+									<p:column headerText="工作单位" styleClass="width60">
+										<h:outputText value="#{family.company}" />
+									</p:column>
+									<p:column headerText="住址" styleClass="width60">
+										<h:outputText value="#{family.address}" />
+									</p:column>
+									<p:column headerText="紧急" styleClass="width50">
+										<h:selectBooleanCheckbox value="#{family.defaultFamily}"
+											disabled="true" />
+									</p:column>
+								</p:dataTable></td>
+							</tr>
+						</table>
+					</h:form>
+				</p:tab>
+			</p:tabView>
+		</p:dialog>
+		<script type="text/javascript">
+		function hiddenbtnClick(){
+			jQuery("#roomForm\\:hiddenbtn").click();
+		}
+       /*  取消滚动条
+        */
+	jQuery(document).ready(function(){ 
+		 cleanBar();
+	}); 
+
+</script>
+	</h:body>
+</f:view>
+</html>

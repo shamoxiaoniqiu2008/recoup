@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages" widgetVar="message"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:outputText value="&nbsp;&nbsp;开始时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{haircutItemManageController.startDate}" />
+				<h:outputText value="结束时间:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{haircutItemManageController.endDate}" />
+				<h:outputLabel value="项目名称:" for="headForm:itemText" />
+				<h:panelGroup>
+					<p:inputText id="itemText" style="width:120px" />
+					<his:IME for="headForm:itemText" fitcol="itemName" resultcol="1"
+						lock="true" rawSQL="true"
+						SQL="#{haircutItemManageController.itemNameSql}"
+						SQLResult="项目ID:0:hide,项目名称:4,开始时间:1,结束时间:2,理发地址:3"
+						multiresult="headForm:itemIdHd;0" />
+					<h:inputHidden id="itemIdHd"
+						value="#{haircutItemManageController.itemId}" />
+				</h:panelGroup>
+				<h:outputLabel value="是否发布:" for="postFlagText" />
+				<h:selectOneMenu value="#{haircutItemManageController.postFlag}"
+					id="postFlagText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="0" />
+					<f:selectItem itemLabel="已发布" itemValue="1" />
+					<f:selectItem itemLabel="未发布" itemValue="2" />
+				</h:selectOneMenu>
+				<p:commandButton id="searchButton"
+					action="#{haircutItemManageController.selectHaircutItemRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:haircutItemTable,:maintainForm,:messages,:itemDetailForm" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{haircutItemManageController.clearSelectForm}"
+					update=":headForm,:messages" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="haircutItemRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="haircutItemTable" rowIndexVar="row"
+					value="#{haircutItemManageController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{haircutItemManageController.selectedRow}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{haircutItemManageController.selectRecord}"
+						update=":dataTableForm,:maintainForm,:itemDetailForm" />
+					<p:ajax event="rowUnselect"
+						istener="#{haircutItemManageController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm,:itemDetailForm" />
+					<p:column headerText="项目名称">
+						<h:outputText value="#{record.itemName}" />
+					</p:column>
+					<p:column headerText="理发地点">
+						<h:outputText value="#{record.haircutAddress}" />
+					</p:column>
+					<p:column headerText="开始时间">
+						<h:outputText value="#{record.startTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="持续时间">
+						<h:outputText value="#{record.durationStr}" />
+					</p:column>
+					<p:column headerText="最多人数">
+						<h:outputText value="#{record.maxNumber}" />
+					</p:column>
+					<p:column headerText="是否发布">
+						<h:outputText value="已发布" rendered="#{record.postFlag == 1}" />
+						<h:outputText value="未发布" rendered="#{record.postFlag != 1}" />
+					</p:column>
+					<p:column headerText="备注">
+						<h:outputText value="#{record.note}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton styleClass="addbtn" value=""
+					action="#{haircutItemManageController.clearInsertForm}"
+					oncomplete="insertRecordDialog.show()" update=":insertForm" />
+				<p:commandButton styleClass="deletebtn" value=""
+					disabled="#{haircutItemManageController.disUpdateDeleteAndPostButton}"
+					onclick="confirmDialog.show()" type="button" />
+				<p:commandButton styleClass="modifybtn" value=""
+					disabled="#{haircutItemManageController.disUpdateDeleteAndPostButton}"
+					action="#{haircutItemManageController.copyRecordUpdatedRow}"
+					oncomplete="handleUpdateInit(xhr, status, args)"
+					update=":updateForm,:messages" />
+				<p:commandButton value="发布" styleClass="commonbtn"
+					disabled="#{haircutItemManageController.disUpdateDeleteAndPostButton}"
+					action="#{haircutItemManageController.postHaircutItemRecord}"
+					update=":dataTableForm,:maintainForm,:messages" />
+			</div>
+		</h:form>
+		<h:form id="itemDetailForm">
+
+		</h:form>
+		<p:dialog header="新增" widgetVar="insertRecordDialog" resizable="false"
+			appendTo="@(body)" position="center" modal="true">
+			<h:form id="insertForm">
+				<table class="hengbiaoge" width="100%" id="insertTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="itemNameText">项目名称:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="itemNameText"
+								style="width:140px"
+								value="#{haircutItemManageController.insertedRow.itemName}" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="haircutAddressText">理发地点:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								id="haircutAddressText" style="width:140px"
+								value="#{haircutItemManageController.insertedRow.haircutAddress}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="startDate_input">开始时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar size="20"
+								id="startDate" showButtonPanel="true"
+								value="#{haircutItemManageController.insertedRow.startTime}"
+								pattern="yyyy-MM-dd HH:mm" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="endDate_input">结束时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar size="20" id="endDate"
+								showButtonPanel="true"
+								value="#{haircutItemManageController.insertedRow.endTime}"
+								pattern="yyyy-MM-dd HH:mm" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="maxNumber">最大人数:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{haircutItemManageController.insertedRow.maxNumber}"
+								style="width:140px" id="maxNumber"
+								converterMessage="最大人数请输入正整数！" validatorMessage="最大人数请输入正整数！">
+								<f:validateLongRange minimum="1"
+									for="insertRecordDialog:maxNumber" />
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="备注:"
+								for="noteText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="noteText"
+								style="width:140px"
+								value="#{haircutItemManageController.insertedRow.note}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="commonbtn" value="发布"
+						onstart="return checkNulls('insertForm','redfont',true);"
+						action="#{haircutItemManageController.insertAndPostHaircutItemRecord}"
+						update=":insertForm,:dataTableForm,:messages,:maintainForm"
+						oncomplete="handleInsertComplete(xhr, status, args)" />
+					<p:commandButton styleClass="commonbtn" value="保存"
+						onstart="return checkNulls('insertForm','redfont',true);"
+						action="#{haircutItemManageController.insertHaircutItemRecord}"
+						update=":insertForm,:dataTableForm,:messages,:maintainForm"
+						oncomplete="handleInsertComplete(xhr, status, args)" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="insertRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="修改" widgetVar="updateRecordDialog" resizable="false"
+			appendTo="@(body)" position="center" modal="true">
+			<h:form id="updateForm">
+				<table class="hengbiaoge" width="100%" id="updateTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="itemNameText">项目名称:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="itemNameText"
+								style="width:127px"
+								value="#{haircutItemManageController.updatedRow.itemName}" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="haircutAddressText">理发地点:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								id="haircutAddressText" style="width:127px" required="true"
+								value="#{haircutItemManageController.updatedRow.haircutAddress}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="startDate_input">开始时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar size="18"
+								id="startDate" showButtonPanel="true"
+								value="#{haircutItemManageController.updatedRow.startTime}"
+								pattern="yyyy-MM-dd HH:mm" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="endDate_input">结束时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar size="18" id="endDate"
+								showButtonPanel="true"
+								value="#{haircutItemManageController.updatedRow.endTime}"
+								pattern="yyyy-MM-dd HH:mm" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="maxNumber">最大人数:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{haircutItemManageController.updatedRow.maxNumber}"
+								style="width:127px" id="maxNumber"
+								converterMessage="最大人数请输入正整数！" validatorMessage="最大人数请输入正整数！">
+								<f:validateLongRange minimum="1"
+									for="updateRecordDialog:maxNumber" />
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="备注:"
+								for="noteText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="noteText"
+								style="width:127px"
+								value="#{haircutItemManageController.updatedRow.note}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						onstart="return checkNulls('updateForm','redfont',true);"
+						action="#{haircutItemManageController.updateHaircutItemRecord}"
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":updateForm,:dataTableForm,:messages,:maintainForm" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="updateRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:confirmDialog modal="true" appendTo="@(body)"
+			widgetVar="confirmDialog" message="确定要删除该理发项目？">
+			<h:form>
+				<p:commandButton styleClass="commonbtn" value="确定"
+					action="#{haircutItemManageController.deleteHaircutItemRecord}"
+					update=":dataTableForm,:maintainForm,:messages"
+					oncomplete="confirmDialog.hide();">
+				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="取消" type="reset"
+					onclick="confirmDialog.hide();"></p:commandButton>
+			</h:form>
+		</p:confirmDialog>
+
+		<script type="text/javascript">
+		//清空 selectForm
+		function clearSelectForm(){
+			document.getElementById("headForm:startDate").value="";
+			document.getElementById("headForm:endDate").value="";
+			document.getElementById("headForm:itemText").value="";
+			return true;
+		}
+		function handleInsertComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				insertRecordDialog.hide();
+            }	
+		}
+		function handleDeleteComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				confirmDialog.show();
+            }	
+		}
+		function handleUpdateInit(xhr, status, args){
+			if(args.success) {
+				updateRecordDialog.show();
+            }	
+		}
+		function handleUpdateComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				updateRecordDialog.hide();
+            }	
+		}
+		
+	</script>
+	</h:body>
+</f:view>
+</html>

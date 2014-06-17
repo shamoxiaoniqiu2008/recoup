@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ManualColumnMapper.xml  author:Ade-->
+<mapper namespace="persistence.system.ManualColumnMapper">
+    <!-- 
+    	为什么这里使用$符号，而不是用#符号
+	    默认情况下，使用#{}格式的语法会导致MyBatis创建预处理语句属性并以它为背景设置安全的值（比如?）。这样做很安全，很迅速也是首选做法，有时你只是想直接在SQL语句中插入一个不改变的字符串。比如，像ORDER BY，你可以这样来使用：
+	ORDER BY ${columnName}
+	这里MyBatis不会修改或转义字符串 摘自Mybatis3.1.0
+     -->
+    
+	<!-- 查询某个表的全部数据 -->
+	<select id="selectDataOfTable" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		SELECT ${columnNames} FROM ${tableName} ORDER BY ${orderColumnName}
+</select>
+
+<!-- 根据某个列查询这个表的数据  注：模糊查询-->
+<select id="selectDataOfTabelByColumnName" parameterType="java.util.Map" resultType="java.util.HashMap">
+	SELECT * FROM  ${tableName} WHERE ${searchCondition}  ORDER BY ${orderColumnName}
+</select>
+
+<!-- 增加一条数据 -->
+<insert id="insertRecord" parameterType="java.util.Map">
+	INSERT INTO ${tableName}(${columnNames}) VALUES(${values})
+</insert>
+<!-- 查询某个表的seq -->
+<select id="selectSeqOfTable" parameterType="java.util.Map" resultType="java.lang.String" useCache="false">
+	SELECT ${tableSeq} FROM DUAL
+</select>
+<!-- 删除数据库中的某条记录 -->
+<delete id="deleteData" parameterType="java.util.Map">
+	DELETE FROM ${tableName} WHERE ${columnName}=${parameter} 
+</delete>
+<!-- 更新数据 -->
+<update id="updateData">
+	UPDATE ${tableName} SET ${columnAndValues} WHERE ${columnName}=${parameter} 
+</update>
+<!-- 查询主键为1的记录是否存在 -->
+<select id="selectPKEqOne" parameterType="java.util.Map" resultType="java.util.HashMap">
+	SELECT ${columnNames} FROM  ${tableName} WHERE ${searchCondition}
+</select>
+
+<!-- 通过表名查询某个表的主键 -->
+<select id ="selectPkColumnName" parameterType="java.util.Map" resultType="java.lang.String">
+    select c.COLUMN_NAME as COLUMN_NAME
+  	  from COLUMNS c
+     WHERE c.TABLE_NAME = '${tableName}'
+       and  c.COLUMN_KEY = 'PRI'
+</select>
+
+</mapper>

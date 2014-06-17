@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:outputText value="&nbsp;&nbsp;开始时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{haircutReservationController.startDate}" />
+				<h:outputText value="结束时间:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{haircutReservationController.endDate}" />
+				<h:outputLabel value="项目名称:" for="headForm:itemText" />
+				<h:panelGroup>
+					<p:inputText id="itemText" style="width:120px" />
+					<his:IME for="headForm:itemText" fitcol="itemName" resultcol="1"
+						lock="true" rawSQL="true"
+						SQL="#{haircutReservationController.itemNameSql}"
+						SQLResult="项目ID:0:hide,项目名称:4,开始时间:1,结束时间:2,理发地址:3"
+						multiresult="headForm:itemIdHd;0" />
+					<h:inputHidden id="itemIdHd"
+						value="#{haircutReservationController.itemId}" />
+				</h:panelGroup>
+				<p:commandButton id="searchButton"
+					action="#{haircutReservationController.selectHaircutItemRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:haircutItemTable,:maintainForm,:messages,:itemDetailForm" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{haircutReservationController.clearSelectForm}"
+					update=":headForm,:messages" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="haircutItemRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="5" style="width:100%"
+					id="haircutItemTable" rowIndexVar="row"
+					value="#{haircutReservationController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{haircutReservationController.selectedRow}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{haircutReservationController.selectRecord}"
+						update=":dataTableForm,:maintainForm,:itemDetailForm,:reserveForm:nameText" />
+					<p:ajax event="rowUnselect"
+						listener="#{haircutReservationController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm,:itemDetailForm" />
+					<p:column headerText="项目名称">
+						<h:outputText value="#{record.itemName}" />
+					</p:column>
+					<p:column headerText="理发地点">
+						<h:outputText value="#{record.haircutAddress}" />
+					</p:column>
+					<p:column headerText="开始时间">
+						<h:outputText value="#{record.startTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="持续时间">
+						<h:outputText value="#{record.durationStr}" />
+					</p:column>
+					<p:column headerText="最多人数">
+						<h:outputText value="#{record.maxNumber}" />
+					</p:column>
+					<p:column headerText="预约人数">
+						<h:outputText value="#{record.currentOrdernumber}" />
+					</p:column>
+					<p:column headerText="实际理发人数">
+						<h:outputText value="#{record.haircutedNumber}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton value="理发预约" styleClass="commonbtn"
+					action="#{haircutReservationController.checkNumber}"
+					process="@this,:dataTableForm"
+					oncomplete="handleReserveInit(xhr, status, args)"
+					disabled="#{haircutReservationController.disReserveButton}"
+					update=":dataTableForm,:maintainForm,:messages,:reserveForm" />
+			</div>
+		</h:form>
+		<h:form id="itemDetailForm">
+			<h:panelGrid id="reserveDetailRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="5" style="width:100%"
+					id="reserveDetailTable" rowIndexVar="row"
+					value="#{haircutReservationController.reservedOlderDetails}"
+					var="detail" rowKey="#{detail.id}" emptyMessage="没有相应记录"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:column headerText="姓名">
+						<h:outputText value="#{detail.olderName}" />
+					</p:column>
+					<p:column headerText="床位">
+						<h:outputText value="#{detail.bedName}" />
+					</p:column>
+					<p:column headerText="报名时间">
+						<h:outputText value="#{detail.signTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="理发时间">
+						<h:outputText value="#{detail.haircutTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="操作">
+						<p:commandButton value="取消预约"
+							oncomplete="handleCancelInit(xhr, status, args)"
+							action="#{haircutReservationController.copySelectToCanceledRow(detail)}"
+							disabled="#{detail.cutedFlag == 1}"
+							update=":dataTableForm,:itemDetailForm,:messages" />
+						<p:commandButton value="登记"
+							action="#{haircutReservationController.signHaircut(detail)}"
+							disabled="#{detail.cutedFlag == 1}"
+							update=":dataTableForm,:itemDetailForm,:messages" />
+					</p:column>
+
+				</p:dataTable>
+			</h:panelGrid>
+			<h:outputText value="&nbsp;"></h:outputText>
+		</h:form>
+		<p:dialog header="预约" widgetVar="reserveRecordDialog"
+			resizable="false" appendTo="@(body)" position="400,100" modal="true">
+			<h:form id="reserveForm">
+				<table class="hengbiaoge" width="100%" id="reserveTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="老人姓名:"
+								for="nameText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><h:panelGroup>
+								<p:inputText id="nameText" style="width:125px" required="true"
+									requiredMessage="请输入老人姓名!"
+									value="#{haircutReservationController.reserveOlderRow.olderName}">
+								</p:inputText>
+								<his:IME for="reserveForm:nameText" fitcol="inputCode"
+									resultcol="0" lock="true" rawSQL="true"
+									SQL="#{haircutReservationController.olderNameSql}"
+									SQLResult="老人姓名:0,大厦:1,楼层:2,房间:3,床位:4,老人Id:5:hide,输入码:6"
+									multiresult="reserveForm:buildingText;1,reserveForm:roomText;3,reserveForm:bedNoText;4,reserveForm:olderIdHd;5" />
+								<h:inputHidden id="olderIdHd"
+									value="#{haircutReservationController.reserveOlderRow.olderId}" />
+							</h:panelGroup></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="大厦:"
+								for="buildingText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="buildingText"
+								style="width:125px" readonly="true"
+								value="#{haircutReservationController.reserveOlderRow.buildName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="房间:"
+								for="roomText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="roomText"
+								style="width:125px" readonly="true"
+								value="#{haircutReservationController.reserveOlderRow.roomName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="床位号:"
+								for="bedNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="bedNoText"
+								style="width:125px" readonly="true"
+								value="#{haircutReservationController.reserveOlderRow.bedName}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{haircutReservationController.reserveHaircut}"
+						update=":reserveForm,:dataTableForm,:messages,:maintainForm,:itemDetailForm"
+						oncomplete="handleReserveComplete(xhr, status, args)" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="reserveRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+				<script>
+			setTimeout(function(){
+				document.getElementById("reserveForm:nameText").focus();
+			},200);
+			
+			</script>
+			</h:form>
+		</p:dialog>
+		<p:confirmDialog modal="true" appendTo="@(body)"
+			widgetVar="confirmDialog" message="确定要取消该预约记录？">
+			<h:form>
+				<p:commandButton styleClass="commonbtn" value="确定"
+					action="#{haircutReservationController.cancelHaircut}"
+					update=":dataTableForm,:itemDetailForm,:messages"
+					oncomplete="confirmDialog.hide();">
+				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="取消" type="reset"
+					onclick="confirmDialog.hide();"></p:commandButton>
+			</h:form>
+		</p:confirmDialog>
+
+
+		<script type="text/javascript">
+		//清空 selectForm
+		function clearSelectForm(){
+			document.getElementById("headForm:startDate").value="";
+			document.getElementById("headForm:endDate").value="";
+			document.getElementById("headForm:itemText").value="";
+			return true;
+		}
+		function handleReserveComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				reserveRecordDialog.hide();
+            }	
+		}
+		function handleReserveInit(xhr, status, args){
+			if(args.success) {
+				reserveRecordDialog.show();
+            }	
+		}
+		function handleCancelInit(xhr, status, args){
+			if(args.success) {
+				confirmDialog.show();
+            }	
+		}
+	</script>
+	</h:body>
+</f:view>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText value="#{drugNoticeController.olderName}"
+							id="olderName">
+							<p:ajax event="blur" process="@this,searchForm:olderId"
+								listener="#{drugNoticeController.updateDrugSql}"></p:ajax>
+						</p:inputText> <his:IME for="searchForm:olderName" rawSQL="true" resultcol="1"
+							SQLResult="编号:0,姓名:1,输入码:2"
+							SQL="#{drugNoticeController.olderSql}" sortcol="id"
+							fitcol="inputCode" lock="true" multiresult="searchForm:olderId;0" />
+						<h:inputHidden value="#{drugNoticeController.olderId}"
+							id="olderId" /></td>
+					<td class="leftcell">药物名称:</td>
+					<td><p:inputText id="drugName"
+							value="#{drugNoticeController.drugName}" /> <his:IME
+							for="searchForm:drugName" rawSQL="true" resultcol="1"
+							SQLResult="编号:0,药物名称:1,输入码:2"
+							SQL="#{drugNoticeController.drugSql}" fitcol="input_code"
+							lock="true" sortcol="id" /></td>
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value="" actionListener="#{drugNoticeController.searchDrugList}"
+							update=":overDulDrugForm,:message,:shortageDrugForm" /></td>
+					<td class="leftcell"><p:commandButton styleClass="blankbtn"
+							value="" actionListener="#{drugNoticeController.clearSearch}"
+							update=":searchForm" /></td>
+				</tr>
+			</table>
+		</h:form>
+
+		<h:form id="overDulDrugForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="5" style="width:100%"
+							id="overDulDrugTable"
+							value="#{drugNoticeController.overDulDrugList}" paginator="true"
+							paginatorPosition="bottom" paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="over" rowKey="#{over.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+
+							<p:column headerText="老人姓名" styleClass="width60">
+								<h:outputText value="#{over.olderName}" />
+							</p:column>
+							<p:column headerText="申请人" styleClass="width60">
+								<h:outputText value="#{over.applicantName}" />
+							</p:column>
+							<p:column headerText="关系" styleClass="width50">
+								<h:outputText value="#{over.relationShip}" />
+							</p:column>
+							<p:column headerText="联系电话" styleClass="width60">
+								<h:outputText value="#{over.phoneNo}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="药物名称" styleClass="width60">
+								<h:outputText value="#{over.drugreceiveName}" />
+							</p:column>
+							<p:column headerText="总量" styleClass="width50">
+								<h:outputText value="#{over.totalAmount}" />
+							</p:column>
+							<p:column headerText="单次用量" styleClass="width60">
+								<h:outputText value="#{over.singleDose}" />
+							</p:column>
+							<p:column headerText="单位" styleClass="width50">
+								<h:outputText value="#{over.unit}" />
+							</p:column>
+							<p:column headerText="在用" styleClass="width50">
+								<h:selectBooleanCheckbox value="#{over.useFlag}" disabled="true" />
+							</p:column>
+							<p:column headerText="有效" styleClass="width50">
+								<h:selectBooleanCheckbox value="#{over.validF}" disabled="true" />
+							</p:column>
+							<p:column headerText="保质期" styleClass="width80">
+								<h:outputText value="#{over.shelflifeTime}" styleClass="redfont">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+		</h:form>
+		<div style="margin-top: 30px">
+			<h:form id="shortageDrugForm">
+				<table width="100%">
+					<tr>
+						<td><p:dataTable cellspacing="2" rows="5" style="width:100%"
+								id="shortageTable"
+								value="#{drugNoticeController.shortageDrugList}"
+								paginator="true" paginatorPosition="bottom"
+								paginatorAlwaysVisible="false"
+								paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+								var="shortage" rowKey="#{shortage.id}" selectionMode="single"
+								emptyMessage="没有相应记录">
+
+								<p:column headerText="老人姓名" styleClass="width60">
+									<h:outputText value="#{shortage.olderName}" />
+								</p:column>
+								<p:column headerText="申请人" styleClass="width50">
+									<h:outputText value="#{shortage.applicantName}" />
+								</p:column>
+								<p:column headerText="关系" styleClass="width50">
+									<h:outputText value="#{shortage.relationShip}" />
+								</p:column>
+								<p:column headerText="联系电话" styleClass="width60">
+									<h:outputText value="#{shortage.phoneNo}">
+									</h:outputText>
+								</p:column>
+								<p:column headerText="药物名称" styleClass="width100">
+									<h:outputText value="#{shortage.drugreceiveName}" />
+								</p:column>
+								<p:column headerText="总量" styleClass="width50">
+									<h:outputText value="#{shortage.totalAmount}"
+										styleClass="redfont" />
+								</p:column>
+								<p:column headerText="单次用量" styleClass="width60">
+									<h:outputText value="#{shortage.singleDose}" />
+								</p:column>
+								<p:column headerText="单位" styleClass="width50">
+									<h:outputText value="#{shortage.unit}" />
+								</p:column>
+								<p:column headerText="早" styleClass="width50">
+									<h:selectBooleanCheckbox value="#{shortage.morningFlag}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="中" styleClass="width50">
+									<h:selectBooleanCheckbox value="#{shortage.noonFlag}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="晚" styleClass="width50">
+									<h:selectBooleanCheckbox value="#{shortage.nightFlag}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="有效" styleClass="width50">
+									<h:selectBooleanCheckbox value="#{shortage.validF}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="保质期" styleClass="width80">
+									<h:outputText value="#{shortage.shelflifeTime}">
+										<f:convertDateTime pattern="yyyy-MM-dd" />
+									</h:outputText>
+								</p:column>
+							</p:dataTable></td>
+					</tr>
+				</table>
+			</h:form>
+		</div>
+	</h:body>
+</f:view>
+</html>

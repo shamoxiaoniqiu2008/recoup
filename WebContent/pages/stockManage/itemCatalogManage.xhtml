@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css">
+		</link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		</meta>
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">物资类型:</td>
+					<td><p:inputText id="typeName"></p:inputText> <his:IME
+							for="searchForm:typeName" SQLResult="编号:0,类型:1,输入码:2"
+							fitcol="input_code" rawSQL="true"
+							SQL="select p.id,p.item_name,p.input_code from pension_dic_itemtype  p where p.cleared=2"
+							lock="true" resultcol="1" multiresult="searchForm:typeId;0" /> <h:inputHidden
+							value="#{itemCatalogManageController.typeId}" id="typeId" /></td>
+
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value="" prcess="@this,searchForm:typeId"
+							actionListener="#{itemCatalogManageController.searchItemCatalog}"
+							update=":itemCatalogForm" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="itemCatalogForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="10" style="width:100%"
+							id="itemCatalogTable"
+							selection="#{itemCatalogManageController.selectedRow}"
+							value="#{itemCatalogManageController.itemCatalogList}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="item" rowKey="#{item.id}" selectionMode="single"
+							paginatorAlwaysVisible="false" emptyMessage="没有相应记录">
+
+							<p:ajax event="rowSelect"
+								listener="#{itemCatalogManageController.setEnableFlag}" />
+							<p:ajax event="rowUnselect"
+								listener="#{itemCatalogManageController.setUnableFlag}" />
+							<p:column headerText="序号" style="width:130px">
+								<h:outputText value="#{item.id}" />
+							</p:column>
+							<p:column headerText="物资名称" style="width:140px">
+								<h:outputText value="#{item.itemName}" />
+							</p:column>
+							<p:column headerText="物资类型">
+								<h:outputText value="#{item.typeName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="输入码" style="width:140px">
+								<h:outputText value="#{item.inputCode}" />
+							</p:column>
+							<p:column headerText="备注" style="width:100px">
+								<h:outputText value="#{item.note}" />
+							</p:column>
+
+						</p:dataTable></td>
+				</tr>
+			</table>
+		</h:form>
+		<!-- 物资目录维护 -->
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton oncomplete="addItemDlg.show()" id="addButton"
+					actionListener="#{itemCatalogManageController.initAddForm}"
+					styleClass="addbtn" value="" update=":addItemForm"></p:commandButton>
+				<p:commandButton oncomplete="editItemDlgShow(xhr,status,args)"
+					id="modifyButton"
+					actionListener="#{itemCatalogManageController.initEditForm}"
+					styleClass="modifybtn" value="" update=":editItemForm,:message"></p:commandButton>
+				<p:commandButton oncomplete="delItemDlgShow(xhr,status,args)"
+					actionListener="#{itemCatalogManageController.delItemConfirm}"
+					styleClass="deletebtn" value="" update=":message"></p:commandButton>
+			</div>
+		</h:form>
+
+
+		<!-- 新增物资目录 -->
+		<p:dialog header="新增物资目录" widgetVar="addItemDlg" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="addItemForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="330px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="itemName">物资名称:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="itemName"
+								value="#{itemCatalogManageController.addItemCatalog.itemName}">
+								<p:ajax event="blur"
+									listener="#{itemCatalogManageController.updateInputCode}"
+									update=":addItemForm:inputCode"></p:ajax>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><lable class="redfont"
+								for="inputCode">输入码:</lable></td>
+						<td class="hengbiaogedata"><p:inputText id="inputCode"
+								value="#{itemCatalogManageController.addItemCatalog.inputCode}"></p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><lable class="redfont"
+								for="addItemTypeName">物资类型:</lable></td>
+						<td class="hengbiaogedata"><p:inputText id="addItemTypeName"
+								value="#{itemCatalogManageController.addItemCatalog.typeName}">
+							</p:inputText> <his:IME for="addItemForm:addItemTypeName"
+								SQLResult="编号:0,类型:1,输入码:2" fitcol="input_code"
+								SQL="select t.id,t.item_name,t.input_code from pension_dic_itemtype t where t.cleared=2"
+								lock="true" resultcol="1" rawSQL="true"
+								multiresult="addItemForm:addItemTypeId;0" /> <h:inputHidden
+								value="#{itemCatalogManageController.addItemCatalog.typeId}"
+								id="addItemTypeId" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label>备注:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{itemCatalogManageController.addItemCatalog.note}" /></td>
+					</tr>
+				</table>
+
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton process="@this,addItemForm"
+						onstart="return checkNulls('addItemForm','redfont',true);"
+						actionListener="#{itemCatalogManageController.saveItemCatalog}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="保存" update=":itemCatalogForm,:message">
+					</p:commandButton>
+					<p:commandButton onclick="addItemDlg.hide()" type="button"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 修改物资目录 -->
+		<p:dialog header="修改物资目录" widgetVar="editItemDlg" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="editItemForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="330px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editItemName">物资名称:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="editItemName"
+								value="#{itemCatalogManageController.addItemCatalog.itemName}">
+								<p:ajax event="blur"
+									listener="#{itemCatalogManageController.updateInputCode}"
+									update=":editItemForm:editInputCode"></p:ajax>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><lable class="redfont"
+								for="editInputCode">输入码:</lable></td>
+						<td class="hengbiaogedata"><p:inputText id="editInputCode"
+								value="#{itemCatalogManageController.addItemCatalog.inputCode}"></p:inputText></td>
+
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><lable class="redfont"
+								for="editItemTypeName">物资类型:</lable></td>
+						<td class="hengbiaogedata"><p:inputText id="editItemTypeName"
+								value="#{itemCatalogManageController.addItemCatalog.typeName}">
+							</p:inputText> <his:IME for="editItemForm:editItemTypeName"
+								SQLResult="编号:0,类型:1,输入码:2" fitcol="input_code"
+								SQL="select t.id,t.item_name,t.input_code from pension_dic_itemtype t where t.cleared=2"
+								lock="true" resultcol="1" rawSQL="true"
+								multiresult="editItemForm:editItemTypeId;0" /> <h:inputHidden
+								value="#{itemCatalogManageController.addItemCatalog.typeId}"
+								id="editItemTypeId" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label>备注:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{itemCatalogManageController.addItemCatalog.note}" /></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton process="@this,editItemForm"
+						onstart="return checkNulls('editItemForm','redfont',true);"
+						actionListener="#{itemCatalogManageController.updateItemCatalog}"
+						oncomplete="editItemDlgHide(xhr,status,args)"
+						styleClass="commonbtn" value="保存"
+						update=":itemCatalogForm,:message">
+					</p:commandButton>
+					<p:commandButton onclick="editItemDlg.hide()" type="button"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 删除物资目录dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="删除物资目录确认"
+			widgetVar="delRecordDlg" width="220">
+			<h:form id="delRecordForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="确定删除该物资目录？" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							actionListener="#{itemCatalogManageController.deletItemCatalog}"
+							update=":message,:itemCatalogForm"
+							oncomplete="delRecordDlg.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="delRecordDlg.hide();"></p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<script type="text/javascript">
+			//隐藏新增物资记录对话框
+			function addConfirm(xhr, status, args) {
+				if (args.addHide) {
+					addItemDlg.hide();
+				}
+			}
+
+			//显示修改物资申请对话框
+			function editItemDlgShow(xhr, status, args) {
+				if (args.editshow) {
+					editItemDlg.show();
+				}
+			}
+			//隐藏修改物资申请对话框
+			function editItemDlgHide(xhr, status, args) {
+				if (args.edithide) {
+					editItemDlg.hide();
+				}
+			}
+			//确认删除主记录确认
+			function delItemDlgShow(xhr, status, args) {
+				if (args.delRecord) {
+					delRecordDlg.show();
+				}
+			}
+			/*  取消滚动条
+			 */
+			jQuery(document).ready(function() {
+				cleanBar();
+			});
+		</script>
+	</body>
+</f:view>
+</html>

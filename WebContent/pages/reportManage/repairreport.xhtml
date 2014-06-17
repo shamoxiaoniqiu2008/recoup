@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+
+<style>
+.ui-panel .ui-panel-content {
+	padding: 0em !important;
+}
+
+</style>
+
+	<h:head>
+		<title>#{pageConfig.paidReport}</title>
+
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+<script type="text/javascript">
+		</script>
+
+
+	<h:body>
+	<p:growl id="message" widgetVar="message"></p:growl>
+		<p:growl id="messages"></p:growl>
+		<h:form id="searchForm" style="display: inline">
+		<h:outputText value="起始时间:" style="text-align:right" />
+		<p:calendar id="startDate" pattern="yyyy-MM-dd HH:mm"  
+			value="#{repairReportController.startDate}"  >
+		</p:calendar>
+		<h:outputText value="截止时间:" style="text-align:right" />
+		<p:calendar id="endDate" pattern="yyyy-MM-dd HH:mm"  
+			value="#{repairReportController.endDate}"  >
+		</p:calendar>
+		<h:outputText value="排序方式:" style="text-align:right" />
+		<h:selectOneMenu value="#{repairReportController.sortClass}" 
+			id="sortClass" 
+			class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover" >
+			<f:selectItem itemLabel="按大厦分类" itemValue="buildName" />
+			<f:selectItem itemLabel="按楼层分类" itemValue="floorName" />
+			<p:ajax event="valueChange" process="@this"
+				listener="#{repairReportController.createPia}"
+				update=":reportForm,:messages"></p:ajax>
+		</h:selectOneMenu>
+		<p:commandButton styleClass="commonbtn" value="查询"
+			action="#{repairReportController.selectRepairReports}"
+			update=":reportForm,:messages"  id="searchBtn"
+			process="@this,startDate,endDate" ></p:commandButton>
+		<p:commandButton value="导出" styleClass="commonbtn" update=":messages"
+			ajax="false">
+	          	<p:dataExporter type="xls" target=":reportForm:reports" fileName="repairRecords" />  
+		</p:commandButton>
+		</h:form>
+		<h:form id="reportForm">
+		<table><tr><td width="750px">
+		<p:dataTable id="reports" 
+			value="#{repairReportController.repairRecords}"
+			var="repairRecord" 
+			emptyMessage="没有记录"
+			scrollable="true" scrollHeight="400"
+			sortBy="#{repairReportController.sortClass}">
+			<p:column id="buildName"  style="width: 60px">
+				<f:facet name="header">
+						<h:outputText value="大厦名" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{repairRecord.buildName}"></h:outputText>
+			</p:column>
+			<p:column id="floorName"  style="width: 30px">
+				<f:facet name="header">
+						<h:outputText value="楼层名" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{repairRecord.floorName}"></h:outputText>
+			</p:column>
+			<p:column id="roomName" style="width: 30px">
+				<f:facet name="header">
+						<h:outputText value="房间名" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{repairRecord.roomName}"></h:outputText>
+			</p:column>
+			<p:column id="repairCount" style="width: 60px">
+				<f:facet name="header">
+						<h:outputText value="维修次数" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{repairRecord.repairCount}"></h:outputText>
+			</p:column>
+			<p:summaryRow listener="#{repairReportController.calculateTotalNum(repairRecord.floorName)}"
+				rendered="#{repairReportController.sortClass == 'floorName'}">  
+	            <p:column colspan="3" style="text-align:right">  
+	            	<h:outputText value="总次数" ></h:outputText>
+	            </p:column>  
+	            <p:column>  
+	            	<h:outputText value="#{repairReportController.total}" ></h:outputText>
+	            </p:column>  
+      	  </p:summaryRow> 
+      	  <p:summaryRow listener="#{repairReportController.calculateTotalNum(repairRecord.buildName)}"
+				rendered="#{repairReportController.sortClass == 'buildName'}">  
+	            <p:column colspan="3" style="text-align:right">  
+	            	<h:outputText value="总次数" ></h:outputText>
+	            </p:column>  
+	            <p:column>  
+	            	<h:outputText value="#{repairReportController.total}" ></h:outputText>
+	            </p:column>  
+      	  </p:summaryRow>
+      	   <p:summaryRow listener="#{repairReportController.createPia}">  
+      	  </p:summaryRow> 
+		</p:dataTable>
+		</td><td width="400px" valign="top">
+		 <p:pieChart id="paywayPie" 
+          	value="#{repairReportController.repairPie}" 
+          	rendered="#{fn:length(repairReportController.repairPie.data) > 0}"
+          	legendPosition="se" 
+          	fill="true" 
+          	showDataLabels="true"  
+            title="维修次数对比" 
+            style="width:380px;height:280px" />  
+           </td></tr></table>
+		</h:form>
+		<script type="text/javascript">
+		//页面加载完成即向页面添加输入框和按钮
+	   	jQuery(document).ready(function(){
+	   		jQuery("#searchForm\\:searchBtn").click();
+		 });
+		
+		
+		</script>
+	</h:body>
+</f:view>
+</html>

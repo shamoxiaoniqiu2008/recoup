@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText id="olderName"
+							value="#{agentConfirmController.olderName}" /> <his:IME
+							for="searchForm:olderName" rawSQL="true" resultcol="1"
+							SQLResult="编号:0,姓名:1,输入码:2" sortcol="older_id"
+							SQL="#{agentConfirmController.olderSQL}" fitcol="inputCode"
+							lock="true" multiresult="searchForm:olderId;0" /> <h:inputHidden
+							value="#{agentConfirmController.olderId}" id="olderId" /></td>
+					<td class="leftcell">服务日期:</td>
+					<td><p:calendar value="#{agentConfirmController.startDate}"
+							size="9" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar value="#{agentConfirmController.endDate}"
+							size="9" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{agentConfirmController.searchAgents}"
+							update=":applicationForm,:message" styleClass="searchbtn"
+							value="" /></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{agentConfirmController.clearSearchForm}"
+							update=":searchForm" styleClass="blankbtn" value="" /></td>
+				</tr>
+			</table>
+		</h:form>
+
+		<h:form id="applicationForm">
+			<h:panelGrid style="width:100%">
+				<div style="width: 100%; margin-top: 10px">
+					<table style="width: 100%">
+						<tr>
+							<td><p:dataTable cellspacing="8" rows="10"
+									style="width:100%" id="applicationTable"
+									selection="#{agentConfirmController.selectedRow}"
+									value="#{agentConfirmController.agentList}" paginator="true"
+									paginatorPosition="bottom" paginatorAlwaysVisible="false"
+									paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+									var="agent" rowKey="#{agent.id}" selectionMode="single"
+									emptyMessage="没有相应记录">
+
+									<p:ajax event="rowSelect"
+										listener="#{agentConfirmController.setEnableFlag}" />
+
+									<p:ajax event="rowUnselect"
+										listener="#{agentConfirmController.setUnableFlag}" />
+
+									<p:column headerText="申请日期" styleClass="width60">
+										<h:outputText value="#{agent.applyTime}">
+											<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+										</h:outputText>
+									</p:column>
+									<p:column headerText="老人姓名" styleClass="width60">
+										<h:outputText value="#{agent.olderName}" />
+									</p:column>
+									<p:column headerText="服务项目" styleClass="width60">
+										<h:outputText value="#{agent.serviceItem}" />
+									</p:column>
+									<p:column headerText="服务日期" styleClass="width80">
+										<h:outputText value="#{agent.serviceTime}">
+											<f:convertDateTime pattern="yyyy-MM-dd" />
+										</h:outputText>
+									</p:column>
+									<p:column headerText="代收金额" styleClass="width60">
+										<h:outputText value="#{agent.debitAmount}">
+											<f:convertNumber pattern="0.00" />
+										</h:outputText>
+									</p:column>
+									<p:column headerText="返还金额" styleClass="width60">
+										<h:outputText value="#{agent.returnAmount}">
+											<f:convertNumber pattern="0.00" />
+										</h:outputText>
+									</p:column>
+									<p:column headerText="预计时间" styleClass="width60">
+										<h:outputText value="#{agent.expectServetime}">
+											<f:convertNumber pattern="0.00" />
+										</h:outputText>
+									</p:column>
+									<p:column headerText="实际时间" styleClass="width60">
+										<h:outputText value="#{agent.actualServetime}">
+											<f:convertNumber pattern="0.00" />
+										</h:outputText>
+									</p:column>
+									<p:column headerText="代办人" styleClass="width50">
+										<h:outputText value="#{agent.agentName}" />
+									</p:column>
+									<p:column headerText="已完成" styleClass="width50">
+										<h:outputText value="是" rendered="#{agent.finishFlag==1}" />
+										<h:outputText value="否" rendered="#{agent.finishFlag==2}" />
+									</p:column>
+									<p:column headerText="已录费" styleClass="width50">
+										<h:outputText value="是" rendered="#{agent.payFlag==1}" />
+										<h:outputText value="否" rendered="#{agent.payFlag==2}" />
+									</p:column>
+									<p:column headerText="确认人" styleClass="width50">
+										<h:outputText value="#{agent.payerName}" />
+									</p:column>
+								</p:dataTable></td>
+						</tr>
+					</table>
+				</div>
+			</h:panelGrid>
+			<div align="center">
+				<p:commandButton value="确认"
+					oncomplete="confirmShow(xhr,status,args)" process="@this"
+					actionListener="#{agentConfirmController.checkAgent}"
+					styleClass="commonbtn" update=":confirmForm,:message"></p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="费用录入"
+					actionListener="#{agentConfirmController.temPay}" update=":message"
+					oncomplete="showTag(xhr,status,args)" process="@this"></p:commandButton>
+			</div>
+		</h:form>
+
+		<!-- 确认代办服务对话框 -->
+		<p:dialog header="代办服务确认" widgetVar="confirmDialog" resizable="false"
+			appendToBody="true">
+			<h:form id="confirmForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="老人姓名:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{agentConfirmController.agentConfirm.olderName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="服务项目:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{agentConfirmController.agentConfirm.serviceItem}"></h:outputText>
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="服务日期: " /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{agentConfirmController.agentConfirm.serviceTime}">
+								<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+							</h:outputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="申请日期: " /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{agentConfirmController.agentConfirm.applyTime}">
+								<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+							</h:outputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="代收金额:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{agentConfirmController.agentConfirm.debitAmount}">
+								<f:convertNumber pattern="0.00" />
+							</h:outputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="预计服务时间:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{agentConfirmController.agentConfirm.expectServetime}">
+								<f:convertNumber pattern="0.00" />
+							</h:outputText>小时</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{agentConfirmController.agentConfirm.note}">
+							</h:outputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="代办人:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{agentConfirmController.agentConfirm.agentName}">
+							</h:outputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="returnAmount">返还金额:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="returnAmount"
+								value="#{agentConfirmController.returnAmount}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="servetime">实际服务时间:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								validatorMessage="实际服务时间不可超过5位"
+								value="#{agentConfirmController.servetime}" id="servetime">
+								<f:validateLength maximum="5"></f:validateLength>
+							</p:inputText>小时</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton
+						onstart="return checkNulls('confirmForm','redfont',true);"
+						actionListener="#{agentConfirmController.confirmAgent}"
+						oncomplete="closeConfirm(xhr,status,args)" styleClass="submitbtn"
+						value="" update=":applicationForm:applicationTable,:message">
+					</p:commandButton>
+					<p:commandButton onclick="confirmDialog.hide()" type="button"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+		function confirmShow(xhr,status,args){
+			if(args.success){
+				confirmDialog.show();
+			}
+			}
+		
+	
+		function closeConfirm(xhr,status,args){
+			if(args.close){
+				confirmDialog.hide();
+			}
+			}
+
+	        /*  取消滚动条
+	           */
+	       	jQuery(document).ready(function(){ 
+	       		 cleanBar();
+	       	}); 
+
+	       	function showTag(xhr,status,args){
+				if(args.older!=null){
+					var obj1=#{agentConfirmController.itemPurseTypeId};
+					var obj3=args.older.id;
+					var obj2=args.older.olderId;
+					var obj4="pension_agent_apply";
+					parent.showTag("financeManage/temppay.jsf?priceTypeId="+obj1+"&amp;olderId="+obj2+"&amp;tableName="+obj4+"&amp;key="+obj3);
+				}
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

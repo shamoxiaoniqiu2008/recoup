@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+		<p:growl id="message"></p:growl>
+		<h:form id="olderLivingForm" styleClass="noDisable">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText id="olderName" style="width:60px;"
+							value="#{livingNoticeController.olderName}" /> <his:IME
+							for="olderLivingForm:olderName" rawSQL="true"
+							SQL="#{livingNoticeController.olderSQL}" fitcol="inputCode"
+							multiresult="olderLivingForm:olderId;0,olderLivingForm:sex;8,olderLivingForm:visitDate;7,olderLivingForm:build;3,olderLivingForm:floor;4,olderLivingForm:room;5,olderLivingForm:bed;6"
+							SQLResult="编号:0,姓名:1,输入码:3,大厦:7,楼层:6,房间:5,床位:4,入住时间:2,性别:8"
+							resultcol="1" lock="true" sortcol="olderId" /> <h:inputHidden
+							value="#{livingNoticeController.olderId}" id="olderId" /></td>
+					<td class="leftcell">入住日期:</td>
+					<td><p:calendar value="#{livingNoticeController.startDate}"
+							size="9" locale="zh_CN" pattern="yyyy-MM-dd" id="startDate"></p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar value="#{livingNoticeController.endDate}"
+							size="9" pattern="yyyy-MM-dd" id="endDate"></p:calendar></td>
+					<td class="leftcell">当前状态:</td>
+					<td><h:selectOneMenu id="handleFlag"
+							value="#{livingNoticeController.handleFlag}" style="width:90px"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemValue="" itemLabel="全部" />
+							<f:selectItem itemValue="1" itemLabel="已完成" />
+							<f:selectItem itemValue="2" itemLabel="未完成" />
+						</h:selectOneMenu></td>
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value="" style="width:50px"
+							process="@this,olderLivingForm:olderId,olderLivingForm:olderName,olderLivingForm:startDate,olderLivingForm:endDate,olderLivingForm:handleFlag"
+							actionListener="#{livingNoticeController.searchDeptEvent}"
+							update=":eventForm:eventTable,:message" /></td>
+					<td class="leftcell"><p:commandButton style="width:50px"
+							actionListener="#{livingNoticeController.clearSearchForm}"
+							update=":olderLivingForm" styleClass="blankbtn" value="" /></td>
+				</tr>
+			</table>
+		</h:form>
+
+		<h:form id="eventForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="10" style="width:100%"
+							id="eventTable" selection="#{livingNoticeController.selectedRow}"
+							value="#{livingNoticeController.unDealEventRecords}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							rowSelectListener="#{livingNoticeController.selectRow}"
+							var="record" rowKey="#{record.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+							<p:column headerText="选择" styleClass="width50">
+								<h:selectBooleanCheckbox value="#{record.handleFlag}"
+									disabled="#{record.handleresult==1}" />
+							</p:column>
+							<p:column headerText="姓名" styleClass="width50">
+								<h:outputText value="#{record.olderName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="入住日期" styleClass="width70">
+								<h:outputText value="#{record.visitTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+							<p:column headerText="床位" styleClass="width50">
+								<h:outputText value="#{record.bedName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="房间" styleClass="width50">
+								<h:outputText value="#{record.roomName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="楼层" styleClass="width50">
+								<h:outputText value="#{record.floorName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="大厦" styleClass="width50">
+								<h:outputText value="#{record.buildName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="部门" styleClass="width50">
+								<h:outputText value="#{livingNoticeController.deptName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="事件" styleClass="width60">
+								<h:outputText value="#{record.eventName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="当前状态" styleClass="width60">
+								<h:outputText value="已完成" rendered="#{record.handleresult==1}">
+								</h:outputText>
+								<h:outputText value="未完成" rendered="#{record.handleresult==2}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="处理人" styleClass="width50">
+								<h:outputText value="#{record.handleName}" />
+							</p:column>
+							<p:column headerText="处理时间" styleClass="width70">
+								<h:outputText value="#{record.handletime}">
+									<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+			<div align="center">
+				<p:commandButton id="confirmButton" value="确认"
+					actionListener="#{livingNoticeController.confirmNotice}"
+					process="@this,eventForm:eventTable" styleClass="commonbtn"
+					update=":eventForm:eventTable,:message"></p:commandButton>
+			</div>
+		</h:form>
+	</h:body>
+</f:view>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css">
+		</link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		</meta>
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="msg"></p:growl>
+		<p:dialog id="menuDialog" widgetVar="menuDialog" appendToBody="ture"
+			header="点餐" modal="true" position="top">
+			<h:form id="infoForm">
+				<table>
+					<tr>
+						<td class="hengbiaogeHeader1 redfont"><h:outputText
+								value="菜品名称" style="text-align:right" /></td>
+						<td class="hengbiaogedata" width="120"
+							style="padding: 0px 0px 0px 0px"><p:inputText
+								id="addFoodName" required="true" requiredMessage="请选择菜品名称"
+								value="#{scrappyOrderController.addFoodName}"></p:inputText> <his:IME
+								for="infoForm:addFoodName"
+								fitcol="#{scrappyOrderController.fitcolFood}" resultcol="1"
+								lock="false" rawSQL="true"
+								SQL="#{scrappyOrderController.foodToSql}"
+								SQLResult="#{scrappyOrderController.displaycolFood}"
+								multiresult="infoForm:addFoodId;0,infoForm:editMenuTxt;1" /> <h:inputHidden
+								id="addFoodId" value="#{scrappyOrderController.addFoodId}"></h:inputHidden>
+						</td>
+						<td class="hengbiaogeHeader1 redfont"><h:outputText
+								value="数量" style="text-align:right" /></td>
+						<td class="hengbiaogedata" width="120"
+							style="padding: 0px 0px 0px 0px"><p:spinner id="addFoodNum"
+								min="1" max="100" maxlength="3" required="true"
+								requiredMessage="请填写数量！"
+								value="#{scrappyOrderController.addFoodNum}"></p:spinner></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px">
+							<p:commandLink ajax="true"
+								process="@this,addFoodName,addFoodId,addFoodNum"
+								action="#{scrappyOrderController.addOrder}"
+								update=":infoForm,:msg">
+								<p:graphicImage value="/images/plus_alt.png"
+									style="border:0px;;width: 20px;height: 20px;" />
+							</p:commandLink>
+						</td>
+					</tr>
+				</table>
+				<p:dataTable id="addOrderList" emptyMessage="没有找到记录" rows="7"
+					value="#{scrappyOrderController.addOrderList}"
+					paginatorAlwaysVisible="false" var="orderedList"
+					rowKey="#{orderedList.id}" paginator="true"
+					paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{scrappyOrderController.setSelectedFlag}"
+						update=":orderedOpForm:changeFoodButton,:orderedOpForm:cancleFoodButton" />
+					<p:ajax event="rowUnselect"
+						listener="#{scrappyOrderController.setUnselectedFlag}"
+						update=":orderedOpForm:changeFoodButton,:orderedOpForm:cancleFoodButton" />
+					<p:column headerText="老人">
+						<h:outputText value="#{orderedList.olderName}"></h:outputText>
+					</p:column>
+					<p:column headerText="菜名">
+						<h:outputText value="#{orderedList.menuName}"></h:outputText>
+					</p:column>
+					<p:column headerText="数量">
+						<h:outputText value="#{orderedList.orderNumber}"></h:outputText>
+					</p:column>
+					<p:column headerText="就餐时间">
+						<h:outputText value="#{orderedList.eattime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+						</h:outputText>
+					</p:column>
+					<p:column headerText="操作">
+						<p:commandLink process="@this," ajax="true" rendered="true"
+							action="#{scrappyOrderController.deleteOrder(orderedList)}"
+							update=":infoForm,:msg">
+							<p:graphicImage value="/css/images/move_btn.jpg"
+								style="margin: 0px 0px 0px 0;border:0px;border-radius: 3px;width: 40px;height: 20px;"></p:graphicImage>
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+				<div align="center">
+					<p:commandButton styleClass="submitbtn" value="" ajax="true"
+						process="@this" action="#{scrappyOrderController.saveOrderList}"
+						oncomplete="afterSaveOrder(xhr, status, args)"
+						update=":orderedForm,:msg"></p:commandButton>
+					<p:commandButton styleClass="closebtn" value=""
+						oncomplete="menuDialog.hide()" update=":msg"></p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<h:form id="scrappyForm">
+			<p:watermark value="调用输入法" for=":scrappyForm:olderNameInputLeft"></p:watermark>
+			<p:watermark value="选择就餐时间" for=":scrappyForm:dinnerCalendar"></p:watermark>
+			<h:outputText value="老人姓名:"></h:outputText>
+			<p:inputText id="olderNameInputLeft"
+				value="#{scrappyOrderController.olderName}"></p:inputText>
+			<his:IME for="scrappyForm:olderNameInputLeft"
+				fitcol="#{scrappyOrderController.fitcolName}" resultcol="1"
+				lock="false" rawSQL="true" SQL="#{scrappyOrderController.nameToSql}"
+				SQLResult="#{scrappyOrderController.displaycolName}"
+				multiresult="scrappyForm:olderNameInputLeftHidden;0,scrappyForm:olderNameInputLeft;1" />
+			<h:inputHidden id="olderNameInputLeftHidden"
+				value="#{scrappyOrderController.olderId}"></h:inputHidden>
+			<h:outputText value="就餐时间:"></h:outputText>
+			<p:calendar value="#{scrappyOrderController.diningDate}"
+				pattern="yyyy-MM-dd" id="dinnerCalendar" size="12"></p:calendar>
+			<h:outputText value="日"></h:outputText>
+			<p:inputText size="3" value="#{scrappyOrderController.diningHour}"
+				maxlength="2" id="dinnerHour">
+			</p:inputText>
+			<h:outputText value="点"></h:outputText>
+			<p:inputText size="3"
+				value="#{scrappyOrderController.diningMinitues}" maxlength="2"
+				id="dinnerMinitues">
+			</p:inputText>
+			<h:outputText value="分"></h:outputText>
+			<h:outputLabel value="是否确认:" for="isConfirm" />
+			<h:selectOneMenu value="#{scrappyOrderController.isConfirm}"
+				id="isConfirm"
+				class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+				<f:selectItem itemLabel="全部" />
+				<f:selectItem itemLabel="已确认" itemValue="1" />
+				<f:selectItem itemLabel="未确认" itemValue="2" />
+			</h:selectOneMenu>
+			<h:selectBooleanCheckbox value="#{scrappyOrderController.sendFlag}"></h:selectBooleanCheckbox>
+			<h:outputText value="是否派送"></h:outputText>
+			<p:commandButton value="点餐" styleClass="commonbtn"
+				action="#{scrappyOrderController.scrappyOrder}"
+				update=":msg,:infoForm" oncomplete="showMenu(xhr,status,args)"></p:commandButton>
+			<p:commandButton value="查询" styleClass="commonbtn"
+				update=":msg,:orderedForm,:orderedOpForm,:scrappyForm:olderNameInputLeftHidden"
+				action="#{scrappyOrderController.scrappyOrdered}"></p:commandButton>
+			<p:commandButton value="清空" styleClass="commonbtn"
+				action="#{scrappyOrderController.initSearchPara}"
+				update=":scrappyForm"></p:commandButton>
+		</h:form>
+		<h:form id="orderedForm">
+			<p:dataTable id="menuTableOrdered" emptyMessage="没有找到记录" rows="13"
+				value="#{scrappyOrderController.pensionOrderList}"
+				selectionMode="single" paginatorAlwaysVisible="false"
+				selection="#{scrappyOrderController.selectedPensionOrder}"
+				var="orderedList" rowKey="#{orderedList.id}" paginator="true"
+				paginatorPosition="bottom"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:ajax event="rowSelect"
+					listener="#{scrappyOrderController.setSelectedFlag}"
+					update=":orderedOpForm:changeFoodButton,:orderedOpForm:cancleFoodButton" />
+				<p:ajax event="rowUnselect"
+					listener="#{scrappyOrderController.setUnselectedFlag}"
+					update=":orderedOpForm:changeFoodButton,:orderedOpForm:cancleFoodButton" />
+				<p:column headerText="老人">
+					<h:outputText value="#{orderedList.olderName}"></h:outputText>
+				</p:column>
+				<p:column headerText="菜名">
+					<h:outputText value="#{orderedList.menuName}"></h:outputText>
+				</p:column>
+				<p:column headerText="数量">
+					<h:outputText value="#{orderedList.orderNumber}"></h:outputText>
+				</p:column>
+				<p:column headerText="就餐时间">
+					<h:outputText value="#{orderedList.eattime}">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="是否确认">
+					<h:outputText value="#{orderedList.isConfirmName}"></h:outputText>
+				</p:column>
+				<p:column headerText="是否派送">
+					<h:outputText value="#{orderedList.sendFlagName}"></h:outputText>
+				</p:column>
+				<p:column headerText="备注">
+					<h:outputText value="#{orderedList.notes}"></h:outputText>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+		<h:form id="orderedOpForm">
+			<div align="center">
+				<p:commandButton styleClass="modifybtn" value=""
+					disabled="#{scrappyOrderController.changeFlag or scrappyOrderController.selectedPensionOrder.iscomfirm == 1}"
+					id="changeFoodButton" onclick="editFoodDialog.show()"
+					update=":editForm"></p:commandButton>
+				<p:commandButton styleClass="deletebtn" value=""
+					disabled="#{scrappyOrderController.cancelFlag}"
+					id="cancleFoodButton" onclick="deleteFoodDialog.show()"></p:commandButton>
+			</div>
+		</h:form>
+		<p:dialog id="confirmOrderDialog" widgetVar="orderDialog"
+			appendToBody="ture" header="确认点餐" modal="true" position="center">
+			<h:form id="orderShowForm">
+				<h:panelGrid columns="1">
+					<h:panelGroup>
+						<h:outputLabel value="老人姓名:"
+							style="font-size:14px;font-weight:bold;color:blue"></h:outputLabel>
+						<h:outputText value="#{scrappyOrderController.olderName}"
+							style="font-size:14px;font-weight:bold;color:blue"></h:outputText>
+						<h:outputLabel value="就餐时间:"
+							style="font-size:14px;font-weight:bold;color:blue"></h:outputLabel>
+						<h:outputText value="#{scrappyOrderController.diningDate}"
+							style="font-size:14px;font-weight:bold;color:blue">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+						</h:outputText>
+					</h:panelGroup>
+					<h:panelGroup>
+						<h:outputLabel value="已点菜品:"
+							style="font-size:14px;font-weight:bold;color:blue"></h:outputLabel>
+						<h:outputText value="#{scrappyOrderController.orderedFoodStr}"
+							style="font-size:14px;font-weight:bold;color:blue"></h:outputText>
+					</h:panelGroup>
+					<h:panelGroup>
+						<h:outputLabel value="是否派送:"
+							style="font-size:14px;font-weight:bold;color:blue"></h:outputLabel>
+						<h:outputText value="#{scrappyOrderController.sendFlagStr}"
+							style="font-size:14px;font-weight:bold;color:blue"></h:outputText>
+					</h:panelGroup>
+					<h:panelGroup>
+						<div style="margin-left: 130px; margin-top: 70px" align="center">
+							<p:commandButton styleClass="submitbtn" value=""
+								action="#{scrappyOrderController.saveOrderRecord}"
+								oncomplete="orderDialog.hide();menuDialog.hide()"
+								update=":msg,:scrappyForm,:orderedForm:menuTableOrdered"></p:commandButton>
+							<p:commandButton styleClass="cancelbtn" value=""
+								onclick="orderDialog.hide()"></p:commandButton>
+						</div>
+					</h:panelGroup>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="editDialog" widgetVar="editFoodDialog" modal="true"
+			appendTo="@(body)" position="center" header="修改" closable="true">
+			<h:form id="editForm">
+				<table class="hengbiaoge">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="老人:"></h:outputText></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{scrappyOrderController.selectedPensionOrder.olderName}"></h:outputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="是否派送:"></h:outputText></td>
+						<td class="hengbiaogedata"><h:selectBooleanCheckbox
+								value="#{scrappyOrderController.selectedPensionOrder.tempSendFlag}"></h:selectBooleanCheckbox>
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="菜名:"
+								styleClass="redfont"></h:outputText></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:inputText
+								id="editMenuTxt"
+								value="#{scrappyOrderController.selectedPensionOrder.menuName}"
+								required="true" requiredMessage="请选择菜名！"></p:inputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="就餐时间:"
+								styleClass="redfont"></h:outputText></td>
+						<td class="hengbiaogedata" style="padding: 0px 0px 0px 0px"><p:calendar
+								value="#{scrappyOrderController.selectedPensionOrder.eattime}"
+								pattern="yyyy-MM-dd HH:mm" required="true"
+								showButtonPanel="true" requiredMessage="请选择就餐时间！"></p:calendar></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:"></h:outputText></td>
+						<td class="hengbiaogedata" colspan="3"
+							style="padding: 0px 0px 0px 0px"><p:inputText
+								value="#{scrappyOrderController.selectedPensionOrder.notes}"
+								style="width:358px"></p:inputText></td>
+					</tr>
+				</table>
+				<his:IME for="editForm:editMenuTxt"
+					fitcol="#{scrappyOrderController.fitcolFood}" resultcol="1"
+					lock="false" rawSQL="true"
+					SQL="#{scrappyOrderController.foodToSql}"
+					SQLResult="#{scrappyOrderController.displaycolFood}"
+					multiresult="editForm:orderNameInputLeftHiddenEdit;0,editForm:editMenuTxt;1" />
+				<h:inputHidden id="orderNameInputLeftHiddenEdit"
+					value="#{scrappyOrderController.foodIdEdit}"></h:inputHidden>
+				<h:panelGrid columns="2" style="margin:0px auto">
+					<p:commandButton styleClass="savebtn" value=""
+						action="#{scrappyOrderController.updateOrderedRecord}"
+						update=":msg,:orderedForm"
+						oncomplete="handleEditRequest(xhr, status, args)"></p:commandButton>
+					<p:commandButton styleClass="closebtn" value=""
+						onclick="editFoodDialog.hide()"></p:commandButton>
+				</h:panelGrid>
+				<p:watermark value="调用输入法" for="editMenuTxt"></p:watermark>
+			</h:form>
+		</p:dialog>
+		<p:dialog id="deleteDialog" widgetVar="deleteFoodDialog"
+			appendToBody="ture" position="center" modal="true" header="删除确认"
+			closable="false">
+			<h:form id="deleteForm">
+				<h:outputText value="确定要删除该记录吗？"></h:outputText>
+				<h:panelGrid columns="2" style="margin:0px auto">
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{scrappyOrderController.deleteOrderedRecord}"
+						update=":orderedForm:menuTableOrdered,:orderedOpForm,:msg"
+						oncomplete="deleteFoodDialog.hide()"></p:commandButton>
+					<p:commandButton styleClass="closebtn" value=""
+						onclick="deleteFoodDialog.hide()"></p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			function showMenu(xhr, status, args) {
+				if (args.older) {
+					jQuery("#scrappyForm\\:olderNameInputLeft").focus();
+				} else if (args.time) {
+					jQuery("#scrappyForm\\:dinnerCalendar_input").focus();
+				} else if (args.hour) {
+					jQuery("#scrappyForm\\:dinnerHour").focus();
+				} else if (args.minute) {
+					jQuery("#scrappyForm\\:dinnerMinitues").focus();
+				} else if (args.canOrder) {
+					menuDialog.show();
+				}
+			}
+			function afterOrderMenu(xhr, status, args) {
+				if (args.orderMenu) {
+					orderDialog.show();
+				}
+			}
+			function handleEditRequest(xhr, status, args) {
+				if (args.canSaveFlag) {
+					editFoodDialog.hide();
+				}
+			}
+			function afterSaveOrder(xhr, status, args) {
+				if (args.saveOrder) {
+					menuDialog.hide();
+				}
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+
+<style>
+.ui-panel .ui-panel-content {
+	padding: 0em !important;
+}
+
+</style>
+
+	<h:head>
+		<title>#{pageConfig.paidReport}</title>
+
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+<script type="text/javascript">
+		</script>
+
+
+	<h:body>
+	<p:growl id="message" widgetVar="message"></p:growl>
+		<p:growl id="messages"></p:growl>
+		<h:form id="searchForm" style="display: inline">
+		<h:outputText value="起始时间:" style="text-align:right" />
+		<p:calendar id="startDate" pattern="yyyy-MM-dd HH:mm"  
+			value="#{accidentReportController.startDate}"  >
+		</p:calendar>
+		<h:outputText value="截止时间:" style="text-align:right" />
+		<p:calendar id="endDate" pattern="yyyy-MM-dd HH:mm"  
+			value="#{accidentReportController.endDate}"  >
+		</p:calendar>
+		<h:outputText value="排序方式:" style="text-align:right" />
+		<h:selectOneMenu value="#{accidentReportController.sortClass}" 
+			id="sortClass" 
+			class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover" >
+			<f:selectItem itemLabel="按老人分类" itemValue="olderName" />
+			<f:selectItem itemLabel="按事故类别分类" itemValue="accidentType" />
+			<f:selectItem itemLabel="按护理员分类" itemValue="dutynurserName" />
+			<p:ajax event="valueChange" process="@this"
+				update=":reportForm,:messages"></p:ajax>
+		</h:selectOneMenu>
+		<p:commandButton styleClass="commonbtn" value="查询"
+			action="#{accidentReportController.selectaccidentReports}"
+			update=":reportForm,:messages" 
+			process="@this,startDate,endDate"></p:commandButton>
+		<p:commandButton value="导出" styleClass="commonbtn" update=":messages"
+			ajax="false">
+	          	<p:dataExporter type="xls" target=":reportForm:reports" fileName="accidentRecords" />  
+		</p:commandButton>
+		</h:form>
+		<h:form id="reportForm">
+		<p:dataTable id="reports" 
+			value="#{accidentReportController.accidentRecords}"
+			var="accidentRecord" 
+			emptyMessage="没有记录"
+			scrollable="true" scrollHeight="400"
+			sortBy="#{accidentReportController.sortClass}">
+			<p:column id="olderName"  style="width: 60px">
+				<f:facet name="header">
+						<h:outputText value="老人姓名" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{accidentRecord.olderName}"></h:outputText>
+			</p:column>
+			<p:column id="olderSex"  style="width: 30px">
+				<f:facet name="header">
+						<h:outputText value="性别" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{accidentRecord.olderSex}"></h:outputText>
+			</p:column>
+			<p:column id="olderAge" style="width: 30px">
+				<f:facet name="header">
+						<h:outputText value="年龄" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{accidentRecord.olderAge}"></h:outputText>
+			</p:column>
+			<p:column id="accidentType" style="width: 60px">
+				<f:facet name="header">
+						<h:outputText value="事故类型" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{accidentRecord.accidentType}"></h:outputText>
+			</p:column>
+			<p:column id="accidentReason"  style="width: 400px">
+				<f:facet name="header">
+						<h:outputText value="事故原因" ></h:outputText>
+				</f:facet>
+				<h:outputText title="#{accidentRecord.accidentReason}"
+					value="#{fn:substring(accidentRecord.accidentReason,0,34)}#{fn:length(accidentRecord.accidentReason) gt 34?'..':''}">
+				</h:outputText>
+			</p:column>
+			<p:column id="dutynurserName"  style="width: 80px">
+				<f:facet name="header">
+						<h:outputText value="责任护理员" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{accidentRecord.dutynurserName}"></h:outputText>
+			</p:column>
+			<p:column id="accidentTime"  style="width: 120px">
+				<f:facet name="header">
+						<h:outputText value="事故时间" ></h:outputText>
+				</f:facet>
+				<h:outputText value="#{accidentRecord.accidentTime}">
+					<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+				</h:outputText>
+			</p:column>
+			<p:summaryRow listener="#{accidentReportController.calculateTotalNum(accidentRecord.olderId)}"
+				rendered="#{accidentReportController.sortClass == 'olderName'}">  
+	            <p:column colspan="6" style="text-align:right">  
+	            	<h:outputText value="总数量" ></h:outputText>
+	            </p:column>  
+	            <p:column>  
+	            	<h:outputText value="#{accidentReportController.total}" ></h:outputText>
+	            </p:column>  
+      	  </p:summaryRow> 
+      	  <p:summaryRow listener="#{accidentReportController.calculateTotalNum(accidentRecord.accidenttypeId)}"
+				rendered="#{accidentReportController.sortClass == 'accidentType'}">  
+	            <p:column colspan="3" style="text-align:right">  
+	            	<h:outputText value="总数量" ></h:outputText>
+	            </p:column>  
+	            <p:column>  
+	            	<h:outputText value="#{accidentReportController.total}" ></h:outputText>
+	            </p:column>  
+	            <p:column colspan="3" >  
+	            </p:column>  
+      	  </p:summaryRow> 
+      	  <p:summaryRow listener="#{accidentReportController.calculateTotalNum(accidentRecord.dutynurserId)}"
+				rendered="#{accidentReportController.sortClass == 'dutynurserName'}">  
+	            <p:column colspan="5" style="text-align:right">  
+	            	<h:outputText value="总数量" ></h:outputText>
+	            </p:column>  
+	            <p:column>  
+	            	<h:outputText value="#{accidentReportController.total}" ></h:outputText>
+	            </p:column>  
+	            <p:column colspan="1" >  
+	            </p:column>  
+      	  </p:summaryRow> 
+		</p:dataTable>
+		</h:form>
+		<script type="text/javascript">
+		
+		</script>
+	</h:body>
+</f:view>
+</html>

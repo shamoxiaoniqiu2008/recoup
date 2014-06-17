@@ -1,0 +1,325 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<f:view contentType="text/html">
+
+	<h:head>
+		<title>#{pageConfig.financialBalance}</title>
+
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="searchForm">
+			<h:outputText value="结帐开始日期:" style="text-align:right" />
+			<p:calendar id="startDate" pattern="yyyy-MM-dd"
+				value="#{financialBalanceController.startDate}" />
+			<h:outputText value="结帐结束日期:" style="text-align:right" />
+			<p:calendar id="endDate" pattern="yyyy-MM-dd"
+				value="#{financialBalanceController.endDate}" />
+			<h:outputText value="部门名称:" style="text-align:right" />
+			<h:inputHidden id="deptId"
+				value="#{financialBalanceController.deptId}"></h:inputHidden>
+			<p:inputText id="deptName"
+				value="#{financialBalanceController.deptName}">
+			</p:inputText>
+			<his:IME for="searchForm:deptName" rawSQL="true"
+				SQL="#{financialBalanceController.selectDeptSQL}"
+				fitcol="id,inputCode" SQLResult="编号:0,名称:1,输入码:2:hide" resultcol="1"
+				lock="true" multiresult="searchForm:deptId;0,searchForm:deptName;1" />
+			<h:outputText value="员工姓名:" style="text-align:right" />
+			<h:inputHidden id="empId" value="#{financialBalanceController.empId}"></h:inputHidden>
+			<p:inputText id="empName"
+				value="#{financialBalanceController.empName}">
+			</p:inputText>
+			<his:IME for="searchForm:empName" rawSQL="true"
+				SQL="#{financialBalanceController.selectEmpSQL}"
+				fitcol="id,inputCode" SQLResult="编号:0,姓名:1,输入码:2:hide" resultcol="1"
+				lock="true" multiresult="searchForm:empId;0,searchForm:empName;1" />
+			<p:commandButton styleClass="searchbtn" value=""
+				action="#{financialBalanceController.search}"
+				update=":financialPaymentListForm,:messages">
+			</p:commandButton>
+			<p:commandButton styleClass="commonbtn" value="清空"
+				action="#{financialBalanceController.clearSearchForm}"
+				update=":searchForm,:messages">
+			</p:commandButton>
+		</h:form>
+		<h:form id="financialPaymentListForm">
+			<p:dataTable id="financialpaymentList"
+				value="#{financialBalanceController.financialPayments}"
+				var="financialPayment" rowKey="#{financialPayment.id}"
+				emptyMessage="当前无信息"
+				selection="#{financialBalanceController.selectFinancialPayment}"
+				selectionMode="single" paginator="true"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+				rows="10" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+				<p:ajax event="rowSelect"
+					listener="#{financialBalanceController.onFinancialPaymentSelect}"
+					update=":messages" />
+				<p:ajax event="rowUnselect"
+					listener="#{financialBalanceController.onFinancialPaymentUnselect}"
+					update=":messages" />
+				<p:column headerText="开始时间">
+					<h:outputText value="#{financialPayment.starttime}">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="结束时间">
+					<h:outputText value="#{financialPayment.endtime}">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="结帐员">
+					<h:outputText value="#{financialPayment.payeename}" />
+				</p:column>
+				<p:column headerText="结帐金额">
+					<h:outputText value="#{financialPayment.money}" />
+				</p:column>
+				<p:column headerText="结帐处理时间">
+					<h:outputText value="#{financialPayment.paytime}">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="备注">
+					<h:outputText value="#{financialPayment.notes}">
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+			<div align="center">
+				<p:commandButton value="结帐" styleClass="commonbtn" ajax="true"
+					process="@this"
+					action="#{financialBalanceController.beforeBalance}"
+					oncomplete="detailDig.show()"
+					update=":balanceDateForm,:tabView:normalForm,:tabView:tempForm,:tabView:depositLogForm,:totalForm,:messages">
+				</p:commandButton>
+				<p:commandButton value="撤销结帐" styleClass="commonbtn" ajax="true"
+					process="@this,financialPaymentListForm:checkSelectBalancedData"
+					oncomplete="afterCheckSelectCloseData(xhr,status,args)"
+					update=":messages">
+				</p:commandButton>
+				<p:commandButton value="查看详情" styleClass="commonbtn" ajax="true"
+					process="@this,financialPaymentListForm:checkSelectData"
+					action="#{financialBalanceController.beforeSee}"
+					oncomplete="afterCheckSee(xhr,status,args)"
+					update=":balanceDateForm,:tabView:normalForm,:tabView:tempForm,:tabView:depositLogForm,:totalForm,:messages">
+				</p:commandButton>
+				<h:inputHidden id="checkSelectData" value="checkSelectData"
+					validator="#{financialBalanceController.checkSelectData}"></h:inputHidden>
+				<h:inputHidden id="checkSelectBalancedData"
+					value="checkSelectBalancedData"
+					validator="#{financialBalanceController.checkSelectBalancedData}"></h:inputHidden>
+			</div>
+		</h:form>
+		<p:confirmDialog message="是否确认撤销财务结算？" severity="alert" modal="true"
+			widgetVar="undoBalanceConfirm" appendTo="@(body)">
+			<h:form>
+				<p:commandButton styleClass="submitbtn" value=""
+					style="margin-left:80px;"
+					actionListener="#{financialBalanceController.undoBalance}"
+					update=":financialPaymentListForm,:messages" ajax="true"
+					oncomplete="undoBalanceConfirm.hide()" />
+				<p:commandButton styleClass="cancelbtn" value=""
+					onclick="undoBalanceConfirm.hide()" type="button" />
+			</h:form>
+		</p:confirmDialog>
+		<p:dialog widgetVar="detailDig" header="结帐明细" appendTo="@(body)"
+			resizable="true" modal="true">
+			<h:form id="balanceDateForm">
+				<table>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="balanceDate:balanceStartDate">开始时间</label></td>
+						<td class="hengbiaogedata"><p:calendar
+								pattern="yyyy-MM-dd HH:mm:ss"
+								value="#{financialBalanceController.balanceStartDate}"
+								id="balanceStartDate" showButtonPanel="true"
+								disabled="#{financialBalanceController.seeFlag}" required="true"
+								requiredMessage="请选择开始时间！" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="balanceDate:balanceEndDate">结束时间</label></td>
+						<td class="hengbiaogedata"><p:calendar
+								pattern="yyyy-MM-dd HH:mm:ss" showButtonPanel="true"
+								value="#{financialBalanceController.balanceEndDate}"
+								id="balanceEndDate"
+								disabled="#{financialBalanceController.seeFlag}" required="true"
+								requiredMessage="请选择结束时间！" /></td>
+						<td><p:commandButton value="" styleClass="searchbtn"
+								action="#{financialBalanceController.searchBalanceInfo}"
+								rendered="#{!financialBalanceController.seeFlag}"
+								update=":tabView:normalForm,:tabView:tempForm,:tabView:depositLogForm,:totalForm,:messages"></p:commandButton>
+						</td>
+					</tr>
+				</table>
+			</h:form>
+			<p:tabView style="height:250px;" id="tabView"
+				tabChangeListener="#{financialBalanceController.onChangeTab}">
+				<p:tab title="日常缴费项目" id="normal">
+					<h:form id="normalForm">
+						<p:dataTable id="normalList"
+							value="#{financialBalanceController.normalPayments}" var="normal"
+							rowKey="#{normal.id}" emptyMessage="当前无记录" paginator="true"
+							rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+							<p:column headerText="收据号">
+								<h:outputText value="#{normal.numberid}" />
+							</p:column>
+							<p:column headerText="老人姓名">
+								<h:outputText value="#{normal.name}" />
+							</p:column>
+							<p:column headerText="总费用">
+								<h:outputText value="#{normal.totalfees}" />
+							</p:column>
+							<p:column headerText="开单人">
+								<h:outputText value="#{normal.generatorName}" />
+							</p:column>
+							<p:column headerText="开单日期">
+								<h:outputText value="#{normal.generatetime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="收款人">
+								<h:outputText value="#{normal.payeeName}" />
+							</p:column>
+							<p:column headerText="收款日期">
+								<h:outputText value="#{normal.paytime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+					</h:form>
+				</p:tab>
+				<p:tab title="临时缴费项目" id="temp">
+					<h:form id="tempForm">
+						<p:dataTable id="tempList"
+							value="#{financialBalanceController.tempPayments}" var="temp"
+							rowKey="#{temp.id}" emptyMessage="当前无记录" paginator="true"
+							rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+							<p:column headerText="收据号">
+								<h:outputText value="#{temp.numberid}" />
+							</p:column>
+							<p:column headerText="老人姓名">
+								<h:outputText value="#{temp.name}" />
+							</p:column>
+							<p:column headerText="总费用">
+								<h:outputText value="#{temp.totalfees}" />
+							</p:column>
+							<p:column headerText="开单人">
+								<h:outputText value="#{temp.generatorName}" />
+							</p:column>
+							<p:column headerText="开单日期">
+								<h:outputText value="#{temp.generatetime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="收款员">
+								<h:outputText value="#{temp.payeeName}" />
+							</p:column>
+							<p:column headerText="收款日期">
+								<h:outputText value="#{temp.paytime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+					</h:form>
+				</p:tab>
+				<p:tab title="押金缴费" id="depositLog">
+					<h:form id="depositLogForm">
+						<p:dataTable id="depositLogList"
+							value="#{financialBalanceController.depositLogs}"
+							var="depositLog" rowKey="#{depositLog.id}" emptyMessage="当前无记录"
+							paginator="true" rows="5" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom">
+							<p:column headerText="押金类型">
+								<h:outputText value="#{depositLog.depositTypeName}" />
+							</p:column>
+							<p:column headerText="交易额">
+								<h:outputText value="#{depositLog.tradefee}" />
+							</p:column>
+							<p:column headerText="收款员">
+								<h:outputText value="#{depositLog.traderName}" />
+							</p:column>
+							<p:column headerText="收款时间">
+								<h:outputText value="#{depositLog.tradeDate}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+					</h:form>
+				</p:tab>
+			</p:tabView>
+			<div align="center">
+				<h:form id="totalForm">
+					<h1 style="font-size: 18px; font-weight: bold">
+						<nobr> <font color="red"> 总金额： <h:outputText
+								value="#{financialBalanceController.totalFee}">
+								<f:convertNumber pattern="0.00" />
+							</h:outputText></font></nobr>
+						<br></br>
+						<nobr> <ui:repeat
+							value="#{financialBalanceController.payWays}" var="payWay">
+							<font color="green"> #{payWay.paywayName}： <h:outputText
+									value="#{payWay.fee}">
+									<f:convertNumber pattern="0.00" />
+								</h:outputText>
+							</font>
+						</ui:repeat> </nobr>
+					</h1>
+					<p:commandButton value="" styleClass="submitbtn"
+						rendered="#{!financialBalanceController.seeFlag}"
+						action="#{financialBalanceController.balance}"
+						oncomplete="afterBalance(xhr,status,args)"
+						update=":financialPaymentListForm,:messages"></p:commandButton>
+					<p:commandButton value="关闭" styleClass="commonbtn"
+						onclick="detailDig.hide()" type="button"></p:commandButton>
+				</h:form>
+			</div>
+		</p:dialog>
+		<script type="text/javascript">
+			function afterCheckSelectCloseData(xhr, status, args) {
+				if (args.validate) {
+					undoBalanceConfirm.show();
+				}
+			}
+			function afterBalance(xhr, status, args) {
+				if (args.validate) {
+					detailDig.hide();
+				}
+			}
+
+			function afterCheckSee(xhr, status, args) {
+				if (args.validate) {
+					detailDig.show();
+				}
+			}
+
+			function clearSearchForm() {
+				jQuery("#searchForm\\:olderName").val("");
+				jQuery("#searchForm\\:bedName").val("");
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

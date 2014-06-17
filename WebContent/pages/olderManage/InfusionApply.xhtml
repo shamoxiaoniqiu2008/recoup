@@ -1,0 +1,557 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<style>
+.overdiv {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: hidden;
+	height: 18px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+
+.overdivscroll {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: auto;
+	height: 90px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+</style>
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText value="#{infusionApplyController.olderName}"
+							id="olderName" style="width:145px;" /> <his:IME
+							for="searchForm:olderName" rawSQL="true" resultcol="1"
+							SQLResult="编号:0,姓名:1,输入码:2" sortcol="id"
+							SQL="#{infusionApplyController.olderSql}" fitcol="inputCode"
+							lock="true" multiresult="searchForm:olderId;0" /> <h:inputHidden
+							value="#{infusionApplyController.olderId}" id="olderId" /></td>
+					<td class="leftcell">开始日期:</td>
+					<td><p:calendar value="#{infusionApplyController.startDate}"
+							size="9" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar value="#{infusionApplyController.endDate}"
+							size="9" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">是否审核:</td>
+					<td><h:selectOneMenu
+							value="#{infusionApplyController.isAudit}" style="width:145px"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemValue="" itemLabel="全部" />
+							<f:selectItem itemValue="1" itemLabel="是" />
+							<f:selectItem itemValue="2" itemLabel="否" />
+						</h:selectOneMenu></td>
+					<td class="leftcell">审核结果:</td>
+					<td><h:selectOneMenu
+							value="#{infusionApplyController.auditResult}"
+							style="width:145px"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemValue="" itemLabel="全部" />
+							<f:selectItem itemValue="1" itemLabel="通过" />
+							<f:selectItem itemValue="2" itemLabel="不通过" />
+						</h:selectOneMenu></td>
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value=""
+							actionListener="#{infusionApplyController.searchApplications}"
+							update=":applicationForm,:message" /></td>
+					<td class="leftcell"><p:commandButton styleClass="blankbtn"
+							value="" actionListener="#{infusionApplyController.clearSearch}"
+							update=":searchForm" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="applicationForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="5" style="width:100%"
+							id="applicationTable"
+							selection="#{infusionApplyController.selectedRow}"
+							value="#{infusionApplyController.infusionApplyList}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="apply" rowKey="#{apply.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+
+							<p:ajax event="rowSelect"
+								listener="#{infusionApplyController.SetEnableFlag}" />
+							<p:ajax event="rowUnselect"
+								listener="#{infusionApplyController.clearInfusionRecord}" />
+							<p:column headerText="姓名" styleClass="width50">
+								<h:outputText value="#{apply.olderName}" />
+							</p:column>
+							<p:column headerText="年龄" styleClass="width50">
+								<h:outputText value="#{apply.olderAge}" />
+							</p:column>
+							<p:column headerText="输液医嘱" styleClass="width60">
+								<div title="点击查看更多" onDblClick="changeme(this);"
+									onselectstart="return false" class="overdiv">
+									#{apply.treatmentScheme}</div>
+							</p:column>
+							<p:column headerText="已输液" styleClass="width50">
+								<h:outputText value="是" rendered="#{apply.infusionFlag==1}" />
+								<h:outputText value="否" rendered="#{apply.infusionFlag==2}" />
+							</p:column>
+							<p:column headerText="证明" styleClass="width50">
+								<h:outputText value="有" rendered="#{apply.hospitalproofFlag==1}" />
+								<h:outputText value="无" rendered="#{apply.hospitalproofFlag==2}" />
+							</p:column>
+							<p:column headerText="公章" styleClass="width50">
+								<h:outputText value="有" rendered="#{apply.hospitalSeal==1}" />
+								<h:outputText value="无" rendered="#{apply.hospitalSeal==2}" />
+							</p:column>
+							<p:column headerText="开始日期" styleClass="width80">
+								<h:outputText value="#{apply.startTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="结束日期" styleClass="width80">
+								<h:outputText value="#{apply.endTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="持续时间" styleClass="width60">
+								<h:outputText value="#{apply.lastTime}" />
+							</p:column>
+							<p:column headerText="总次数" styleClass="width50">
+								<h:outputText value="#{apply.countNumbers}" />
+							</p:column>
+							<p:column headerText="申请人" styleClass="width50">
+								<h:outputText value="#{apply.applyName}" />
+							</p:column>
+							<p:column headerText="已提交" styleClass="width50">
+								<h:outputText value="是" rendered="#{apply.sendFlag==1}" />
+								<h:outputText value="否" rendered="#{apply.sendFlag==2}" />
+							</p:column>
+							<p:column headerText="已审核" styleClass="width50">
+								<h:outputText value="是" rendered="#{apply.verifyFlag==1}" />
+								<h:outputText value="否" rendered="#{apply.verifyFlag==2}" />
+							</p:column>
+							<p:column headerText="审核结果" styleClass="width60">
+								<h:outputText value="通过" rendered="#{apply.verifyResult==1}" />
+								<h:outputText value="不通过" rendered="#{apply.verifyResult==2}" />
+							</p:column>
+							<p:column headerText="已生成" styleClass="width50">
+								<h:outputText value="是" rendered="#{apply.generateFlag==1}" />
+								<h:outputText value="否" rendered="#{apply.generateFlag==2}" />
+							</p:column>
+							<p:column headerText="详情" styleClass="width50">
+								<p:commandLink update=":infusionRecordForm,:message"
+									oncomplete="infusionRecordDialog.show()" title="查看"
+									action="#{infusionApplyController.selectInfusionRecords(apply)}">
+									<p:graphicImage value="/images/search.png" style="border:0px;" />
+								</p:commandLink>
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+		</h:form>
+		<!-- 申请信息维护 -->
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton oncomplete="addApplyDialog.show()" id="addButton"
+					actionListener="#{infusionApplyController.clearAddForm}"
+					styleClass="addbtn" value="" update=":addForm"></p:commandButton>
+				<p:commandButton oncomplete="editApplyDialogShow(xhr,status,args)"
+					id="editButton"
+					actionListener="#{infusionApplyController.showEditForm}"
+					update=":editForm,:message" styleClass="modifybtn" value=""></p:commandButton>
+				<p:commandButton id="delButton"
+					oncomplete="confirmDelDialogShow(xhr,status,args)"
+					styleClass="deletebtn" value="" update=":message"
+					actionListener="#{infusionApplyController.showDelForm}">
+				</p:commandButton>
+				<p:commandButton value="提交"
+					actionListener="#{infusionApplyController.sentMessage}"
+					styleClass="commonbtn" update=":message,:applicationForm"></p:commandButton>
+				<p:commandButton value="生成"
+					actionListener="#{infusionApplyController.generateInfusionPlan}"
+					styleClass="commonbtn"
+					update=":applicationForm,:message,:infusionRecordForm"></p:commandButton>
+			</div>
+		</h:form>
+		<!-- 输液记录列表 -->
+		<p:dialog header="输液记录" widgetVar="infusionRecordDialog" width="500"
+			appendTo="@(body)" position="center" modal="true">
+			<h:form id="infusionRecordForm">
+				<table width="100%">
+					<tr>
+						<td><p:dataTable cellspacing="2" rows="5" style="width:100%"
+								id="infusionRecordTable"
+								value="#{infusionApplyController.infusionRecordList}"
+								paginator="true" paginatorPosition="bottom"
+								paginatorAlwaysVisible="false"
+								paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+								var="record" rowKey="#{record.id}" selectionMode="single"
+								emptyMessage="没有相应记录">
+
+
+								<p:column headerText="输液日期" styleClass="width70">
+									<h:outputText value="#{record.infusionTime}">
+										<f:convertDateTime pattern="yyyy-MM-dd" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="执行人" styleClass="width60">
+									<h:outputText value="#{record.executorName}" />
+								</p:column>
+								<p:column headerText="执行时间" styleClass="width70">
+									<h:outputText value="#{record.executeTime}">
+										<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="已完成" styleClass="width50">
+									<h:outputText value="是" rendered="#{record.finishFlag==1}" />
+									<h:outputText value="否" rendered="#{record.finishFlag==2}" />
+								</p:column>
+							</p:dataTable></td>
+					</tr>
+				</table>
+			</h:form>
+		</p:dialog>
+		<!-- 删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="删除确认"
+			widgetVar="confirmDelDialog">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="确定删除该输液申请？" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{infusionApplyController.deleteApplication}"
+							update=":applicationForm:applicationTable,:message"
+							oncomplete="confirmDelDialog.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();"></p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<!-- 新增申请信息 -->
+		<p:dialog header="新增输液申请" widgetVar="addApplyDialog" resizable="false"
+			appendTo="@(body)" modal="true" styleClass="noDisable">
+			<h:form id="addForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="addOlderName">老人姓名:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="addOlderName"
+								value="#{infusionApplyController.addInfusionApply.olderName}">
+							</p:inputText> <his:IME for="addForm:addOlderName" rawSQL="true" resultcol="1"
+								SQLResult="编号:0,姓名:1,输入码:2,年龄:3" sortcol="id"
+								SQL="select po.id,po.name,po.inputCode,po.age from pension_older po where po.statuses in(3,4)"
+								fitcol="inputCode" lock="true"
+								multiresult="addForm:addOlderId;0,addForm:age;3,addForm:addOlderAge;3" />
+							<h:inputHidden
+								value="#{infusionApplyController.addInfusionApply.olderId}"
+								id="addOlderId" /> <h:inputHidden
+								value="#{infusionApplyController.addInfusionApply.olderAge}"
+								id="addOlderAge" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="age">年龄:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="age"
+								validatorMessage="年龄不可为零或负数" readonly="true"
+								value="#{infusionApplyController.addInfusionApply.olderAge}">
+								<f:validateLongRange minimum="1"></f:validateLongRange>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="treatmentScheme">输液医嘱:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="treatmentScheme"
+								value="#{infusionApplyController.addInfusionApply.treatmentScheme}"></p:inputText></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="doctorName">开单医生:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="doctorName"
+								value="#{infusionApplyController.addInfusionApply.doctorName}"></p:inputText></td>
+					</tr>
+
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="startTime_input">开始日期:</label></td>
+						<td class="hengbiaogedata"><p:calendar
+								value="#{infusionApplyController.addInfusionApply.startTime}"
+								id="startTime" pattern="yyyy-MM-dd">
+								<p:ajax event="dateSelect"
+									listener="#{infusionApplyController.selectLastTime}"
+									update=":addForm:lastTime,,:message"
+									process="@this,addForm:startTime"></p:ajax>
+							</p:calendar></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="endTime_input">结束日期:</label></td>
+						<td class="hengbiaogedata"><p:calendar
+								value="#{infusionApplyController.addInfusionApply.endTime}"
+								id="endTime" pattern="yyyy-MM-dd">
+								<p:ajax event="dateSelect"
+									listener="#{infusionApplyController.selectLastTime}"
+									update=":addForm:lastTime,:message"
+									process="@this,addForm:endTime"></p:ajax>
+							</p:calendar></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="持续时间:" /></td>
+						<td class="hengbiaogedata"><p:inputText id="lastTime"
+								readonly="true"
+								value="#{infusionApplyController.addInfusionApply.lastTime}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="countNumbers">总次数:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="countNumbers"
+								validatorMessage="总次数不可为零或负数" converterMessage="总次数必须为数字"
+								value="#{infusionApplyController.addInfusionApply.countNumbers}">
+								<f:validateLongRange minimum="1"></f:validateLongRange>
+								<f:convertNumber pattern="0" />
+								<p:ajax event="blur"
+									listener="#{infusionApplyController.selectExecutePlan}"
+									update=":addForm:executePlan"></p:ajax>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="executePlan">执行计划:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="executePlan"
+								validatorMessage="执行计划格式不正确【不允许输入数字和逗号之外的其他字符】"
+								value="#{infusionApplyController.addInfusionApply.executePlan}">
+								<f:validateRegex pattern="^\d*[\,\s\d]*\d$" />
+							</p:inputText></td>
+						<td class="hengbiaogedata" colspan="2"><h:outputText
+								value="已输液" /> <h:selectBooleanCheckbox
+								value="#{infusionApplyController.addInfusionApply.infusion}" />
+							<h:outputText value="医院证明" /> <h:selectBooleanCheckbox
+								value="#{infusionApplyController.addInfusionApply.proof}" /> <h:outputText
+								value="医院公章" /> <h:selectBooleanCheckbox
+								value="#{infusionApplyController.addInfusionApply.sealFlag}" /></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton process="@this,addForm"
+						onstart="return checkNulls('addForm','redfont',true);"
+						actionListener="#{infusionApplyController.saveAndSendApplication}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="提交" update=":applicationForm:applicationTable,:message">
+					</p:commandButton>
+					<p:commandButton
+						onstart="return checkNulls('addForm','redfont',true);"
+						actionListener="#{infusionApplyController.saveApplication}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="保存" process="@this,addForm"
+						update=":applicationForm:applicationTable,:message">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value=""
+						actionListener="#{infusionApplyController.clearAddForm}"
+						update=":addForm" process="@this" />
+					<p:commandButton onclick="addApplyDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 修改申请信息 -->
+		<p:dialog header="修改输液申请" widgetVar="editApplyDialog"
+			resizable="false" appendTo="@(body)" modal="true"
+			styleClass="noDisable">
+			<h:form id="editForm">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="老人姓名:"></h:outputText></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{infusionApplyController.editInfusionApply.olderName}">
+							</h:outputText></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editage">年龄:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="editage"
+								validatorMessage="年龄不可为零或负数" disabled="true"
+								value="#{infusionApplyController.editInfusionApply.olderAge}">
+								<f:validateLongRange minimum="1"></f:validateLongRange>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="edittreatmentScheme">输液医嘱:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								id="edittreatmentScheme"
+								value="#{infusionApplyController.editInfusionApply.treatmentScheme}"></p:inputText></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editdoctorName">开单医生:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="editdoctorName"
+								value="#{infusionApplyController.editInfusionApply.doctorName}"></p:inputText></td>
+					</tr>
+
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editstartTime_input">开始日期:</label></td>
+						<td class="hengbiaogedata"><p:calendar
+								value="#{infusionApplyController.editInfusionApply.startTime}"
+								id="editstartTime" pattern="yyyy-MM-dd">
+								<p:ajax event="dateSelect"
+									process="@this,editForm:editstartTime"
+									listener="#{infusionApplyController.selectLastTime}"
+									update=":editForm:editLastTime,:editForm:editexecutePlan,:message"></p:ajax>
+							</p:calendar></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editendTime_input">结束日期:</label></td>
+						<td class="hengbiaogedata"><p:calendar
+								value="#{infusionApplyController.editInfusionApply.endTime}"
+								id="editendTime" pattern="yyyy-MM-dd">
+								<p:ajax event="dateSelect" process="@this,editForm:editendTime"
+									listener="#{infusionApplyController.selectLastTime}"
+									update=":editForm:editLastTime,:editForm:editexecutePlan,:message"></p:ajax>
+							</p:calendar></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="持续时间:" /></td>
+						<td class="hengbiaogedata"><p:inputText disabled="true"
+								id="editLastTime"
+								value="#{infusionApplyController.editInfusionApply.lastTime}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editcountNumbers">总次数:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="editcountNumbers"
+								validatorMessage="执行次数不可为零或负数" converterMessage="执行次数必须为数字"
+								value="#{infusionApplyController.editInfusionApply.countNumbers}">
+								<f:validateLongRange minimum="1"></f:validateLongRange>
+								<f:convertNumber pattern="0" />
+								<p:ajax event="blur"
+									listener="#{infusionApplyController.selectExecutePlan}"
+									update=":editForm:editexecutePlan"></p:ajax>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editexecutePlan">执行计划:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="editexecutePlan"
+								validatorMessage="执行计划格式不正确【不允许输入数字和逗号之外的其他字符】"
+								value="#{infusionApplyController.editInfusionApply.executePlan}">
+								<f:validateRegex pattern="^\d*[\,\s\d]*\d$" />
+							</p:inputText></td>
+						<td class="hengbiaogedata" colspan="2"><h:outputText
+								value="已输液" /> <h:selectBooleanCheckbox
+								value="#{infusionApplyController.editInfusionApply.infusion}" />
+							<h:outputText value="医院证明" /> <h:selectBooleanCheckbox
+								value="#{infusionApplyController.editInfusionApply.proof}" /> <h:outputText
+								value="医院公章" /> <h:selectBooleanCheckbox
+								value="#{infusionApplyController.editInfusionApply.sealFlag}" /></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						onstart="return checkNulls('editForm','redfont',true);"
+						actionListener="#{infusionApplyController.saveAndSendEditApplication}"
+						oncomplete="editConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="提交" update=":applicationForm:applicationTable,:message">
+					</p:commandButton>
+					<p:commandButton
+						onstart="return checkNulls('editForm','redfont',true);"
+						actionListener="#{infusionApplyController.saveEditApplication}"
+						oncomplete="editConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="保存" update=":applicationForm:applicationTable,:message">
+					</p:commandButton>
+					<p:commandButton onclick="editApplyDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+
+
+		<script type="text/javascript">
+			function addConfirm(xhr, status, args) {
+				if (args.addSuccess) {
+					addApplyDialog.hide();
+				}
+			}
+
+			function editApplyDialogShow(xhr, status, args) {
+				if (args.edit) {
+					editApplyDialog.show();
+				}
+			}
+			function editConfirm(xhr, status, args) {
+				if (args.editSuccess) {
+					editApplyDialog.hide();
+				}
+			}
+			function confirmDelDialogShow(xhr, status, args) {
+				if (args.del) {
+					confirmDelDialog.show();
+				}
+			}
+
+			function registDialogShow(xhr, status, args) {
+				if (args.regist) {
+					registDialog.show();
+				}
+			}
+			function registConfirm(xhr, status, args) {
+				if (args.registSuccess) {
+					registDialog.hide();
+				}
+			}
+			function evaluateDialogShow(xhr, status, args) {
+				if (args.evaluate) {
+					evaluateDialog.show();
+				}
+			}
+			function evaluatConfirm(xhr, status, args) {
+				if (args.evaluateSuccess) {
+					evaluateDialog.hide();
+				}
+			}
+			function changeme(obj) {
+				if (obj.className == "overdiv") {
+					obj.className = "overdivscroll";
+					obj.title = "点击关闭";
+					//nowheightflage=true;
+				} else {
+					obj.scrollTop = 0;
+					obj.className = "overdiv";
+					obj.title = "点击查看更多";
+					//	nowheightflage=false;
+				}
+			}
+			/*  取消滚动条
+			 */
+			jQuery(document).ready(function() {
+				cleanBar();
+			});
+		</script>
+	</h:body>
+</f:view>
+</html>

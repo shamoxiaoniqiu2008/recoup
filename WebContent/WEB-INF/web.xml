@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+  <display-name>helloworld</display-name>
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>
+				classpath:applicationContext*.xml
+    	</param-value>
+  </context-param>
+    <context-param>
+    <param-name>javax.faces.FACELETS_LIBRARIES</param-name>
+    <param-value>/WEB-INF/histag/His.taglib.xml</param-value>
+  </context-param>
+    <context-param>
+    <param-name>javax.faces.PROJECT_STAGE</param-name>
+    <param-value>Product</param-value>
+  </context-param>
+  
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>
+			org.springframework.web.context.request.RequestContextListener</listener-class>
+  </listener>
+  <context-param>
+    <description>设置时间转化器的TimeZone Added By Ade Wang</description>
+    <param-name>javax.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
+    <param-value>true</param-value>
+  </context-param>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <servlet-name>Faces Servlet</servlet-name>
+    <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Faces Servlet</servlet-name>
+    <url-pattern>/faces/*</url-pattern>
+    <url-pattern>*.jsf</url-pattern>
+    <url-pattern>*.xhtml</url-pattern>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+<!-- atmosphere is required for primeface push -->
+<!--    <servlet> -->
+<!--        <servlet-name>Push Servlet</servlet-name> -->
+<!--        <servlet-class>org.primefaces.push.PushServlet</servlet-class> -->
+<!--    </servlet> -->
+<!--    <servlet-mapping> -->
+<!--        <servlet-name>Push Servlet</servlet-name> -->
+<!--        <url-pattern>/primepush/*</url-pattern> -->
+<!--    </servlet-mapping> -->
+
+	<!-- 将state保存在server端，放在client端会避免ViewExpiredException的出现 ,server端，压力会减小，client端压力增大-->
+	<context-param>
+		<description>State saving method: 'client' or 'server' (=default). See JSF Specification 2.5.2</description>
+		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+		<param-value>server</param-value>
+	</context-param>
+	
+	<!-- 用于国际化的 -->
+	<context-param>
+		<param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
+		<param-value>resources.application</param-value>
+	</context-param>
+	
+<!-- 	<context-param>   -->
+<!--      	<param-name>primefaces.THEME</param-name>   -->
+<!--      	<param-value>humanity</param-value>   -->
+<!-- 	</context-param>   -->
+  <listener>
+    <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
+  </listener>
+  
+	<!-- 过滤session是否有 -->
+	<filter>
+	
+		<filter-name>vehicleSessionFilter</filter-name>
+		<filter-class>com.centling.his.util.VehicleSessionFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>vehicleSessionFilter</filter-name>
+		<url-pattern>*.jsf</url-pattern>
+		<url-pattern>*.xhtml</url-pattern>
+		<url-pattern>*.html</url-pattern>
+		<url-pattern>*.Servlet</url-pattern>
+	</filter-mapping>
+	
+	
+	
+	
+	<!-- servletContextListner的具体实现 -->
+	<listener>
+		<display-name>vehicleServletContextListener</display-name>
+		<listener-class>com.centling.his.util.VehicleServletContextListener</listener-class>
+	</listener>
+	
+	
+	<!-- session过期默认30分钟 -->
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>  
+
+  <!--   <listener>
+        <description>Socket启动，监听指纹数据</description>
+        <listener-class>util.ServerSocketListener</listener-class>
+    </listener> -->
+
+	 <!-- 图片上传下载 add by justin.su 2013-10-30-->
+	<filter>    
+        <filter-name>PrimeFaces FileUpload Filter</filter-name>    
+        <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>    
+    </filter>            
+    <filter-mapping>    
+        <filter-name>PrimeFaces FileUpload Filter</filter-name>    
+        <servlet-name>Faces Servlet</servlet-name>    
+    </filter-mapping>
+    <!-- 图片上传下载 Primefaces 4.0 新增内容 add by justin.su 2013-10-30-->
+    <context-param>  
+    <param-name>primefaces.UPLOADER</param-name>
+    <param-value>commons</param-value>  
+	</context-param>
+
+</web-app>

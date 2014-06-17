@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+
+	<!-- 驱动类 -->
+   <classPathEntry location="D:\centling\REST\pension\WebContent\WEB-INF\lib\mysql-connector-java-5.1.7-bin.jar"/>
+
+
+  <context id="context1" >
+  	
+  	 <!-- 生成equals和hashcode的插件 -->
+	  <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />
+	   <plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+   
+  	<!-- 数据库连接的配置 -->
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://192.168.208.211:3306/pension_db"
+     userId="root" password="root" />
+   
+   <!-- domain 和example 的配置 -->
+   <!-- targetProject指定生成在哪个工程下，在eclipse中必须指定 -->
+   <!-- targetPackage指定生成在哪个包下，在eclipse中必须指定 -->
+    <javaModelGenerator targetPackage="domain.olderManage" targetProject="pension/JavaSource" >
+    
+    	<!-- 如果某个表在某个schema中，那么类会在package  domain.schema中，而不是domain中 -->
+    	<property name="enableSubPackages" value="true"/>
+    	
+    	<!-- 从数据库返回数据时，是否trim数据 对于char类型的比较有用 -->
+    	<property name="trimStrings" value="true" />
+    	
+    </javaModelGenerator>
+    
+    <!-- mapper.xml  -->
+    <sqlMapGenerator targetPackage="persistence.olderManage" targetProject="pension/JavaSource" >
+    	 <property name="enableSubPackages" value="true" />
+    </sqlMapGenerator>
+    
+    <!-- mapper.java -->
+    <javaClientGenerator targetPackage="persistence.olderManage" targetProject="pension/JavaSource" type="XMLMAPPER" >
+    	<property name="enableSubPackages" value="true" />
+    </javaClientGenerator>
+    
+    <!-- table的配置 -->
+   <!--  <table tableName="pension_livingNotify" >
+    	<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="dept_id" property="deptId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="handler_id" property="handlerId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="checker_id" property="checkerId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="apply_id" property="applyId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="event_id" property="eventId" javaType = "java.lang.Long"></columnOverride>
+    </table>
+    <table tableName="pension_ringRecord" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+
+		<columnOverride column="ring_id" property="ringId" javaType = "java.lang.Long"></columnOverride>
+	</table>
+    <table tableName="pension_hospitalizeGroup" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="manager_id" property="managerId" javaType = "java.lang.Long"></columnOverride>
+		
+	</table>
+    <table tableName="pension_diagnosis" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="recorder_id" property="recorderId" javaType = "java.lang.Long"></columnOverride>
+
+	</table>
+	
+	<table tableName="pension_visitRecord" >
+    	<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="visitor_id" property="visitorId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="dept_id" property="deptId" javaType = "java.lang.Long"></columnOverride>
+		
+    </table>
+    <table tableName="pension_departApprove" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="dept_id" property="deptId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="approver_id" property="approverId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="depart_id" property="departId" javaType = "java.lang.Long"></columnOverride>
+
+	</table>
+    <table tableName="pension_departRegister" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride>
+		
+	</table>
+    <table tableName="pension_departRecord" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+	</table>
+	
+	
+	<table tableName="pension_older" >
+    	<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+
+		<columnOverride column="nation_id" property="nationId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="politics_id" property="politicsId" javaType = "java.lang.Long"></columnOverride>
+		
+    </table>
+    <table tableName="pension_hospitalizeRegister" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+
+		<columnOverride column="group_id" property="groupId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="nurse_id" property="nurseId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride>
+	</table>
+    <table tableName="pension_notBackOnTime" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+
+		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="leave_id" property="leaveId" javaType = "java.lang.Long"></columnOverride>
+
+	</table>
+    <table tableName="pension_dosage" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="sender_id" property="senderId" javaType = "java.lang.Long"></columnOverride>
+		
+	</table>
+	
+	<table tableName="pension_leaveApprove" >
+    	<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+
+		<columnOverride column="leave_id" property="leaveId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="dept_id" property="deptId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="approver_id" property="approverId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="dept_id" property="deptId" javaType = "java.lang.Long"></columnOverride>
+		
+    </table>
+    <table tableName="pension_leave" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride>
+
+	</table>
+    <table tableName="pension_dosageDetail" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="dosage_id" property="dosageId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="dept_id" property="deptId" javaType = "java.lang.Long"></columnOverride>
+
+	</table>
+    <table tableName="pension_itemCount" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="item_id" property="itemId" javaType = "java.lang.Long"></columnOverride>
+	</table> -->
+	<!-- <table tableName="pension_ringRecord">
+			<columnOverride column="id" property="id" javaType="java.lang.Long"></columnOverride>
+
+			<columnOverride column="ring_id" property="ringId"
+				javaType="java.lang.Long"></columnOverride>
+		</table> -->
+		
+		
+<!--   <table tableName="pension_diagnosis" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride>
+		<columnOverride column="recorder_id" property="recorderId" javaType = "java.lang.Long"></columnOverride>
+
+	</table>
+	 -->
+	 
+<!-- 	<table tableName="pension_recure_detail" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+<columnOverride column="recureItem_id" property="recureitemId" javaType = "java.lang.Long"></columnOverride>
+<columnOverride column="dutyNurse" property="dutynurse" javaType = "java.lang.Long"></columnOverride>
+
+	</table> -->
+<!-- 	<table tableName="pension_older_recure" > -->
+<!-- 		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="recureItem_id" property="recureitemId" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="recureDetail_id" property="recuredetailId" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="realNurse" property="realnurse" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="handleNurse" property="handlenurse" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="recure_main_id" property="recureMainId" javaType = "java.lang.Long"></columnOverride> -->
+		
+<!-- 	</table> -->
+<!-- 	<table tableName="pension_older_recure_main" > -->
+<!-- 		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="older_id" property="olderId" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="recureItem_id" property="recureitemId" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="inputer" property="inputer" javaType = "java.lang.Long"></columnOverride> -->
+		
+<!-- 	</table> -->
+	
+	
+	
+
+<!--  <table tableName="pension_hospitalizeGroup" > -->
+<!-- 		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride> -->
+<!-- 		<columnOverride column="manager_id" property="managerId" javaType = "java.lang.Long"></columnOverride> -->
+		
+<!-- 	</table>  -->
+ <table tableName="pension_system_config" >
+		<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
+		
+	</table> 
+  
+  
+  </context>
+</generatorConfiguration>

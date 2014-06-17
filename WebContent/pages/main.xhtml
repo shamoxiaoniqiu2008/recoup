@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+
+<f:view contectType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css" ></link>
+		
+		 <script type="text/javascript"
+			src="#{request.contextPath}/resources/js/message.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/frame.js?ver=#{projectConfig.ver}" />
+		
+	<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />	
+	</h:head>
+	
+    <style>
+    /*---此CSS为DIV仿FRAME,不要置于样式表中,以免冲突---*/
+    html{
+        height:100%;
+        -webkit-box-sizing:border-box;
+        -moz-box-sizing:border-box;
+        box-sizing:border-box;
+		/* padding:80px 0 35px 0;  margin-top:-35px;*/
+		padding:0px 0 45px 0;
+		overflow:hidden;
+		/*min-width:1000px; margin:0 auto;overflow-y:hidden;*/
+    }
+    
+    
+    #topTags {
+		/* float: left; */
+		/* margin-top:50px;
+		margin-left:1px;
+		padding-left: 200px; */
+		overflow:hidden;
+		height:40px;
+		/* background-image: url(../images/126_f2_01.gif);
+		background-position: 1px -32px; */
+		width: 100%;
+	}
+	
+	 #topTags li {
+		float: left;
+		font-size: 14px;
+		font-weight: bold ! important ;
+		color: #00752E ! important ;;
+		height: 35px;
+		width: 120px;
+		line-height: 35px;
+		padding-top: 0px;
+	/* 	padding-left: -3px; */
+		margin-left:-8px;
+		cursor: pointer;
+		text-align: center;
+	}
+	
+ 	#topTags ul
+	{
+	    float: left;
+	} 
+	
+	.menuTop{ background-image:url(../images/common/z9.jpg); background-repeat:repeat-x; font-family:"微软雅黑"; font-size:18px; color:#28be0a; line-height:45px; }
+
+    </style>
+	<h:body>
+
+		<p:growl id="message" widgetVar="message" />
+		<!--#header{{{-->
+		
+		<div id="logoDiv" style=" position: absolute; top: 0px; left: 0px; z-index: 100000;"><div 
+		style="width:100%; height:76px; background-image:url(../images/common/z1.jpg); background-repeat:no-repeat;">
+        <div style="width:185px; padding-top:53px;margin-left:12px; font-size:13px; color:#026b16;">
+        <table>
+			<tr>
+				<td width="20"><img src="../images/common/zh2.jpg" width="16" height="16" /></td>
+				<td>员工:</td>
+				<td id="curUser" style="padding-right: 5px;"></td>
+				<td width="30"  onclick="messageDialog.show();" style="cursor: pointer;"><img id="messagePic" src="#{request.contextPath}/images/msgimg.png" width="16" height="16" /></td>
+		    	<td onclick="messageDialog.show();" id="messageTxt" style="font-weight: bold; color: red;cursor: pointer;" >0</td>
+				<td onclick="messageDialog.show();" style="cursor: pointer;">条消息</td>
+			</tr>
+		</table>
+       <!--  <img src="../images/common/zh2.jpg" /><b>员工:</b>孙俪<b>　消息:</b><a href="#">20条</a> --></div>
+      </div></div>
+      
+		<div id="header" class="tc" style="background-image: url('../images/common/z1.jpg') no-repeat;">	
+			<p:layoutUnit position="top" collapsible="true" collapsed="true">
+				<div id="globallink" ><h:form id="logoutForm"  
+	style="height: 25px; margin: 0px 0px 0px 0px;  background: url(#{request.contextPath}/images/common/zh1.jpg);" >
+	<div id="test" style="display: ;"><img src="../images/common/z2.jpg" width="335" height="25" alt=""/></div>
+		<div style="position: absolute; right: 10px; top:0px;">
+			<table>
+			<tr>
+			<!-- 	<td width="30"><img src="#{request.contextPath}/images/tb1.gif" width="16" height="16" /></td>
+				<td>员工:</td>
+				<td id="curUser" style="padding-right: 10px;"></td>
+				<td width="30"><img id="messagePic" src="#{request.contextPath}/images/msgimg.png" width="16" height="16" /></td>
+		    	<td onclick="messageDialog.show();" id="messageTxt" style="font-weight: bold; color: red;" >0</td>
+				<td onclick="messageDialog.show();" style="cursor: pointer;">条消息</td> -->
+				<td width="75"><div style="cursor: pointer;" onclick="toLockMain();lockDialog.show();"><img 
+				src="../images/common/z3.jpg" alt="锁屏" width="75" height="25" border="0"/></div></td>
+				<td  width="93"><div style="cursor: pointer;" onclick="leaveSysDialog.show();">
+				<img src="../images/common/z4.jpg" 
+				alt="退出系统" width="93" height="25" border="0" /></div></td>
+				<td style="padding-left: 10px;"><div style="cursor: pointer;" onclick="sysHelpDialog.show();"><!-- <img
+				alt="帮助文档" src="#{request.contextPath}/images/help.png" /> -->
+				</div></td>
+				<td style="padding-left: 10px;">
+				</td>
+			</tr>
+			</table>	
+		</div>
+	</h:form></div>
+			</p:layoutUnit>
+			
+		<!-- <div style="height:33px; line-height:33px; width:100%; padding-left:10px;"><table width="100%" border="0" cellpadding="0" cellspacing="0" >
+		  <tr>
+		    <td width="3%"><img src="#{request.contextPath}/images/tb1.gif" width="16" height="16" /></td>
+		    <td width="97%" align="left">
+				<table><tr><td>员工:</td>
+				<td id="curUser" style="padding-right: 10px;"></td>
+				<td width="30"><img src="#{request.contextPath}/images/msgimg.png" width="16" height="16" /></td>
+		    	<td onclick="messageDialog.show();" id="messageTxt" style="font-weight: bold; color: red;" >0</td>
+				<td onclick="messageDialog.show();" style="cursor: pointer;">条消息</td>
+				</tr></table>
+			</td>
+		    </tr>
+		</table>
+		</div> -->
+		</div>
+		<p:dialog widgetVar="messageDialog" appendTo="@(body)" modal="true"
+		onShow="fetchMessageCounts();"
+		header="消息" width="800" height="400">
+		
+		<style>
+			#messageForm table {
+				border-collapse: collapse;
+				border: 1px solid;
+				word-break:break-all;
+/* 				border-color:#E1F5FF !important; */
+			}
+				
+			#messageForm table tr td {
+				border-color:#00752e !important;
+				border: 1px solid  #{doctorOrdersManageController.theadColor};
+				height: #{doctorOrdersManageController.orderPrintRowHeight}px;
+				font-size: #{doctorOrdersManageController.orderPrintFontSize}px ;
+				word-break:break-all;
+			}
+				
+			/* #headId td{
+				border: 1px solid white;
+			} */
+			
+	</style>
+			
+			<h:form id="messageForm">
+				
+			</h:form>
+		</p:dialog>
+		
+		<p:dialog widgetVar="leaveSysDialog" appendTo="@(body)" modal="true"
+		header="退出确认" >
+			<h:form>
+			<table width="100%"><tr>
+			<td valign="middle" align="center" style="font-size: 22px; font-weight: bold;"> 是否要退出系统
+			</td>
+			</tr><tr>
+			<td>
+			<div align="center" >  
+			<p:commandButton styleClass="commonbtn" 
+				action="#{mainController.leaveSystem}"
+								 value="确认退出"
+				oncomplete="leaveConfirm(xhr,status,args)"
+								>
+				</p:commandButton>
+			<p:commandButton styleClass="commonbtn" 
+								 value="取消"
+								 onclick="leaveSysDialog.hide()"
+								 type="button">
+				</p:commandButton>
+			</div>
+			</td>
+			</tr></table>
+			</h:form>
+		</p:dialog>
+		
+		<p:dialog widgetVar="sysHelpDialog" appendTo="@(body)" modal="true"
+		header="帮助文档" >
+			<h:form>
+			<table width="100%"><tr>
+			<td valign="middle" align="center" style="font-size: 14px; font-weight: bold;"> 是否要下载帮助文档
+			</td>
+			</tr><tr>
+			<td>
+			<div align="center" >  
+			<p:commandButton styleClass="commonbtn" actionListener="#{mainController.initFileStream}" value="确认下载" ajax="false" onclick="sysHelpDialog.hide()" process="@this">
+				<p:fileDownload value="#{mainController.helpFile}" />  			
+			</p:commandButton>
+			<p:commandButton styleClass="commonbtn" value="取消下载" onclick="sysHelpDialog.hide()" type="button">
+			</p:commandButton>
+			</div>
+			</td>
+			</tr></table>
+			</h:form>
+		</p:dialog>
+		
+		<p:dialog id="lockDialogID" widgetVar="lockDialog" appendTo="@(body)" modal="true"
+		onShow="hideTitle()"
+		 width="300" height="100">
+		
+				<h:form id="lockForm">
+				
+		 <div align="center" > 输入密码：<h:inputSecret id="paword"
+												required="true" requiredMessage="请输入密码！"
+												value="#{mainController.passWord}"
+												size="20"></h:inputSecret><p:commandButton styleClass="commonbtn" 
+				action="#{mainController.unLock}"
+				onstart="return checkMe()"
+				update=":message"
+				oncomplete=" handleComplete(xhr, status, args)"
+			    value="解锁">
+				</p:commandButton>
+				
+				
+				</div>
+				
+				
+				
+			</h:form>
+		</p:dialog>
+		
+		<!--}}}#header-->
+		<!--#aside{{{-->
+		<div id="aside">
+		<div style="display: block; height: 49px; width: 90px; background-color: blue;">f
+		</div>
+		<div style="display: block; height: 46px; width: 190px; background-color:green;">
+		<table class="menuTop" width="100%" border="0" cellspacing="0" cellpadding="0">
+		  <tr>
+		    <td><img class="left" src="../images/common/z8.jpg" width="15" height="46" alt=""/></td>
+		    <td align="center"><img src="../images/common/z10.jpg" width="88" height="46" alt="" /></td>
+		    <td><img style="float: right;" src="../images/common/z11.jpg" width="12" height="46" alt="" /></td>
+		  </tr>
+		</table>
+		</div>
+		    <div class="menu-wrap" >
+		    <ul>
+		    <li style="display: none" class="menu-li"><img src="" alt="" ></img>工作台<div style="display: none;">desktop.jsf</div></li> 
+		    </ul> 
+		    
+		    <style>
+		    .pull{ background-image:url(../images/common/z12.jpg); background-repeat:repeat-y; width:6px;}
+		    .pfirst{ display:block; width:100%; background-image:url(../images/z13.jpg); 
+		    	background-repeat:repeat-x; height:26px; line-height:26px; font-family:"宋体"; 
+		    	font-size:13px; color:#32b16c; border-bottom:1px solid #bdeab4; border-right:1px solid #bdeab4; 
+		    	font-weight:bold;
+		    }
+		    .pfirst:hover{ color:#FF3300;}
+			.pfirst img{ float:left; margin-left:5px; margin-right:5px;}
+			.pfirst div{float:left; }
+			
+			#leftMenu{
+				float: left;
+				width: 212px;
+				height: 100%;
+				overflow: auto;
+				overflow-x: hidden;
+				overflow-y: auto;
+			}
+			
+		    </style>	    
+		    
+		    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <th width="4%" align="left" scope="col"  class="pull"><div class="pull"> </div>
+	<div style="clear:both"> </div>
+</th>
+    <th width="96%" align="left" valign="top" scope="col" id="leftMenu" >
+    <div>
+    		    <ui:repeat value="#{mainController.pensionMenusList}"
+							var="pensionMenus" rowKey="#{pensionMenus.id}" varStatus="status">
+				<div style="display: #{pensionMenus.pensionMenusList.size() gt 0?'':'none'}">
+					<h3>#{pensionMenus.pensionMenuFirst.displaytext}</h3>
+					<ul class="menu">
+					
+					 <ui:repeat value="#{pensionMenus.pensionMenusList}" 
+							var="pensionMenu" rowKey="#{pensionMenu.id}" varStatus="status">
+					 
+						<li class="menu-li" style="cursor: pointer; background-repeat: no-repeat;"><img align="top" 
+						style="margin-top: 9px; margin-right: 5px;" 
+						src='#{request.contextPath}/images/menuicon/#{pensionMenu.ioc}' 
+						width="16" height="16" ></img>#{pensionMenu.displaytext}<div 
+						style="display: none;">#{pensionMenu.toUrl}</div></li>   
+			
+					</ui:repeat>
+					<li class="menu-bottom"></li>
+			       </ul>
+			    </div>							
+			</ui:repeat>
+	</div>
+  </th>
+  </tr>
+</table>	    
+
+<div style="display: none;">
+<form name="exportExcelForm" method="post" target="exportExcelFrame">
+<input name="excelName" id="excelName" value="excelName"/>
+<input name="contentExcel" id="contentExcel" value="contentExcel"/>
+<input type="submit" value="ti" /> 
+</form>
+
+	<iframe id="exportExcelFrame" name="exportExcelFrame" width="200" height="300"></iframe>
+</div>
+		    <!-- <div>	
+		        <h3>内容管理</h3>
+		             <ul class="menu">
+		                <li><a href="test.jsf" target="mainFrame">内容列表</a></li>
+		                <li><a href="test.jsf" target="mainFrame">内容查询</a></li>
+		                <li><a href="test.jsf" target="mainFrame">内容分类管理</a></li>
+		                <li><a href="test.jsf" target="mainFrame">内容删除</a></li>
+		                <li class="menu-bottom"></li>
+		             </ul>
+		    </div>
+		    
+		     <div>	
+		        <h3>内容管理sss</h3>
+		             <ul class="menu">
+		                <li><a href="user.jsf" target="mainFrame">内容列表</a></li>
+		                <li><a href="user.jsf" target="mainFrame">内容查询</a></li>
+		                <li><a href="user.jsf" target="mainFrame">内容分类管理</a></li>
+		                <li><a href="user.jsf" target="mainFrame">内容删除</a></li>
+		                <li class="menu-bottom"></li>
+		             </ul>
+		    </div> -->	
+		    	
+		             <h:form>
+		             <!-- <p:commandButton styleClass="commonbtn" id="newKV" value="新医保登记"  >
+			   </p:commandButton> -->
+		             
+		             </h:form>
+		       
+		     </div>    
+		</div>
+		<!--}}}#aside-->
+		<!--#toggle-bar{{{-->
+		<div id="toggle-bar"><a  href="javascript:leftShowHide();"></a></div>
+		<!--}}}#toggle-bar-->
+		<!--#main-content{{{-->
+		<div id="main-contentOut" class="main-contentOut">
+	 <div style="width:100%" id="outMenu">
+	 <table width="100%" style="background-image: url('../images/common/z6.jpg');"><tr>
+	 	<td width="110">
+			<div id="topTags" style="height: 30px;width: 80%; overflow:hidden;background-image: url('../images/common/z5.jpg'); background-repeat: no-repeat;">
+		   		<ul></ul>
+		  	</div>
+		</td>
+		<td  onclick="toLeft()" id="toLeftTd" style="cursor: pointer;" width="60">
+			<img src="#{request.contextPath}/images/previous.png" width="15" height="15" ></img>
+		</td>
+		<td style="cursor: pointer;background-image: url('../images/common/z7.jpg'); background-repeat: no-repeat;" id="toRightTd"   width="20" onclick="toRight()">
+			<img src="#{request.contextPath}/images/next.png" width="15" height="15" ></img>
+		</td>
+	</tr>
+	</table>
+	</div>
+		<div id="main-content" >
+		
+			<!-- <iframe name="mainFrame" id="mainFrame" class="mainFrame" src="desktop.jsf" scrolling="auto" frameborder="0"></iframe> -->
+		</div>
+		</div>
+		<!--}}}#main-content-->
+		<!--#footer{{{-->
+		<div id="footer" class="tc">
+		Copyright © 2013  青岛百灵软件科技 版权所有<br></br>
+技术支持：青岛百灵软件科技有限公司
+		<div style="position: absolute; right: 50px; bottom: 12px; cursor: pointer;">
+				<input type="checkbox" onclick="autoClose()">自动关闭历史页面</input>
+				<h:form id="hideForm">
+					<h:outputText id="maxShowCount" value="#{mainController.maxCount}" style="display: none" ></h:outputText>
+					<p:commandButton action="#{mainController.setAutoClose}" id="autoCloseBtn" style="display: none" 
+									 value="设置自动关闭" update=":hideForm:maxShowCount"></p:commandButton>
+				</h:form>
+
+		</div>
+ <div onclick="change_mainFrame()" title="全屏切换" style="position: absolute; right: 10px; bottom: 12px; cursor: pointer;" >
+<img id="imgChange" src="#{request.contextPath}/images/max.png"></img></div>
+		</div>
+		<!--}}}#footer-->
+	</h:body>
+	
+	<script>
+	
+	jQuery(document).ready(function(){
+		//alert("dddddddddddddddddd")
+		jQuery(".menu-wrap h3").click(function() {
+			if(jQuery(this).parent().find("ul").is(":hidden")){  //展开
+				
+				jQuery(".menu").slideUp(300);
+			
+				jQuery(this).parent().find("ul").slideDown();
+				//jQuery(".menu-wrap h3").css("background-image","url(../images/cd_open.png)");
+				//jQuery(this).css("background-image","url(../images/cd_close.png)");
+			} else {
+				jQuery(this).parent().find("ul").slideUp();
+				//jQuery(this).css("background-image","url(../images/cd_open.png)");
+			}
+		});
+		
+		jQuery(".menu").hide();
+		//jQuery(".menu:eq(0)").slideDown(1500);
+		jQuery(".menu-wrap h3:eq(0)").click();
+		resizeWindow();
+	})
+	
+	
+	
+	jQuery(window).resize(function() {
+		resizeWindow();
+	});
+	
+
+	function resizeWindow() {
+		
+		//alert("dddddddddddddddddd")
+		//alert(jQuery("#aside").height());
+		//jQuery("#main-contentOut").height(jQuery("#aside").height());
+		
+		var browser=navigator.appName
+		var b_version=navigator.appVersion
+		var trim_Version=b_version.replace(/[ ]/g,"");
+		buff = 30;
+		buff_top = 30;
+		if(browser=="Microsoft Internet Explorer" )if(trim_Version.indexOf('MSIE8')>=0)
+		{
+			buff = 50;
+			buff_top = 35;
+		} 
+		jQuery("#main-content").height(jQuery("#aside").height()-buff);
+		jQuery("#topTags").css("width", (jQuery("#main-content").width()-buff_top)+"px");
+		
+		
+		jQuery("#leftMenu").height(jQuery("#aside").height()-105);
+		
+		/* jQuery("#main-contentOut").height(jQuery("#aside").height());
+		jQuery("#main-content").height(jQuery("#aside").height()-30);
+		//alert(jQuery("#topTags").parent().css("width"));
+		//alert(jQuery("#main-content").width())
+		jQuery("#topTags").css("width", (jQuery("#main-content").width()-30)+"px"); */
+		
+	}
+
+
+
+	function leftShowHide() {
+		if(jQuery("#aside").is(":hidden")){  //展开
+			jQuery("#logoDiv").css("margin-top","0px",1000);
+			jQuery("#aside").show(200,function() {
+				resizeWindow();
+			});
+		} else {
+			jQuery("#logoDiv").css("margin-top","-50px",1000);
+			jQuery("#aside").hide(200,function() {
+				resizeWindow();
+			});
+		}
+		
+	}
+	
+	function leaveConfirm(xhr,status,args){
+		window.location.reload();
+	}
+
+	function checkMe() {
+		if(checkIsNotNull("lockForm:paword")) {	
+			return true;
+		} else {
+			jsMessageInfoFun("密码不能为空");
+			//alert("密码不能为空");
+			return false;
+		}
+	}
+	function handleComplete(xhr, status, args) { 
+
+			if(args.login=="success"){
+				jQuery(".ui-widget-overlay").css({'opacity':"0.3"});
+				lockDialog.hide();
+				if(hideMe != "undefined") {
+					clearTimeout(hideMe);
+				}
+			}
+	}
+	
+	function trimStr(str){  
+	    return str.replace(/(^\s*)|(\s*$)/g, "");  
+	}
+	function checkIsNotNull(id){
+		var txt=document.getElementById(id).value;
+		if(typeof(txt) == 'undefined') {
+			return false;
+		} else {
+			txt = trimStr(txt);
+			if(txt == "") {
+				return false;
+			}
+			return true;
+		}
+	}
+	
+	
+	function jsMessageInfoFun(messageInfo) {
+		jQuery(function()
+		{	
+			try {
+				 msg = new Object();
+				 msg["severity"] = 'info';
+				 msg["summary"] = messageInfo;
+				// msg["detail"]= messageInfo;
+				PF('message').show([msg]);
+			} catch(err) {
+			}
+		});
+	}
+	
+	var hideMe;
+	var opacity = 1
+	
+	function testf() {
+		jQuery("#lockDialogID").prev().hide();
+	}
+	
+	function hideTitle() {
+		jQuery("#lockDialogID").prev().hide();
+		jQuery("#lockDialogID").parent().find(".ui-resizable-se").hide();
+		toHide();
+		//alert(jQuery(".ui-widget-overlay").css('opacity'));
+		jQuery(".ui-widget-overlay").css({'opacity':"0.9"});
+	
+		jQuery("#lockDialogID").parent().unbind("keydown");
+		jQuery("#lockDialogID").parent().keydown(function(e){
+			if(e.keyCode == 27) {
+				　return false;
+			}
+		}); 
+		 jQuery("#lockDialogID").parent().parent().keydown(function(e){
+			if(e.keyCode == 27) {
+				e.stopPropagation();
+			}
+		});
+		setTimeout(function() {		
+
+
+			jQuery("#lockDialogID").mousemove(function() {
+			
+				jQuery('#lockDialogID').parent().css({'opacity':"1"});
+				opacity = 1;
+				if(hideMe != "undefined") {
+					clearTimeout(hideMe);
+				}
+				toHide();
+			});
+			
+			 jQuery(".ui-widget-overlay").mousemove(function() {
+			
+				jQuery('#lockDialogID').parent().css({'opacity':"1"});
+				opacity = 1;
+				if(hideMe != "undefined") {
+					clearTimeout(hideMe);
+				}
+				toHide();
+			});
+			jQuery("#lockDialogID").keydown(function(){
+				jQuery('#lockDialogID').parent().css({'opacity':"1"});
+				opacity = 1;
+				if(hideMe != "undefined") {
+					clearTimeout(hideMe);
+				}
+				toHide();
+			});
+		},1000);
+		 
+	
+		
+	}
+
+	function toHide() {
+		if(hideMe != "undefined") {
+			opacity = jQuery('#lockDialogID').parent().css('opacity');
+			if(0.3 > opacity) {
+				clearTimeout(hideMe);
+				return;
+				//alert('stop');
+			}
+		}
+		opacity -= 0.2;
+		jQuery('#lockDialogID').parent().css({'opacity':opacity});
+		hideMe = setTimeout(toHide,2000);
+	}
+	</script>
+	
+	<script>
+	jQuery(document).ready(function(){
+	//	alert(jQuery("#logoutForm\\:lockInput").val());
+		
+		var strUrl=window.location.href;
+		  arrUrl=strUrl.split("/");
+			// 再取。之前的字符
+			var strPage1=arrUrl[arrUrl.length-1];
+			var arrUrl1=strPage1.split(".");
+			var strPage=arrUrl[arrUrl.length-2]+"/"+arrUrl1[0];
+			
+		 jQuery.get("/"+arrUrl[3]+"/LockServlet.Servlet?getLock=getLock",function(result){
+				if(result == "true") {
+					lockDialog.show();
+				}
+		  });
+		 
+	});
+	function toLockMain() {
+		
+		 jQuery("#lockForm\\:paword").val("");
+		var strUrl=window.location.href;
+		  arrUrl=strUrl.split("/");
+			// 再取。之前的字符
+			var strPage1=arrUrl[arrUrl.length-1];
+			var arrUrl1=strPage1.split(".");
+			var strPage=arrUrl[arrUrl.length-2]+"/"+arrUrl1[0];
+		 jQuery.get("/"+arrUrl[3]+"/LockServlet.Servlet",function(result){
+			//	alert(result)
+		  });
+	}
+	
+	
+	function change_mainFrame() {
+		if(jQuery("#main-contentOut").attr("class") != "main-contentOut-full") {
+			 jQuery("#main-contentOut").removeClass("main-contentOut");
+			 jQuery("#main-contentOut").addClass("main-contentOut-full");
+			 
+			 jQuery("#logoDiv").css("margin-top","-50px",1000);
+			 jQuery("#imgChange").attr("src","../images/min.png")
+		} else {
+			jQuery("#main-contentOut").removeClass("main-contentOut-full");
+			 jQuery("#main-contentOut").addClass("main-contentOut");
+			 jQuery("#logoDiv").css("margin-top","0px",1000);
+			 jQuery("#imgChange").attr("src","../images/max.png")
+		}
+		
+		 jQuery("#main-content").height(jQuery("#main-contentOut").height()-60);
+		 jQuery("#topTags").css("width", (jQuery("#main-content").width()-30)+"px");
+	}
+	
+	/* jQuery(document).keydown(function(){
+		 change_mainFrame();
+	}); */
+
+	function autoClose(){
+		jQuery("#hideForm\\:autoCloseBtn").click();
+	}
+	</script>
+</f:view>
+</html>

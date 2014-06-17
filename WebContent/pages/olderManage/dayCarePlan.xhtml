@@ -1,0 +1,457 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<style>
+.overdiv {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: hidden;
+	height: 18px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+
+.overdivscroll {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: auto;
+	height: 90px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+</style>
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText value="#{dayCarePlanController.olderName}"
+							id="olderName" style="width:145px;" /> <his:IME
+							for="searchForm:olderName" rawSQL="true" resultcol="1"
+							SQLResult="编号:0,姓名:1,输入码:2" sortcol="older_id"
+							SQL="#{dayCarePlanController.selectOlderSql}" fitcol="inputCode"
+							lock="true" multiresult="searchForm:olderId;0" /> <h:inputHidden
+							value="#{dayCarePlanController.olderId}" id="olderId" /></td>
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value="" actionListener="#{dayCarePlanController.searchCarePlan}"
+							update=":carePlanForm,:message,:dayCareForm" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="carePlanForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="7" style="width:100%"
+							id="carePlanFormTable"
+							selection="#{dayCarePlanController.selectedRow}"
+							value="#{dayCarePlanController.carePlanList}" paginator="true"
+							paginatorPosition="bottom" paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="plan" rowKey="#{plan.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+
+							<p:ajax event="rowSelect" update=":dayCareForm"
+								listener="#{dayCarePlanController.selectDaycareRecord}" />
+							<p:ajax event="rowUnselect" update=":dayCareForm"
+								listener="#{dayCarePlanController.clearDaycareRecord}" />
+							<p:column headerText="老人姓名" styleClass="width60">
+								<h:outputText value="#{plan.olderName}" />
+							</p:column>
+							<p:column headerText="护理员" styleClass="width60">
+								<h:outputText value="#{plan.nurseName}" />
+							</p:column>
+							<p:column headerText="开始日期" styleClass="width70">
+								<h:outputText value="#{plan.startTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="结束日期" styleClass="width70">
+								<h:outputText value="#{plan.endTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="持续时间" styleClass="width60">
+								<h:outputText value="#{plan.lastDays}" />
+							</p:column>
+							<p:column headerText="总次数" styleClass="width50">
+								<h:outputText value="#{plan.countNumbers}" />
+							</p:column>
+							<p:column headerText="家属签字" styleClass="width60">
+								<h:outputText value="是" rendered="#{plan.familySign==1}" />
+								<h:outputText value="否" rendered="#{plan.familySign==2}" />
+							</p:column>
+							<p:column headerText="已生成" styleClass="width50">
+								<h:outputText value="是" rendered="#{plan.generateFlag==1}" />
+								<h:outputText value="否" rendered="#{plan.generateFlag==2}" />
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+		</h:form>
+		<!-- 申请信息维护 -->
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton oncomplete="addPlanDialog.show()" id="addButton"
+					actionListener="#{dayCarePlanController.clearAddForm}"
+					styleClass="addbtn" value="" update=":addForm"></p:commandButton>
+				<p:commandButton oncomplete="editPlanDialogShow(xhr,status,args)"
+					id="editButton"
+					actionListener="#{dayCarePlanController.showEditForm}"
+					update=":editForm,:message" styleClass="modifybtn" value=""></p:commandButton>
+				<p:commandButton id="delButton"
+					oncomplete="delDialogShow(xhr,status,args)" styleClass="deletebtn"
+					value="" update=":message"
+					actionListener="#{dayCarePlanController.showDelForm}">
+				</p:commandButton>
+				<p:commandButton value="生成"
+					actionListener="#{dayCarePlanController.generateCarePlan}"
+					styleClass="commonbtn" update=":carePlanForm,:message"></p:commandButton>
+			</div>
+		</h:form>
+		<!-- 护理记录列表 -->
+		<h:form id="dayCareForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="5" style="width:100%"
+							id="dayCareTable" value="#{dayCarePlanController.dayCareList}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="record" rowKey="#{record.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+
+							<p:column headerText="老人姓名" styleClass="width70">
+								<h:outputText value="#{record.olderName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="护理类型" styleClass="width70">
+								<h:outputText value="日常护理" rendered="#{record.nurseType==1}" />
+								<h:outputText value="临时护理" rendered="#{record.nurseType==2}" />
+							</p:column>
+							<p:column headerText="护理日期" styleClass="width70">
+								<h:outputText value="#{record.nurseTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="健康状况" styleClass="width60">
+								<h:outputText value="#{record.healthCondition}" />
+							</p:column>
+							<p:column headerText="护理情况" styleClass="width60">
+								<h:outputText value="#{record.nurseMedicine}" />
+							</p:column>
+							<p:column headerText="执行时间" styleClass="width70">
+								<h:outputText value="#{record.executeTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="护理员" styleClass="width60">
+								<h:outputText value="#{record.nurserName}" />
+							</p:column>
+							<p:column headerText="已执行" styleClass="width50">
+								<h:selectBooleanCheckbox disabled="true"
+									value="#{record.executeF}" />
+							</p:column>
+							<p:column headerText="评价" styleClass="width60">
+								<p:rating value="#{record.evaluation}" readonly="true" />
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+		</h:form>
+
+		<!-- 删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="删除确认"
+			widgetVar="confirmDelDialog">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="确定删除该护理计划？" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{dayCarePlanController.deleteApplication}"
+							update=":carePlanForm,:message"
+							oncomplete="confirmDelDialog.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();"></p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<!-- 新增护理计划 -->
+		<p:dialog header="新增护理计划" widgetVar="addPlanDialog" resizable="false"
+			appendTo="@(body)" modal="true" position="top">
+			<h:form id="addForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="addOlderName">老人姓名:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="addOlderName" style="width:151px"
+								value="#{dayCarePlanController.addCarePlan.olderName}">
+							</p:inputText> <his:IME for="addForm:addOlderName" rawSQL="true" resultcol="1"
+								SQLResult="编号:0,姓名:1,输入码:2,护理员:3" sortcol="id"
+								SQL="#{dayCarePlanController.olderSql}" fitcol="inputCode"
+								lock="true"
+								multiresult="addForm:addOlderId;0,addForm:nurseName;3,addForm:nurseId;4," />
+							<h:inputHidden
+								value="#{dayCarePlanController.addCarePlan.olderId}"
+								id="addOlderId" /></td>
+						<td class="hengbiaogeHeader1"><label>护理员:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="nurseName" disabled="true"
+								value="#{dayCarePlanController.addCarePlan.nurseName}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="startTime_input">开始日期:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:calendar
+								value="#{dayCarePlanController.addCarePlan.startTime}" size="22"
+								id="startTime" pattern="yyyy-MM-dd">
+								<p:ajax event="dateSelect"
+									listener="#{dayCarePlanController.selectLastTime}"
+									update=":addForm:lastDays,:message"
+									process="@this,addForm:startTime"></p:ajax>
+							</p:calendar></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="endTime_input">结束日期:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:calendar
+								value="#{dayCarePlanController.addCarePlan.endTime}"
+								id="endTime" pattern="yyyy-MM-dd">
+								<p:ajax event="dateSelect"
+									listener="#{dayCarePlanController.selectLastTime}"
+									update=":addForm:lastDays,:message"
+									process="@this,addForm:endTime"></p:ajax>
+							</p:calendar></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="持续时间:" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="lastDays" style="width:151px"
+								value="#{dayCarePlanController.addCarePlan.lastDays}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="countNumbers">总次数:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="countNumbers" validatorMessage="总次数不可为零或负数"
+								converterMessage="总次数必须为数字"
+								value="#{dayCarePlanController.addCarePlan.countNumbers}">
+								<f:validateLongRange minimum="1"></f:validateLongRange>
+								<f:convertNumber pattern="0" />
+								<p:ajax event="blur"
+									listener="#{dayCarePlanController.selectExecutePlan}"
+									update=":addForm:executePlan"></p:ajax>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="executePlan">执行计划:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputTextarea
+								id="executePlan"
+								value="#{dayCarePlanController.addCarePlan.executePlan}"
+								autoResize="true" cols="17" rows="1"
+								validatorMessage="执行计划格式不正确【不允许输入数字和逗号之外的其他字符】">
+								<f:validateRegex pattern="^\d*[\,\s\d]*\d$" />
+							</p:inputTextarea></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="家属签字:" />
+						</td>
+						<td class="hengbiaogedata"><p:selectBooleanCheckbox
+								disabled="true" id="familySign"
+								value="#{dayCarePlanController.addCarePlan.signFlag}"></p:selectBooleanCheckbox>
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton process="@this,addForm"
+						onstart="return checkNulls('addForm','redfont',true);"
+						actionListener="#{dayCarePlanController.saveAndGenerateCarePlan}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="生成" update=":carePlanForm,:message">
+					</p:commandButton>
+					<p:commandButton process="@this,addForm"
+						onstart="return checkNulls('addForm','redfont',true);"
+						actionListener="#{dayCarePlanController.saveCarePlan}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="保存" update=":carePlanForm,:message">
+					</p:commandButton>
+					<p:commandButton onclick="addPlanDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 修改护理计划 -->
+		<p:dialog header="修改护理计划" widgetVar="editPlanDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="editForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label>老人姓名:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								disabled="true" style="width:151px"
+								value="#{dayCarePlanController.addCarePlan.olderName}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><label>护理员:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								disabled="true"
+								value="#{dayCarePlanController.addCarePlan.nurseName}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editStartTime_input">开始日期:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:calendar
+								value="#{dayCarePlanController.addCarePlan.startTime}" size="22"
+								id="editStartTime" pattern="yyyy-MM-dd">
+								<p:ajax event="dateSelect"
+									listener="#{dayCarePlanController.selectLastTime}"
+									update=":editForm:editLastDays"
+									process="@this,editForm:editStartTime"></p:ajax>
+							</p:calendar></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editEndTime_input">结束日期:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:calendar
+								value="#{dayCarePlanController.addCarePlan.endTime}"
+								id="editEndTime" pattern="yyyy-MM-dd">
+								<p:ajax event="dateSelect"
+									listener="#{dayCarePlanController.selectLastTime}"
+									update=":editForm:editLastDays"
+									process="@this,editForm:editEndTime"></p:ajax>
+							</p:calendar></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="持续时间:" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="editLastDays" disabled="true" style="width:151px"
+								value="#{dayCarePlanController.addCarePlan.lastDays}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editCountNumbers">总次数:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="editCountNumbers" validatorMessage="执行次数不可为零或负数"
+								converterMessage="执行次数必须为数字"
+								value="#{dayCarePlanController.addCarePlan.countNumbers}">
+								<f:validateLongRange minimum="1"></f:validateLongRange>
+								<f:convertNumber pattern="0" />
+								<p:ajax event="blur"
+									listener="#{dayCarePlanController.selectExecutePlan}"
+									update=":editForm:editExecutePlan"></p:ajax>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editExecutePlan">执行计划:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputTextarea
+								id="editExecutePlan"
+								validatorMessage="执行计划格式不正确【不允许输入数字和逗号之外的其他字符】"
+								value="#{dayCarePlanController.addCarePlan.executePlan}"
+								autoResize="true" cols="17" rows="1">
+								<f:validateRegex pattern="^\d*[\,\s\d]*\d$" />
+							</p:inputTextarea></td>
+						<td class="hengbiaogeHeader1"><label>家属签字:</label></td>
+						<td class="hengbiaogedata"><p:selectBooleanCheckbox
+								disabled="true"
+								value="#{dayCarePlanController.addCarePlan.signFlag}"></p:selectBooleanCheckbox>
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton process="@this,editForm"
+						onstart="return checkNulls('editForm','redfont',true);"
+						actionListener="#{dayCarePlanController.updateAndGeneratePlan}"
+						oncomplete="editConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="生成" update=":carePlanForm,:dayCareForm,:message"></p:commandButton>
+					<p:commandButton process="@this,editForm"
+						onstart="return checkNulls('editForm','redfont',true);"
+						actionListener="#{dayCarePlanController.updateCarePlan}"
+						oncomplete="editConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="保存" update=":carePlanForm,:message">
+					</p:commandButton>
+					<p:commandButton onclick="editPlanDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+
+
+		<script type="text/javascript">
+			//新增护理计划成功，隐藏新增对话框
+			function addConfirm(xhr, status, args) {
+				if (args.add == "success") {
+					addPlanDialog.hide();
+				}
+			}
+			//显示修改护理计划对话框
+			function editPlanDialogShow(xhr, status, args) {
+				if (args.edit) {
+					editPlanDialog.show();
+				}
+			}
+			//修改护理计划成功，隐藏修改对话框
+			function editConfirm(xhr, status, args) {
+				if (args.editSuccess) {
+					editPlanDialog.hide();
+				}
+			}
+			//显示确认删除对话框
+			function delDialogShow(xhr, status, args) {
+				if (args.del) {
+					confirmDelDialog.show();
+				}
+			}
+
+			function changeme(obj) {
+				if (obj.className == "overdiv") {
+					obj.className = "overdivscroll";
+					obj.title = "点击关闭";
+					//nowheightflage=true;
+				} else {
+					obj.scrollTop = 0;
+					obj.className = "overdiv";
+					obj.title = "点击查看更多";
+					//	nowheightflage=false;
+				}
+			}
+			/*  取消滚动条
+			 */
+			jQuery(document).ready(function() {
+				cleanBar();
+			});
+		</script>
+	</h:body>
+</f:view>
+</html>

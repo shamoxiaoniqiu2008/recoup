@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+
+<f:view contectType="text/html">
+	<h:head>
+		<title>#{pageConfig.desktopTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css" ></link>
+		
+		 <script type="text/javascript"
+			src="#{request.contextPath}/resources/js/message.js?ver=#{projectConfig.ver}" />
+	<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+	<table width="100%" height="100%"><tr><td>
+	
+<table width="99%" style="margin-top: 10px;" border="0" cellspacing="0" cellpadding="0" >
+  <tr>
+    <td width="31%"><img src="../images/desktop/lctu1.jpg" width="339" height="478" /></td>
+    <td width="69%" style="background-image:url(../images/desktop/lct2.gif);vertical-align:top;background-repeat: no-repeat;"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><img alt="入住申请"
+	 onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_LivingApply]}')"
+	style="margin-left:15px;margin-top:20px;#{!(desktopController.roleMap[pageConfig.desk_LivingApply] eq null)?'cursor:pointer':''}"  
+	src="../images/desktop/lc1#{!(desktopController.roleMap[pageConfig.desk_LivingApply] eq null)?'':'_1'}.gif" 
+	width="113" height="60" /><img  align="入住审批"
+	 onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_LivingEvaluate]}')"
+	style="margin-left:55px;margin-top:20px;#{!(desktopController.roleMap[pageConfig.desk_LivingEvaluate] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc2#{!(desktopController.roleMap[pageConfig.desk_LivingEvaluate] eq null)?'':'_1'}.gif" width="113" height="60"  /></td>
+  </tr>
+  <tr>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="520"><img  align="入住登记"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_LivingManage]}')" 
+	style="margin-left:15px;margin-top:20px;#{!(desktopController.roleMap[pageConfig.desk_LivingManage] eq null)?'cursor:pointer':''}"
+	src="../images/desktop/lc3#{!(desktopController.roleMap[pageConfig.desk_LivingManage] eq null)?'':'_1'}.gif" 
+	width="113" height="60"/><img  align="入住通知"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_LivingNotice]}')" 
+	style="margin-left:55px;margin-top:20px;#{!(desktopController.roleMap[pageConfig.desk_LivingNotice] eq null)?'cursor:pointer':''}"  
+	src="../images/desktop/lc4#{!(desktopController.roleMap[pageConfig.desk_LivingNotice] eq null)?'':'_1'}.gif" 
+	width="113" height="60"/><img alt="入住质检" 
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_LivingCheck]}')" 
+	style="margin-left:55px;margin-top:20px;#{!(desktopController.roleMap[pageConfig.desk_LivingCheck] eq null)?'cursor:pointer':''}"  
+	src="../images/desktop/lc5#{!(desktopController.roleMap[pageConfig.desk_LivingCheck] eq null)?'':'_1'}.gif" width="113" height="60" /></td>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><img alt="固定缴费"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_paydailypay]}')"
+	style="margin-right:60px;margin-top:20px;#{!(desktopController.roleMap[pageConfig.desk_paydailypay] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc6#{!(desktopController.roleMap[pageConfig.desk_paydailypay] eq null)?'':'_1'}.gif" width="113" height="60" /></td>
+  </tr>
+  <tr>
+    <td><img  alt="临时缴费"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_paytemppay]}')" 
+			style="margin-right:60px;margin-top:10px;#{!(desktopController.roleMap[pageConfig.desk_paytemppay] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc7#{!(desktopController.roleMap[pageConfig.desk_paytemppay] eq null)?'':'_1'}.gif" width="113" height="60" /></td>
+  </tr>
+</table></td>
+  </tr>
+</table>
+</td>
+  </tr>
+  <tr>
+    <td><img  alt="请假申请"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_entryVacationApplication]}')" 
+	style="margin-left:15px;margin-top:45px;#{!(desktopController.roleMap[pageConfig.desk_entryVacationApplication] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc8#{!(desktopController.roleMap[pageConfig.desk_entryVacationApplication] eq null)?'':'_1'}.gif" 
+	width="113" height="60" /><img alt="请假审批"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_ensureVacationApplication]}')" 
+	style="margin-left:55px;margin-top:45px;#{!(desktopController.roleMap[pageConfig.desk_ensureVacationApplication] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc9#{!(desktopController.roleMap[pageConfig.desk_ensureVacationApplication] eq null)?'':'_1'}.gif" 
+	width="113" height="60" /><img alt="门岗查看"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_viewVacationApproval]}')" 
+	style="margin-left:55px;margin-top:45px;#{!(desktopController.roleMap[pageConfig.desk_viewVacationApproval] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc10#{!(desktopController.roleMap[pageConfig.desk_viewVacationApproval] eq null)?'':'_1'}.gif" 
+	width="113" height="60"  /><img alt="老人探望"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_viewVisitationRecord]}')" 
+	style="margin-left:55px;margin-top:45px;#{!(desktopController.roleMap[pageConfig.desk_viewVisitationRecord] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc11#{!(desktopController.roleMap[pageConfig.desk_viewVisitationRecord] eq null)?'':'_1'}.gif" width="113" height="60" /></td>
+  </tr>
+  <tr>
+    <td><img alt="离院申请"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_departRegisterPaper]}')" 
+	style="margin-left:15px;margin-top:70px;#{!(desktopController.roleMap[pageConfig.desk_departRegisterPaper] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc12#{!(desktopController.roleMap[pageConfig.desk_departRegisterPaper] eq null)?'':'_1'}.gif" 
+	width="113" height="60"  /><img alt="离院审核"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_departApprovePaper]}')" 
+	style="margin-left:55px;margin-top:70px;#{!(desktopController.roleMap[pageConfig.desk_departApprovePaper] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc13#{!(desktopController.roleMap[pageConfig.desk_departApprovePaper] eq null)?'':'_1'}.gif" 
+	width="113" height="60"  /><img  alt="离院审批"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_departApproveConfirmPaper]}')" 
+	style="margin-left:55px;margin-top:70px;#{!(desktopController.roleMap[pageConfig.desk_departApproveConfirmPaper] eq null)?'cursor:pointer':''}" 
+	src="../images/desktop/lc14#{!(desktopController.roleMap[pageConfig.desk_departApproveConfirmPaper] eq null)?'':'_1'}.gif" 
+	width="113" height="60"   /><img alt="离院结算"
+	onclick="parent.showMapTag('#{desktopController.roleMap[pageConfig.desk_settleaccounts]}')" 
+	style="margin-left:55px;margin-top:70px;#{!(desktopController.roleMap[pageConfig.desk_settleaccounts] eq null)?'cursor:pointer':''}"  
+	src="../images/desktop/lc15#{!(desktopController.roleMap[pageConfig.desk_settleaccounts] eq null)?'':'_1'}.gif" width="113" height="60"/></td>
+  </tr>
+</table>
+</td>
+  </tr>
+  </table>		
+
+
+</td></tr></table>
+	</h:body>
+</f:view>
+</html>

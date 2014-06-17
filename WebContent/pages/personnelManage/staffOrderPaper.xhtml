@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="scheduleForm" styleClass="noDisable">
+			<h:panelGrid columns="8" style="text-align:right;">
+				<h:outputLabel value="&nbsp;&nbsp;部门:" />
+				<h:panelGroup>
+					<p:inputText id="deptName" style="width:100px;">
+						<p:ajax event="blur"
+							listener="#{staffOrderController.onSelectedDept}"
+							oncomplete="PF('myschedule').update()"
+							process="@this,:scheduleForm">
+						</p:ajax>
+					</p:inputText>
+					<his:IME for="scheduleForm:deptName" fitcol="id,name,inputCode"
+						resultcol="1" rawSQL="true"
+						SQL="select p.id,p.name,p.inputCode from pension_dept p where p.cleared=2"
+						SQLResult="部门Id:0,名称:1,输入码:2" multiresult="scheduleForm:deptId;0">
+					</his:IME>
+					<h:inputHidden id="deptId"
+						value="#{staffOrderController.selectedDeptd}" />
+				</h:panelGroup>
+				<p:watermark value="请选择部门" for="scheduleForm:deptName"></p:watermark>
+			</h:panelGrid>
+			<div align="center">
+				<p:schedule id="schedule" value="#{staffOrderController.eventModel}"
+					widgetVar="myschedule" allDaySlot="false" draggable="false"
+					resizable="false"
+					rightHeaderTemplate="month, agendaWeek, agendaDay"
+					style="height:100px" aspectRatio="3" view="month" axisFormat="H:mm"
+					minTime="#{staffOrderController.currentDate}"
+					timeFormat="yyyy-MM-dd HH:mm">
+					<p:ajax event="eventSelect"
+						listener="#{staffOrderController.onEventSelect}"
+						update=":updateForm" oncomplete="PF('updateDialog').show()" />
+				</p:schedule>
+			</div>
+		</h:form>
+
+		<p:dialog widgetVar="updateDialog" header="排班信息" showEffect="clip"
+			hideEffect="clip" resizable="false" modal="true">
+			<h:form id="updateForm">
+				<table class="hengbiaoge">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont">部门名称:</label>
+						</td>
+						<td class="hengbiaogedata"><p:inputText id="plateNumber"
+								readonly="true"
+								value="#{staffOrderController.selectedOrder.departName}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><label>员工姓名:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="carType"
+								readonly="true"
+								value="#{staffOrderController.selectedOrder.employeeName}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label>值班日期:</label></td>
+						<td class="hengbiaogedata"><p:calendar pattern="yyyy-MM-dd"
+								value="#{staffOrderController.selectedOrder.arrangeTime}"></p:calendar>
+						</td>
+						<td class="hengbiaogeHeader1"><label>值班时段:</label></td>
+						<td class="hengbiaogedata"><p:inputText readonly="true"
+								value="#{staffOrderController.selectedOrder.arrangeName}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label>开始时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar id="expectGotime"
+								pattern="HH:mm:ss" size="20" readonly="true"
+								value="#{staffOrderController.selectedOrder.startTime}" /></td>
+						<td class="hengbiaogeHeader1"><label>结束时间:</label></td>
+						<td class="hengbiaogedata"><p:inputText readonly="true"
+								value="#{staffOrderController.selectedOrder.endTime}">
+								<f:convertDateTime pattern="HH:mm:ss"></f:convertDateTime>
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+						<td class="hengbiaogedata" colspan="3"><p:inputText
+								style="width:368px" id="notes"
+								value="#{staffOrderController.selectedOrder.note}">
+							</p:inputText></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton onclick="updateDialog.hide()" process="@this"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</h:body>
+</f:view>
+</html>

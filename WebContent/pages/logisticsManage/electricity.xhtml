@@ -1,0 +1,419 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:panelGroup>
+					<h:outputLabel value="录入开始时间:"
+						for="inputStartTime" ></h:outputLabel>
+					<p:calendar id="inputStartTime" 
+						value="#{electricityController.inputStartTime}"
+						pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" size="22"></p:calendar>
+					<h:outputLabel value="录入结束时间:"
+						for="inputEndTime" ></h:outputLabel>
+					<p:calendar id="inputEndTime"
+						value="#{electricityController.inputEndTime}"
+						pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" size="22"></p:calendar>
+					<h:outputLabel value="是否确认:" for="paidFlag" />
+					<h:selectOneMenu value="#{electricityController.paidFlag}" id="paidFlag"
+						class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+						<f:selectItem itemLabel="全部" />
+						<f:selectItem itemValue="1" itemLabel="是" />
+						<f:selectItem itemValue="2" itemLabel="否" />
+					</h:selectOneMenu>
+					<h:outputLabel value="大厦:" for="headForm:buildNameText" />
+					<p:inputText id="buildNameText" style="width:60px;"
+						value="#{electricityController.buildName}">
+						<p:ajax event="blur"
+							listener="#{electricityController.changeFloorAndRoomSql}"
+							update=":headForm" process="@this,headForm:buildIdHd" />
+					</p:inputText>
+					<his:IME for="headForm:buildNameText" fitcol="buildName"
+						resultcol="1" rawSQL="true"
+						SQL="#{electricityController.buildSQL}"
+						SQLResult="大厦ID:0:hide,大厦:1" multiresult="headForm:buildIdHd;0">
+					</his:IME>
+					<h:inputHidden id="buildIdHd"
+						value="#{electricityController.buildId}" />
+				</h:panelGroup>
+				<h:panelGroup>
+					<h:outputLabel value="楼层:" for="headForm:floorNameText" />
+					<p:inputText id="floorNameText" style="width:60px;"
+						value="#{electricityController.floorName}">
+						<p:ajax event="blur"
+							listener="#{electricityController.changeRoomSql}"
+							update=":headForm" process="@this,headForm:floorIdHd" />
+					</p:inputText>
+					<his:IME for="headForm:floorNameText" fitcol="floorName"
+						resultcol="1" rawSQL="true"
+						SQL="#{electricityController.floorSQL}"
+						SQLResult="楼层ID:0:hide,楼层:1,大厦:3"
+						multiresult="headForm:floorIdHd;0">
+					</his:IME>
+					<h:inputHidden id="floorIdHd"
+						value="#{electricityController.floorId}" />
+				</h:panelGroup>
+				<h:panelGroup>
+					<h:outputLabel value="房间:" for="headForm:roomNameText" />
+					<p:inputText id="roomNameText" style="width:60px;"
+						value="#{electricityController.roomName}" />
+					<his:IME for="headForm:roomNameText" fitcol="roomName"
+						resultcol="1" rawSQL="true" SQL="#{electricityController.roomSQL}"
+						SQLResult="房间ID:0:hide,房间:1,楼层:2,大厦:3"
+						multiresult="headForm:roomIdHd;0">
+					</his:IME>
+					<h:inputHidden id="roomIdHd"
+						value="#{electricityController.roomId}" />
+				</h:panelGroup>
+				<p:commandButton id="searchButton"
+					action="#{electricityController.selectElectricityRecordRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:vacationApplicationTable,:maintainForm,:messages" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{electricityController.clearSelectForm}"
+					update=":headForm,:messages" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="vacationAppalicationRecord" style="width:100%">
+				<p:dataTable cellspacing="12" rows="5" style="width:100%"
+					id="vacationApplicationTable" rowIndexVar="row"
+					value="#{electricityController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{electricityController.selectedRow}" paginator="true"
+					paginatorPosition="bottom" paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{electricityController.selectRecord}"
+						update=":dataTableForm,:maintainForm,:olderElectricDetailForm" />
+					<p:ajax event="rowUnselect"
+						listener="#{electricityController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm,:olderElectricDetailForm" />
+					<p:column headerText="大厦">
+						<h:outputText value="#{record.buildName}" />
+					</p:column>
+					<p:column headerText="楼层">
+						<h:outputText value="#{record.floorName}" />
+					</p:column>
+					<p:column headerText="房间">
+						<h:outputText value="#{record.roomName}" />
+					</p:column>
+					<p:column headerText="电表名称">
+						<h:outputText value="#{record.ammeterName}" />
+					</p:column>
+					<p:column headerText="上次录入时间">
+						<h:outputText value="#{record.lastInputTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="本次录入时间">
+						<h:outputText value="#{record.inputTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="上次读数">
+						<h:outputText value="#{record.lastDegreesNumber}" />
+					</p:column>
+					<p:column headerText="本次读数">
+						<h:outputText value="#{record.degreesNumber}" />
+					</p:column>
+					<p:column headerText="用电量">
+						<h:outputText
+							value="#{record.degreesNumber-record.lastDegreesNumber}">
+							<f:convertNumber pattern="0.00"></f:convertNumber>
+						</h:outputText>
+					</p:column>
+					<p:column headerText="录入人">
+						<h:outputText value="#{record.inputuserName}" />
+					</p:column>
+					<p:column headerText="是否确认">
+						<h:outputText value="#{record.ensureFlagName}" />
+					</p:column>
+					<p:column headerText="备注">
+						<h:outputText value="#{record.note}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center"><p:commandButton styleClass="addbtn"
+				value="" onclick="inputRecordDialogAdd.show()"
+				action="#{electricityController.initAddParam}"
+				update=":messages,:inputFormAdd">
+			</p:commandButton> <p:commandButton styleClass="modifybtn" value=""
+				disabled="#{electricityController.disInputButton}"
+				onclick="inputRecordDialogEdit.show()"
+				update=":inputFormEdit,:messages">
+			</p:commandButton></div>
+		</h:form>
+		<!-- 老人用电明细Form -->
+		<h:form id="olderElectricDetailForm">
+			<p:dataTable id="electricityDetailDable" rowIndexVar="row"
+				value="#{electricityController.pensionOlderElectricityList}"
+				var="electricityList" emptyMessage="没有相应记录" paginator="true"
+				paginatorPosition="bottom" rows="4" paginatorAlwaysVisible="false"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:column headerText="老人">
+					<h:outputText value="#{electricityList.olderName}"></h:outputText>
+				</p:column>
+				<p:column headerText="房间">
+					<h:outputText value="#{electricityList.roomName}"></h:outputText>
+				</p:column>
+
+				<p:column headerText="楼层">
+					<h:outputText value="#{electricityList.floorName}"></h:outputText>
+				</p:column>
+
+				<p:column headerText="大厦">
+					<h:outputText value="#{electricityList.buildName}">
+					</h:outputText>
+				</p:column>
+				<p:column headerText="抄表开始时间">
+					<h:outputText value="#{electricityList.startTime}">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="抄表截止时间">
+					<h:outputText value="#{electricityList.endTime}">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="用电量" style="padding:0px 0px 0px 0px ">
+					<p:inputText value="#{electricityList.everyDegrees}"
+						id="usedElecAmount"
+						disabled="#{electricityController.saveDetailButtonFlag}">
+						<p:ajax event="blur" process="@this"></p:ajax>
+						<f:convertNumber pattern="0.00"></f:convertNumber>
+					</p:inputText>
+				</p:column>
+				<p:column headerText="单价">
+					<h:outputText value="#{electricityList.unitPrice}">
+						<f:convertNumber pattern="0.00"></f:convertNumber>
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+			<div align="center"><p:commandButton styleClass="submitbtn"
+				value="" action="#{electricityController.checkSum}"
+				update=":messages" id="confirmOkButton"
+				oncomplete="handleInputComplete3(xhr, status, args)"
+				disabled="#{electricityController.saveDetailButtonFlag}">
+			</p:commandButton></div>
+		</h:form>
+
+		<p:dialog id="confirmDialog" widgetVar="confirmDialog"
+			appendTo="@(body)" position="center" resizable="false" width="160"
+			height="80" header="确认" modal="true">
+			<h:form>
+				<h1>是否电费确认？</h1>
+				<p:commandButton styleClass="submitbtn" value=""
+					action="#{electricityController.saveDetail}"
+					update=":messages,:dataTableForm,:olderElectricDetailForm"
+					oncomplete="handleInputComplete2(xhr, status, args)">
+				</p:commandButton>
+				<p:commandButton styleClass="cancelbtn"
+					onclick="confirmDialog.hide()" value=""></p:commandButton>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="新增" widgetVar="inputRecordDialogAdd"
+			resizable="false"  appendTo="@(body)" position="center"
+			modal="true">
+			<h:form id="inputFormAdd">
+				<table class="hengbiaoge"  id="inputTableAdd">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="电表名称:"
+							for="ammeterNameTextAdd" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText
+							id="ammeterNameTextAdd" style="width:140px"
+							value="#{electricityController.pensionElectricityRecord.ammeterName}"></p:inputText>
+						<his:IME for="inputFormAdd:ammeterNameTextAdd"
+							fitcol="ammeterName" resultcol="1" rawSQL="true"
+							SQL="#{electricityController.ammeterRoomSQL}"
+							SQLResult="电表ID:0:hide,电表:1,房间ID:2:hide,房间:3"
+							multiresult="inputFormAdd:ammeterNameTextAddHd;0,inputFormAdd:roomNameTextAddHd;2,inputFormAdd:roomTextAdd;3">
+							<h:inputHidden id="ammeterNameTextAddHd"
+								value="#{electricityController.pensionElectricityRecord.ammeterId}"></h:inputHidden>
+						</his:IME></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="录入时间:"
+							for="inputUserTimeAdd" styleClass="redfont"></h:outputLabel></td>
+						<td class="hengbiaogedata"><p:calendar id="inputUserTimeAdd"
+							value="#{electricityController.pensionElectricityRecord.inputTime}"
+							pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" size="20"></p:calendar>
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="房间:"
+							for="roomTextAdd" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText id="roomTextAdd"
+							style="width:140px;"
+							value="#{electricityController.pensionElectricityRecord.roomName}"></p:inputText>
+						<his:IME for="inputFormAdd:roomTextAdd" fitcol="roomName"
+							resultcol="1" rawSQL="true"
+							SQL="#{electricityController.roomAmmeterSQL}"
+							SQLResult="房间ID:0:hide,房间:1,电表ID:2:hide,电表:3"
+							multiresult="inputFormAdd:roomNameTextAddHd;0,inputFormAdd:ammeterNameTextAddHd;2,inputFormAdd:ammeterNameTextAdd;3"></his:IME>
+						<h:inputHidden id="roomNameTextAddHd"
+							value="#{electricityController.pensionElectricityRecord.roomId}"></h:inputHidden>
+						</td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="本次读数:"
+							for="degreesNumberTextAdd" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText
+							id="degreesNumberTextAdd" style="width:140px"
+							converterMessage="读数必须为两位正小数!如:100.12" required="true"
+							requiredMessage="读数不能为空！" validatorMessage="读数必须为两位正小数!如:100.12"
+							value="#{electricityController.pensionElectricityRecord.degreesNumber}">
+							<f:validateDoubleRange minimum="0.01"
+								for="inputRecordDialogAdd:degreesNumberTextAdd" />
+						</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="录入人:"
+							for="inputUserTextAdd" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText id="inputUserTextAdd"
+							style="width:140px"
+							value="#{electricityController.pensionElectricityRecord.inputuserName}" /></td>
+						<h:inputHidden id="inputUserHdAdd"
+							value="#{electricityController.pensionElectricityRecord.inputuserId}"></h:inputHidden>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="备注:"
+							for="noteTextAdd" /></td>
+						<td class="hengbiaogedata"><p:inputText id="noteTextAdd"
+							style="width:140px"
+							value="#{electricityController.pensionElectricityRecord.note}"></p:inputText>
+						</td>
+					</tr>
+				</table>   
+				<div style="width: 100%; text-align: center;"><p:commandButton
+					styleClass="submitbtn" value=""
+					action="#{electricityController.saveRecord}"
+					update=":messages,:dataTableForm,:inputFormAdd"></p:commandButton>
+				<p:commandButton type="reset" styleClass="cancelbtn" value=""
+					onclick="inputRecordDialogAdd.hide()"></p:commandButton></div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="修改" widgetVar="inputRecordDialogEdit"
+			resizable="false" appendTo="@(body)" position="center"
+			modal="true">
+			<h:form id="inputFormEdit">
+				<table class="hengbiaoge"  id="inputTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="电表名称:"
+							for="ammeterNameText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText id="ammeterNameText"
+							style="width:140px"
+							value="#{electricityController.selectedRow.ammeterName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="录入时间:"
+							for="inputUserTime" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:calendar id="inputUserTime"
+							value="#{electricityController.selectedRow.inputTime}"
+							pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" size="20"
+							disabled="true">
+						</p:calendar></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="房间:"
+							for="roomText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText id="roomText"
+							style="width:140px;"
+							value="#{electricityController.selectedRow.roomName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="本次读数:"
+							for="degreesNumberText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText
+							id="degreesNumberText" style="width:140px"
+							converterMessage="读数必须为两位正小数!如:100.12" required="true"
+							requiredMessage="读数不能为空！" validatorMessage="读数必须为两位正小数!如:100.12"
+							value="#{electricityController.selectedRow.degreesNumber}">
+							<f:validateDoubleRange minimum="0.01"
+								for="inputRecordDialog:degreesNumberText" />
+						</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="录入人:"
+							for="inputUserText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText id="inputUserText"
+							style="width:140px" disabled="true"
+							value="#{electricityController.selectedRow.inputuserName}" /></td>
+						<h:inputHidden id="inputUserHd"
+							value="#{electricityController.selectedRow.inputuserId}" />
+						<td class="hengbiaogeHeader1"><h:outputLabel value="备注:"
+							for="noteText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="noteText"
+							style="width:140px"
+							value="#{electricityController.selectedRow.note}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;"><p:commandButton
+					styleClass="submitbtn" value=""
+					oncomplete="handleInputComplete(xhr, status, args)"
+					update=":messages,:dataTableForm,:olderElectricDetailForm"
+					action="#{electricityController.updateRecord}"></p:commandButton> <p:commandButton
+					type="reset" styleClass="cancelbtn" value=""
+					onclick="inputRecordDialogEdit.hide()">
+				</p:commandButton></div>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			//清空 selectForm
+			function clearSelectForm() {
+				document.getElementById("headForm:roomNameText").value = "";
+				document.getElementById("headForm:floorNameText").value = "";
+				document.getElementById("headForm:buildNameText").value = "";
+				return true;
+			}
+			function handleInputInit(xhr, status, args) {
+				if (!args.validationFailed) {
+					inputRecordDialog.show();
+					document.getElementById("inputForm:degreesNumberText").value = "";
+					document.getElementById("inputForm:noteText").value = "";
+
+				}
+			}
+			function handleInputComplete(xhr, status, args) {
+				if (args.canEditFlag) {
+					inputRecordDialogEdit.hide();
+				}
+			}
+
+			function handleInputComplete2(xhr, status, args) {
+				if (args.canSaveFlag) {
+					confirmDialog.hide();
+				}
+			}
+			
+			function handleInputComplete3(xhr, status, args) {
+				if (args.canShowFlag) {
+					confirmDialog.show();
+				}
+			}
+			
+		</script>
+	</h:body>
+</f:view>
+</html>

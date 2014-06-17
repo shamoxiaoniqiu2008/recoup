@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<style>
+.overdiv {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: hidden;
+	height: 18px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+
+.overdivscroll {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: auto;
+	height: 90px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+</style>
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<!-- 查询 -->
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText
+						value="#{infusionConfirmController.olderName}" id="olderName"
+						style="width:145px;" /> <his:IME for="searchForm:olderName"
+						rawSQL="true" resultcol="1" SQLResult="编号:0,姓名:1,输入码:2"
+						sortcol="id"
+						SQL="select po.id,po.name,po.inputCode from pension_older po where po.statuses not in(1,2)"
+						fitcol="inputCode" lock="true" multiresult="searchForm:olderId;0" />
+					<h:inputHidden value="#{infusionConfirmController.olderId}"
+						id="olderId" /></td>
+					<td class="leftcell">输液日期:</td>
+					<td><p:calendar id="startDate"
+						value="#{infusionConfirmController.startDate}" locale="zh_CN"
+						style="width:145px;" pattern="yyyy-MM-dd">
+					</p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar id="endDate"
+						value="#{infusionConfirmController.endDate}" locale="zh_CN"
+						style="width:145px;" pattern="yyyy-MM-dd">
+					</p:calendar></td>
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+						value="" process="@this,searchForm:startDate,searchForm:endDate"
+						actionListener="#{infusionConfirmController.selectInfusionRecords}"
+						update=":infusionRecordForm,:message" /></td>
+					<td class="leftcell"><p:commandButton
+						actionListener="#{infusionConfirmController.clearSearchForm}"
+						update=":searchForm" styleClass="blankbtn" value="" /></td>
+				</tr>
+			</table>
+		</h:form>
+
+		<!-- 输液记录列表 -->
+		<h:form id="infusionRecordForm">
+			<h:panelGrid style="width:100%">
+				<div style="width: 100%; margin-top: 10px">
+				<table width="100%">
+					<tr>
+						<td><p:dataTable cellspacing="2" rows="5" style="width:100%"
+							id="infusionRecordTable"
+							selection="#{infusionConfirmController.selectedRecord}"
+							value="#{infusionConfirmController.infusionRecordList}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="record" rowKey="#{record.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+
+							<p:ajax event="rowSelect"
+								listener="#{infusionConfirmController.recordSelect}" />
+							<p:ajax event="rowUnselect"
+								listener="#{infusionConfirmController.recordUnSelect}" />
+							<p:column headerText="老人姓名" styleClass="width70">
+								<h:outputText value="#{record.olderName}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="输液日期" styleClass="width70">
+								<h:outputText value="#{record.infusionTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="执行人" styleClass="width60">
+								<h:outputText value="#{record.executorName}" />
+							</p:column>
+							<p:column headerText="执行时间" styleClass="width70">
+								<h:outputText value="#{record.executeTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="已完成" styleClass="width50">
+								<h:outputText value="是" rendered="#{record.finishFlag==1}" />
+								<h:outputText value="否" rendered="#{record.finishFlag==2}" />
+							</p:column>
+							<p:column headerText="已录费" styleClass="width50">
+								<h:outputText value="是" rendered="#{record.payFlag==1}" />
+								<h:outputText value="否" rendered="#{record.payFlag==2}" />
+							</p:column>
+							<p:column headerText="确认人" styleClass="width60">
+								<h:outputText value="#{record.payerName}" />
+							</p:column>
+						</p:dataTable></td>
+					</tr>
+				</table>
+				</div>
+			</h:panelGrid>
+			<div align="center"><p:commandButton
+				actionListener="#{infusionConfirmController.confirmShow}"
+				styleClass="commonbtn" value="确认"
+				oncomplete="confirmDlgShow(xhr, status, args)"
+				update=":infusionConfirmForm,:message"></p:commandButton> <p:commandButton
+				styleClass="commonbtn" value="费用录入" process="@this"
+				actionListener="#{infusionConfirmController.temPay}"
+				update=":message" oncomplete="showTag(xhr,status,args)"></p:commandButton>
+			</div>
+		</h:form>
+
+		<!-- 输液记录确认对话框 -->
+		<p:dialog header="输液确认" widgetVar="confirmDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="infusionConfirmForm">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="老人姓名:"></h:outputText></td>
+						<td class="hengbiaogedata"><h:outputText
+							value="#{infusionConfirmController.confirmRecord.olderName}">
+						</h:outputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="输液时间:"></h:outputText></td>
+						<td class="hengbiaogedata"><h:outputText
+							value="#{infusionConfirmController.confirmRecord.infusionTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd" />
+						</h:outputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="executorName">执行人:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="executorName"
+							value="#{infusionConfirmController.confirmRecord.executorName}">
+						</p:inputText> <his:IME for="infusionConfirmForm:executorName" rawSQL="true"
+							resultcol="1" SQLResult="编号:0,姓名:1,输入码:2"
+							SQL="#{infusionConfirmController.employeeSql}" sortcol="id"
+							fitcol="inputCode" lock="true"
+							multiresult="infusionConfirmForm:executorId;0" /> <h:inputHidden
+							value="#{infusionConfirmController.confirmRecord.executorId}"
+							id="executorId" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="executeTime_input">执行时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar id="executeTime"
+							value="#{infusionConfirmController.confirmRecord.executeTime}"
+							pattern="yyyy-MM-dd HH:mm:ss"></p:calendar></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						onstart="return checkNulls('infusionConfirmForm','redfont',true);"
+						actionListener="#{infusionConfirmController.confirmInfusion}"
+						oncomplete="confirmDlgHide(xhr,status,args)"
+						styleClass="submitbtn" value=""
+						update=":infusionRecordForm,:message">
+					</p:commandButton>
+					<p:commandButton onclick="confirmDialog.hide()" type="button"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<script type="text/javascript">
+		
+        /**显示确认对话框
+        **/
+		function confirmDlgShow(xhr, status, args) {
+			if (args.show) {
+				confirmDialog.show();
+			}
+			}
+		  /**关闭确认对话框
+	        **/
+        function confirmDlgHide(xhr,status,args){
+        	if (args.hide) {
+        		confirmDialog.hide();
+			}
+            }
+
+       
+       
+    	function changeme(obj){
+			if(obj.className=="overdiv"){
+				obj.className="overdivscroll";
+				obj.title="点击关闭";
+				//nowheightflage=true;
+			}else{
+				obj.scrollTop=0;
+				obj.className="overdiv";
+				obj.title="点击查看更多";
+			//	nowheightflage=false;
+			}
+		}
+	           /*  取消滚动条
+	           */
+	       	jQuery(document).ready(function(){ 
+	       		 cleanBar();
+	       	}); 
+
+	    	function showTag(xhr,status,args){
+				if(args.older!=null){
+					var obj1=#{infusionConfirmController.itemPurseTypeId};
+					var obj3=args.keyId;
+					var obj2=args.older.olderId;
+					var obj4="pension_infusion_record";
+					parent.showTag("financeManage/temppay.jsf?priceTypeId="+obj1+"&amp;olderId="+obj2+"&amp;tableName="+obj4+"&amp;key="+obj3);
+				}
+			}
+
+		</script>
+	</h:body>
+</f:view>
+</html>

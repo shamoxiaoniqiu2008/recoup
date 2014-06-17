@@ -1,0 +1,363 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:outputLabel value="&nbsp;&nbsp;老人姓名:" for="nameText" />
+				<h:panelGroup>
+					<p:inputText id="nameText" style="width:120px" />
+					<his:IME for="headForm:nameText" fitcol="inputCode" resultcol="0"
+						lock="true" rawSQL="true"
+						SQL="#{entryVacationApplicationController.olderNameSql}"
+						SQLResult="老人姓名:0,大厦:1,楼层:2,房间:3,床位:4,老人Id:5:hide,输入码:6"
+						multiresult="headForm:olderIdHd;5" />
+					<h:inputHidden id="olderIdHd"
+						value="#{visitationHandleController.olderId}" />
+				</h:panelGroup>
+				<p:commandButton id="searchButton"
+					action="#{visitationHandleController.selectOlderRecords}"
+					styleClass="searchbtn" value="" update=":OlderTableForm,:messages" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{visitationHandleController.clearSelectForm}"
+					update=":headForm" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="OlderTableForm">
+			<h:panelGrid id="olderRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="olderTable" rowIndexVar="row"
+					value="#{visitationHandleController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{visitationHandleController.selectedRow}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:column headerText="详情">
+						<p:commandLink
+							update=":visitForm,:messages,:visitMaintainForm,:visitSelectForm"
+							oncomplete="visitDialog.show()" title="查看"
+							action="#{visitationHandleController.selectVisitRecords(record)}">
+							<p:graphicImage value="/images/search.png" style="border:0px;" />
+						</p:commandLink>
+					</p:column>
+					<p:column headerText="姓名">
+						<h:outputText value="#{record.name}" />
+					</p:column>
+					<p:column headerText="大厦">
+						<h:outputText value="#{record.buildName}" />
+					</p:column>
+					<p:column headerText="房间">
+						<h:outputText value="#{record.roomName}" />
+					</p:column>
+					<p:column headerText="床位">
+						<h:outputText value="#{record.bedName}" />
+					</p:column>
+					<p:column headerText="入住时间">
+						<h:outputText value="#{record.visitTime}">
+							<f:convertDateTime pattern="yyyy年MM月dd日" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<p:dialog header="探访记录" widgetVar="visitDialog" appendTo="@(body)"
+			position="center" modal="true">
+			<h:form id="visitSelectForm">
+				<h:outputLabel value="探访类型:" for="visittypeText" />
+				<h:selectOneMenu value="#{visitationHandleController.visittype}"
+					onchange="clickSelectHiddenButton()"
+					disabled="#{visitationHandleController.visittypeFlag}"
+					id="visittypeText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="入住探访" itemValue="1" />
+					<f:selectItem itemLabel="请假返院探访" itemValue="2" />
+					<f:selectItem itemLabel="就医返院探访" itemValue="3" />
+				</h:selectOneMenu>
+				<h:outputLabel value="请假记录:"
+					rendered="#{visitationHandleController.selectedLeaveAndLivingAndMedicalRenderedFlag==2}"
+					for="leaveRecord" />
+				<p:inputText id="leaveRecord"
+					value="#{visitationHandleController.recordTime}"
+					rendered="#{visitationHandleController.selectedLeaveAndLivingAndMedicalRenderedFlag==2}">
+					<p:ajax event="blur"
+						listener="#{visitationHandleController.selectVisitRecords()}"
+						update=":visitForm,:messages,:visitMaintainForm"
+						process="@this,:visitSelectForm:visittypeText,:visitSelectForm:keyId,:visitSelectForm:leaveRecord" />
+					<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+				</p:inputText>
+				<his:IME for="visitSelectForm:leaveRecord" fitcol="recordTime"
+					sortcol="recordTime" resultcol="1" lock="true" rawSQL="true"
+					multiresult="visitSelectForm:keyId;0"
+					SQL="#{visitationHandleController.pensionLeaveSql}"
+					SQLResult="编号:0,返院时间:1,陪同人:2,请假原因:3" />
+				<h:outputLabel value="就医记录:"
+					rendered="#{visitationHandleController.selectedLeaveAndLivingAndMedicalRenderedFlag==3}"
+					for="medicalRecord" />
+				<p:inputText id="medicalRecord"
+					value="#{visitationHandleController.recordTime}"
+					rendered="#{visitationHandleController.selectedLeaveAndLivingAndMedicalRenderedFlag==3}">
+					<p:ajax event="blur"
+						listener="#{visitationHandleController.selectVisitRecords()}"
+						update=":visitForm,:messages,:visitMaintainForm"
+						process="@this,:visitSelectForm:visittypeText,:visitSelectForm:keyId,:visitSelectForm:medicalRecord" />
+					<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+				</p:inputText>
+				<his:IME for="visitSelectForm:medicalRecord" fitcol="recordTime"
+					sortcol="recordTime" resultcol="1" lock="true" rawSQL="true"
+					multiresult="visitSelectForm:keyId;0"
+					SQL="#{visitationHandleController.pensionMedicalSql}"
+					SQLResult="编号:0,返院时间:1,就医事项:2" />
+				<h:inputHidden id="keyId"
+					value="#{visitationHandleController.keyId}" />
+				<p:commandButton style="display:none" id="changeBtn"
+					process="@this,:visitSelectForm:visittypeText,:visitSelectForm:keyId"
+					actionListener="#{visitationHandleController.changeSelectDialog}"
+					update=":visitSelectForm,:visitForm,:messages,:visitMaintainForm" />
+
+			</h:form>
+			<h:form id="visitForm">
+				<h:panelGrid id="itemRecord" style="width:100%">
+					<p:dataTable cellspacing="8" rows="10" style="width:100%"
+						id="visitTable" rowIndexVar="row"
+						value="#{visitationHandleController.visitRecords}" var="record"
+						rowKey="#{record.id}" emptyMessage="没有相应记录" paginator="true"
+						paginatorPosition="bottom" paginatorAlwaysVisible="false"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+						<p:column headerText="部门">
+							<h:outputText value="#{record.deptName}" />
+						</p:column>
+						<p:column headerText="探访人">
+							<h:outputText value="#{record.visitorName}" />
+						</p:column>
+						<p:column headerText="探访时间">
+							<h:outputText value="#{record.visittime}">
+								<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="离开时间">
+							<h:outputText value="#{record.leavetime}">
+								<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="停留时间">
+							<h:outputText value="#{record.stopTime}">
+								<f:convertDateTime pattern="yyyy年MM月dd日" timeZone="GMT+8" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</h:form>
+			<h:form id="visitMaintainForm">
+				<div align="center">
+					<p:commandButton styleClass="commonbtn" value="探访记录录入"
+						action="#{visitationHandleController.selectVisitAndPrintRecord}"
+						oncomplete="initEntryVisitRecordDialog(xhr, status, args)"
+						update=":visitForm,:messages,:visitMaintainForm,:entryVisitRecordForm,:printForm,:visitRecordForm" />
+
+					<p:commandButton styleClass="closebtn" value=""
+						onclick="visitDialog.hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="指纹记录" widgetVar="entryVisitRecordDialog"
+			appendTo="@(body)" position="center" modal="true"
+			focus=":printForm:entryPrintAndVisitBtn">
+			<h:form id="printForm">
+				<h:panelGrid columns="4" styleClass="nobordertable">
+					<h:outputText value="开始探访时间:" style="width:80" styleClass="redfont" />
+					<p:inputText id="startTimeText" style="width:127px" disabled="true"
+						value="#{visitationHandleController.enteredVisitrecord.visittime}">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+					</p:inputText>
+					<h:outputText value="结束探访时间:" style="width:80" styleClass="redfont" />
+					<p:inputText id="endTimeText" style="width:127px" disabled="true"
+						value="#{visitationHandleController.enteredVisitrecord.leavetime}">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+					</p:inputText>
+					<h:outputText value="&nbsp;&nbsp;探访人:" style="width:80"
+						styleClass="redfont" />
+					<p:inputText id="visitorText" style="width:127px" disabled="true"
+						value="#{visitationHandleController.curEmployee.name}">
+					</p:inputText>
+					<h:outputText value="探访房间:" style="width:80" styleClass="redfont" />
+					<p:inputText id="visitRoomText" style="width:127px" disabled="true"
+						value="#{visitationHandleController.selectedRow.roomName}">
+					</p:inputText>
+					<h:outputText value="开始日期:" style="width:80" />
+					<p:calendar size="19" id="visitStartDate"
+						value="#{visitationHandleController.visitStartDate}"
+						pattern="yyyy-MM-dd" />
+					<h:outputText value="结束日期:" style="width:80" />
+					<p:calendar size="19" id="visitEndDate"
+						value="#{visitationHandleController.visitEndDate}"
+						pattern="yyyy-MM-dd" />
+					<h:outputLabel value="是否已用:" for="usedText" />
+					<h:panelGrid columns="2">
+						<h:selectOneMenu value="#{visitationHandleController.usedFlag}"
+							id="usedText"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemLabel="全部" itemValue="0" />
+							<f:selectItem itemLabel="已使用" itemValue="1" />
+							<f:selectItem itemLabel="未使用" itemValue="2" />
+						</h:selectOneMenu>
+						<p:commandButton styleClass="searchbtn" value=""
+							id="entryPrintAndVisitBtn"
+							action="#{visitationHandleController.selectPrintRecord()}"
+							update=":printForm,:entryVisitRecordForm,:messages,:printMaintainForm,:visitMaintainForm" />
+					</h:panelGrid>
+				</h:panelGrid>
+			</h:form>
+			<h:form id="entryVisitRecordForm">
+				<h:panelGrid style="width:100%">
+					<p:dataTable cellspacing="8" rows="5" style="width:100%"
+						id="visitFingerPrintTable" rowIndexVar="row"
+						value="#{visitationHandleController.printRecords}" var="print"
+						rowKey="#{print.id}" selectionMode="multiple"
+						emptyMessage="无任何指纹记录"
+						selection="#{visitationHandleController.selectedPrintRecords}"
+						paginator="true" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+						<p:ajax event="rowSelect"
+							listener="#{visitationHandleController.selectRecord}"
+							update=":printMaintainForm" />
+						<p:ajax event="rowUnselect"
+							listener="#{visitationHandleController.unSelectRecord}"
+							update=":printMaintainForm" />
+						<p:column headerText="录指纹时间">
+							<h:outputText value="#{print.anLogDate}">
+								<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="是否使用">
+							<h:outputText value="已使用" rendered="#{print.used == 1}" />
+							<h:outputText value="未使用" rendered="#{print.used == 2}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</h:form>
+			<h:form id="printMaintainForm">
+				<div align="center">
+					<p:commandButton styleClass="commonbtn" value="设置探访时间"
+						action="#{visitationHandleController.beVisitTimes}"
+						update=":entryVisitRecordForm,:messages,:printMaintainForm,:printForm" />
+					<p:commandButton styleClass="savebtn" value=""
+						action="#{visitationHandleController.entryVisitRecord}"
+						oncomplete="handleVisitRecordDialog(xhr, status, args)"
+						update=":visitForm,:messages,:visitMaintainForm,:entryVisitRecordForm" />
+					<p:commandButton styleClass="closebtn" value=""
+						onclick="entryVisitRecordDialog.hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="探访录入" widgetVar="entryVisitNotPrintRecordDialog"
+			appendTo="@(body)" position="center" modal="true"
+			focus=":visitRecordForm:entryVisitRecordBtn">
+			<h:form id="visitRecordForm">
+				<h:panelGrid columns="4" styleClass="nobordertable">
+					<h:outputText value="&nbsp;&nbsp;探访人:" style="width:80"
+						styleClass="redfont" />
+					<p:inputText id="visitorText" style="width:127px" disabled="true"
+						value="#{visitationHandleController.curEmployee.name}">
+					</p:inputText>
+					<h:outputText value="探访房间:" style="width:80" styleClass="redfont" />
+					<p:inputText id="visitRoomText" style="width:127px" disabled="true"
+						value="#{visitationHandleController.selectedRow.roomName}">
+					</p:inputText>
+					<h:outputText value="开始探访时间:" style="width:80" styleClass="redfont" />
+					<p:calendar size="18" id="startTimeText" required="true"
+						showButtonPanel="true" pattern="yyyy-MM-dd HH:mm"
+						requiredMessage="请输入开始探访日期!"
+						value="#{visitationHandleController.enteredVisitrecord.visittime}" />
+					<h:outputText value="结束探访时间:" style="width:80" styleClass="redfont" />
+					<p:calendar size="18" id="endTimeText" required="true"
+						showButtonPanel="true" pattern="yyyy-MM-dd HH:mm"
+						requiredMessage="请输入预离院日期!"
+						value="#{visitationHandleController.enteredVisitrecord.leavetime}" />
+				</h:panelGrid>
+				<div align="center">
+					<p:commandButton styleClass="savebtn" value=""
+						id="entryVisitRecordBtn"
+						action="#{visitationHandleController.entryVisitRecord}"
+						oncomplete="handleVisitNotPrintRecordDialog(xhr, status, args)"
+						update=":visitForm,:messages,:visitMaintainForm" />
+					<p:commandButton styleClass="closebtn" value=""
+						onclick="entryVisitNotPrintRecordDialog.hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			function handleUpdateComplete(xhr, status, args) {
+				if (!args.validationFailed) {
+					updateRecordDialog.hide();
+				}
+			}
+			//清空 selectForm
+			function clearSelectForm() {
+				document.getElementById("headForm:nameText").value = "";
+				return true;
+			}
+			function handleVisitRecordDialog(xhr, status, args) {
+				if (args.success) {
+					entryVisitRecordDialog.hide();
+				}
+			}
+
+			function handleVisitNotPrintRecordDialog(xhr, status, args) {
+				if (args.success) {
+					entryVisitNotPrintRecordDialog.hide();
+				}
+			}
+
+			function initEntryVisitRecordDialog(xhr, status, args) {
+				if (args.entryFlag) {
+					if (args.printFlag) {
+						entryVisitRecordDialog.show();
+					} else {
+						entryVisitNotPrintRecordDialog.show();
+					}
+
+				}
+			}
+			function clickSelectVisitRecordBtn() {
+				jQuery("#visitSelectForm\\:selectVisitRecordBtn").click();
+			}
+
+			function clickSelectHiddenButton() {
+				document.getElementById("visitSelectForm:changeBtn").click();
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

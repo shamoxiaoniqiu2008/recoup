@@ -1,0 +1,404 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<style>
+.overdiv {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: hidden;
+	height: 18px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+
+.overdivscroll {
+	cursor: pointer;
+	display: block;
+	font-size: 12px;
+	overflow: auto;
+	height: 90px;
+	width: 100px;
+	border: 0px solid #e6e6e6;
+}
+</style>
+	<h:body>
+		<p:growl id="messages" widgetVar="message"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:outputText value="&nbsp;&nbsp;预离院时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{entryVacationApplicationController.startDate}" />
+				<h:outputText value="至:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{entryVacationApplicationController.endDate}" />
+				<h:outputLabel value="是否提交:" for="submitFlagText" />
+				<h:selectOneMenu
+					value="#{entryVacationApplicationController.submitFlag}"
+					id="submitFlagText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="0" />
+					<f:selectItem itemLabel="是" itemValue="1" />
+					<f:selectItem itemLabel="否" itemValue="2" />
+				</h:selectOneMenu>
+				<p:commandButton id="searchButton"
+					action="#{entryVacationApplicationController.selectVacationApplicationRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:vacationApplicationTable,:maintainForm,:messages" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{entryVacationApplicationController.clearSelectForm}"
+					update=":headForm,:messages" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="vacationAppalicationRecord" style="width:100%;">
+				<p:dataTable cellspacing="2" rows="8" style="width:100%"
+					id="vacationApplicationTable" rowIndexVar="row"
+					value="#{entryVacationApplicationController.leaveRecords}"
+					var="record" rowKey="#{record.id}" selectionMode="multiple"
+					emptyMessage="没有相应记录"
+					selection="#{entryVacationApplicationController.selectedRows}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{entryVacationApplicationController.selectRecord}"
+						update=":dataTableForm,:maintainForm" />
+					<p:ajax event="rowUnselect"
+						listener="#{entryVacationApplicationController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm" />
+					<p:column headerText="姓名" styleClass="width50">
+						<h:outputText value="#{record.olderName}" />
+					</p:column>
+					<p:column headerText="大厦" styleClass="width50">
+						<h:outputText value="#{record.buildName}" />
+					</p:column>
+					<p:column headerText="房间" styleClass="width50">
+						<h:outputText value="#{record.roomName}" />
+					</p:column>
+					<p:column headerText="床位" styleClass="width50">
+						<h:outputText value="#{record.bedName}" />
+					</p:column>
+					<p:column headerText="请假理由" styleClass="width60">
+						<div title="点击查看更多" onDblClick="changeme(this);"
+							onselectstart="return false" class="overdiv">
+							#{record.leavereason}</div>
+					</p:column>
+					<p:column headerText="预离院时间" styleClass="width70">
+						<h:outputText value="#{record.expectleavetime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="预返院时间" styleClass="width70">
+						<h:outputText value="#{record.expectbacktime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="陪同人" styleClass="width50">
+						<h:outputText value="#{record.escortname}" />
+					</p:column>
+					<p:column headerText="联系方式" styleClass="width60">
+						<h:outputText value="#{record.escortphone}" />
+					</p:column>
+					<p:column headerText="已提交" styleClass="width50">
+						<h:outputText value="是" rendered="#{record.sended == 1}" />
+						<h:outputText value="否" rendered="#{record.sended != 1}" />
+					</p:column>
+					<p:column headerText="审批结果" styleClass="width60">
+						<h:outputText value="待审批" rendered="#{record.finalResult == 1}" />
+						<h:outputText value="审批中" rendered="#{record.finalResult == 2}" />
+						<h:outputText value="通过" rendered="#{record.finalResult == 3}" />
+						<h:outputText value="不通过" rendered="#{record.finalResult== 4}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton styleClass="addbtn" value=""
+					action="#{entryVacationApplicationController.clearInsertForm}"
+					oncomplete="insertRecordDialog.show()" update=":insertForm" />
+				<p:commandButton styleClass="deletebtn" value=""
+					disabled="#{entryVacationApplicationController.disDeleteAndSubmitButton}"
+					onclick="confirmDialog.show()" type="button" />
+				<p:commandButton styleClass="modifybtn" value=""
+					disabled="#{entryVacationApplicationController.disUpdateButton}"
+					action="#{entryVacationApplicationController.copyRecordUpdatedRow}"
+					oncomplete="handleUpdateInit(xhr, status, args)"
+					update=":updateForm,:messages" />
+				<p:commandButton value="提交" styleClass="commonbtn"
+					disabled="#{entryVacationApplicationController.disDeleteAndSubmitButton}"
+					action="#{entryVacationApplicationController.submitVacationApplicationRecord}"
+					update=":dataTableForm,:maintainForm,:messages" />
+			</div>
+		</h:form>
+
+		<p:dialog header="新增" widgetVar="insertRecordDialog" resizable="false"
+			appendTo="@(body)" position="top" modal="true">
+			<h:form id="insertForm">
+				<table class="hengbiaoge" width="100%" id="insertTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="nameText">老人姓名</label></td>
+						<td class="hengbiaogedata"><h:panelGroup>
+								<p:inputText id="nameText" style="width:128px"
+									value="#{entryVacationApplicationController.insertedRow.olderName}">
+								</p:inputText>
+								<his:IME for="insertForm:nameText" fitcol="inputCode"
+									resultcol="0" lock="true" rawSQL="true"
+									SQL="#{entryVacationApplicationController.olderNameSql}"
+									SQLResult="老人姓名:0,大厦:1,楼层:2,房间:3,床位:4,老人Id:5:hide,输入码:6"
+									multiresult="insertForm:buildingText;1,insertForm:roomText;3,insertForm:bedNoText;4,insertForm:olderIdHd;5" />
+								<h:inputHidden id="olderIdHd"
+									value="#{entryVacationApplicationController.insertedRow.olderId}" />
+							</h:panelGroup></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="大厦:" /></td>
+						<td class="hengbiaogedata"><p:inputText id="buildingText"
+								style="width:128px"
+								value="#{entryVacationApplicationController.insertedRow.buildName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="房间:"
+								for="roomText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="roomText"
+								style="width:128px"
+								value="#{entryVacationApplicationController.insertedRow.roomName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="床位号:"
+								for="bedNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="bedNoText"
+								style="width:128px"
+								value="#{entryVacationApplicationController.insertedRow.bedName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="陪同人姓名:" /></td>
+						<td class="hengbiaogedata"><h:panelGroup>
+								<p:inputText id="companionNameText" style="width:128px"
+									value="#{entryVacationApplicationController.insertedRow.escortname}" />
+								<his:IME for="insertForm:companionNameText" fitcol="inputCode"
+									resultcol="0" lock="false" rawSQL="true"
+									SQL="#{entryVacationApplicationController.employeeNameSql}"
+									SQLResult="陪同人:0,部门:2,输入码:1,负责人Id:3:hide,联系方式:4"
+									multiresult="insertForm:telephoneNoText;4" />
+							</h:panelGroup></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="联系方式:"
+								for="telephoneNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="telephoneNoText"
+								style="width:128px"
+								value="#{entryVacationApplicationController.insertedRow.escortphone}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="leaveDate_input">预离院时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar size="18"
+								showButtonPanel="true" id="leaveDate" mode="popup"
+								navigator="true"
+								value="#{entryVacationApplicationController.insertedRow.expectleavetime}"
+								pattern="yyyy-MM-dd HH:mm" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="returnDate_input">预返院时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar size="18"
+								showButtonPanel="true" id="returnDate" mode="popup"
+								navigator="true"
+								value="#{entryVacationApplicationController.insertedRow.expectbacktime}"
+								pattern="yyyy-MM-dd HH:mm" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="reasonText">请假原由:</label></td>
+						<td class="hengbiaogedata" colspan="3"><p:inputTextarea
+								id="reasonText" cols="43" rows="3"
+								value="#{entryVacationApplicationController.insertedRow.leavereason}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="commonbtn" value="提交"
+						onstart="return checkNulls('insertForm','redfont',true);"
+						action="#{entryVacationApplicationController.insertAndSubmitVacationApplicationRecord}"
+						update=":insertForm,:dataTableForm,:messages,:maintainForm"
+						oncomplete="handleInsertComplete(xhr, status, args)" />
+					<p:commandButton styleClass="commonbtn" value="保存"
+						onstart="return checkNulls('insertForm','redfont',true);"
+						action="#{entryVacationApplicationController.insertVacationApplicationRecord}"
+						update=":insertForm,:dataTableForm,:messages,:maintainForm"
+						oncomplete="handleInsertComplete(xhr, status, args)" />
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{entryVacationApplicationController.clearInsertForm}"
+						update=":insertForm" />
+					<p:commandButton type="reset" styleClass="commonbtn" value="关闭"
+						onclick="insertRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="修改" widgetVar="updateRecordDialog" resizable="false"
+			appendTo="@(body)" position="top" modal="true">
+			<h:form id="updateForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="100%" id="updateTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="老人姓名:" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:128px"
+								disabled="true"
+								value="#{entryVacationApplicationController.updatedRow.olderName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel /></td>
+						<td class="hengbiaogedata"><p:inputText id="buildingText"
+								style="width:128px" disabled="true"
+								value="#{entryVacationApplicationController.updatedRow.buildName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="房间:" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:128px"
+								disabled="true"
+								value="#{entryVacationApplicationController.updatedRow.roomName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="床位号:" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:128px"
+								disabled="true"
+								value="#{entryVacationApplicationController.updatedRow.bedName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="陪同人姓名:" /></td>
+						<td class="hengbiaogedata"><h:panelGroup>
+								<p:inputText id="companionNameText" style="width:128px"
+									value="#{entryVacationApplicationController.updatedRow.escortname}" />
+								<his:IME for="updateForm:companionNameText" fitcol="inputCode"
+									resultcol="0" lock="false" rawSQL="true"
+									SQL="#{entryVacationApplicationController.employeeNameSql}"
+									SQLResult="陪同人:0,部门:2,输入码:1,负责人Id:3:hide,联系方式:4"
+									multiresult="updateForm:telephoneNoText;4" />
+							</h:panelGroup></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="联系方式:"
+								for="telephoneNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="telephoneNoText"
+								style="width:128px"
+								value="#{entryVacationApplicationController.updatedRow.escortphone}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="leaveDate_input">预离院时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar size="18"
+								showButtonPanel="true" id="leaveDate" mode="popup"
+								navigator="true"
+								value="#{entryVacationApplicationController.updatedRow.expectleavetime}"
+								pattern="yyyy-MM-dd HH:mm" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="returnDate_input">预返院时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar size="18"
+								showButtonPanel="true" id="returnDate" mode="popup"
+								navigator="true"
+								value="#{entryVacationApplicationController.updatedRow.expectbacktime}"
+								pattern="yyyy-MM-dd HH:mm" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="reasonText">请假原由:</label></td>
+						<td class="hengbiaogedata" colspan="3"><p:inputTextarea
+								id="reasonText" required="true" cols="43" rows="3"
+								requiredMessage="请输入请假原由!"
+								value="#{entryVacationApplicationController.updatedRow.leavereason}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="commonbtn" value="提交"
+						onstart="return checkNulls('updateForm','redfont',true);"
+						action="#{entryVacationApplicationController.updateAndSubmitVacationApplicationRecord}"
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":updateForm,:dataTableForm,:messages,:maintainForm" />
+					<p:commandButton styleClass="commonbtn" value="保存"
+						onstart="return checkNulls('updateForm','redfont',true);"
+						action="#{entryVacationApplicationController.updateVacationApplicationRecord}"
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":updateForm,:dataTableForm,:messages,:maintainForm" />
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{entryVacationApplicationController.clearUpdateFrom}"
+						update=":updateForm" />
+					<p:commandButton type="reset" styleClass="commonbtn" value="关闭"
+						onclick="updateRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:confirmDialog modal="true" appendTo="@(body)"
+			widgetVar="confirmDialog" message="确定要删除该申请记录？">
+			<h:form>
+				<p:commandButton styleClass="commonbtn" value="确定"
+					action="#{entryVacationApplicationController.deleteVacationApplicationRecord}"
+					update=":dataTableForm,:maintainForm,:messages"
+					oncomplete="confirmDialog.hide();">
+				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="取消" type="reset"
+					onclick="confirmDialog.hide();"></p:commandButton>
+			</h:form>
+		</p:confirmDialog>
+
+		<script type="text/javascript">
+		//清空 selectForm
+		function clearSelectForm(){
+			document.getElementById("headForm:startDate").value="";
+			document.getElementById("headForm:endDate").value="";
+			return true;
+		}
+		function handleInsertComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				insertRecordDialog.hide();
+            }	
+		}
+		function handleDeleteComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				confirmDialog.show();
+            }	
+		}
+		function handleUpdateInit(xhr, status, args){
+			if(args.success) {
+				updateRecordDialog.show();
+            }	
+		}
+		function handleUpdateComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				updateRecordDialog.hide();
+            }	
+		}
+		function changeme(obj) {
+			if (obj.className == "overdiv") {
+				obj.className = "overdivscroll";
+				obj.title = "点击关闭";
+				//nowheightflage=true;
+			} else {
+				obj.scrollTop = 0;
+				obj.className = "overdiv";
+				obj.title = "点击查看更多";
+				//	nowheightflage=false;
+			}
+		}
+		
+	</script>
+	</h:body>
+</f:view>
+</html>

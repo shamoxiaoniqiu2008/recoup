@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText
+							value="#{drugReceiveEvaluateController.olderName}" id="olderName"
+							style="width:145px;" /> <his:IME for="searchForm:olderName"
+							rawSQL="true" resultcol="1" SQLResult="编号:0,姓名:1,输入码:2"
+							sortcol="id"
+							SQL="select po.id,po.name,po.inputCode from pension_older po where po.statuses not in(1,2)"
+							fitcol="inputCode" lock="true" multiresult="searchForm:olderId;0" />
+						<h:inputHidden value="#{drugReceiveEvaluateController.olderId}"
+							id="olderId" /></td>
+					<td class="leftcell">是否审核:</td>
+					<td><h:selectOneMenu
+							value="#{drugReceiveEvaluateController.isAudit}"
+							style="width:145px"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemValue="" itemLabel="全部" />
+							<f:selectItem itemValue="1" itemLabel="是" />
+							<f:selectItem itemValue="2" itemLabel="否" />
+						</h:selectOneMenu></td>
+					<td class="leftcell">审核结果:</td>
+					<td><h:selectOneMenu
+							value="#{drugReceiveEvaluateController.auditResult}"
+							style="width:145px"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemValue="" itemLabel="全部" />
+							<f:selectItem itemValue="1" itemLabel="通过" />
+							<f:selectItem itemValue="2" itemLabel="不通过" />
+						</h:selectOneMenu></td>
+
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value=""
+							actionListener="#{drugReceiveEvaluateController.searchAllApplications}"
+							update=":applicationForm,:message,:detailForm" /></td>
+					<td class="leftcell"><p:commandButton styleClass="blankbtn"
+							value=""
+							actionListener="#{drugReceiveEvaluateController.clearSearch}"
+							update=":searchForm" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="applicationForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="6" style="width:100%"
+							id="applicationTable"
+							selection="#{drugReceiveEvaluateController.selectedRow}"
+							value="#{drugReceiveEvaluateController.drugApplyList}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="apply" rowKey="#{apply.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+
+							<p:ajax event="rowSelect" update=":detailForm"
+								listener="#{drugReceiveEvaluateController.viewDetailList}" />
+							<p:ajax event="rowUnselect" update=":detailForm"
+								listener="#{drugReceiveEvaluateController.clearDetailList}" />
+							<p:column headerText="姓名" styleClass="width50">
+								<h:outputText value="#{apply.olderName}" />
+							</p:column>
+							<p:column headerText="申请人" styleClass="width50">
+								<h:outputText value="#{apply.applicantName}" />
+							</p:column>
+							<p:column headerText="关系" styleClass="width50">
+								<h:outputText value="#{apply.relationShip}" />
+							</p:column>
+							<p:column headerText="联系电话" styleClass="width60">
+								<h:outputText value="#{apply.phoneNo}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="有效" styleClass="width50">
+								<h:outputText value="是" rendered="#{apply.validFlag==1}" />
+								<h:outputText value="否" rendered="#{apply.validFlag==2}" />
+							</p:column>
+							<p:column headerText="配送分组" styleClass="width60">
+								<h:outputText value="#{apply.deliveryName}" />
+							</p:column>
+							<p:column headerText="已审核" styleClass="width50">
+								<h:outputText value="是" rendered="#{apply.auditFlag==1}" />
+								<h:outputText value="否" rendered="#{apply.auditFlag==2}" />
+							</p:column>
+							<p:column headerText="审核结果" styleClass="width60">
+								<h:outputText value="通过" rendered="#{apply.auditResult==1}" />
+								<h:outputText value="不通过" rendered="#{apply.auditResult==2}" />
+							</p:column>
+							<p:column headerText="审核人" styleClass="width50">
+								<h:outputText value="#{apply.auditName}" />
+							</p:column>
+							<p:column headerText="审核时间" styleClass="width70">
+								<h:outputText value="#{apply.auditTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="备注" styleClass="width50">
+								<h:outputText value="#{apply.note}" />
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+		</h:form>
+		<div style="margin-top: 30px">
+			<h:form id="detailForm">
+				<table width="100%">
+					<tr>
+						<td><p:dataTable cellspacing="2" rows="6" style="width:100%"
+								id="viewDrugDetail"
+								value="#{drugReceiveEvaluateController.drugDetailList}"
+								paginator="true" paginatorPosition="bottom"
+								paginatorAlwaysVisible="false"
+								paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+								var="detail" rowKey="#{detail.id}" selectionMode="single"
+								emptyMessage="没有相应记录">
+
+								<p:column headerText="药物名称" styleClass="width60">
+									<h:outputText value="#{detail.drugreceiveName}" />
+								</p:column>
+								<p:column headerText="总量" styleClass="width60">
+									<h:outputText value="#{detail.totalAmount}" />
+								</p:column>
+								<p:column headerText="单次用量" styleClass="width60">
+									<h:outputText value="#{detail.singleDose}" />
+								</p:column>
+								<p:column headerText="单位" styleClass="width60">
+									<h:outputText value="#{detail.unit}" />
+								</p:column>
+								<p:column headerText="早" styleClass="width60">
+									<h:selectBooleanCheckbox value="#{detail.morningF}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="中" styleClass="width60">
+									<h:selectBooleanCheckbox value="#{detail.noonF}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="晚" styleClass="width60">
+									<h:selectBooleanCheckbox value="#{detail.nightF}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="饭前" styleClass="width60">
+									<h:selectBooleanCheckbox value="#{detail.eatTimeF}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="在用" styleClass="width60">
+									<h:selectBooleanCheckbox value="#{detail.inUseF}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="有效" styleClass="width60">
+									<h:selectBooleanCheckbox value="#{detail.validF}"
+										disabled="true" />
+								</p:column>
+								<p:column headerText="保质期" styleClass="width60">
+									<h:outputText value="#{detail.shelflifeTime}">
+										<f:convertDateTime pattern="yyyy-MM-dd" />
+									</h:outputText>
+								</p:column>
+							</p:dataTable></td>
+					</tr>
+				</table>
+			</h:form>
+		</div>
+		<!-- 审核申请信息 -->
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton
+					actionListener="#{drugReceiveEvaluateController.passApply}"
+					styleClass="commonbtn" value="同意"
+					update=":applicationForm,:message,:detailForm"></p:commandButton>
+				<p:commandButton
+					actionListener="#{drugReceiveEvaluateController.selectCheck}"
+					styleClass="commonbtn" value="不同意"
+					oncomplete="optionDialogShow(xhr,status,args)"
+					update=":optionForm,:message"></p:commandButton>
+			</div>
+		</h:form>
+
+		<p:dialog header="审批意见" widgetVar="optionDialog" resizable="false"
+			appendToBody="true" modal="true">
+			<h:form id="optionForm">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="原因:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea required="true"
+								requiredMessage="不同意原因不可为空！" autoResize="true" cols="40"
+								rows="3"
+								value="#{drugReceiveEvaluateController.selectedRow.note}"></p:inputTextarea>
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="2" style="margin:0px auto">
+					<p:commandButton process="@this,optionForm"
+						actionListener="#{drugReceiveEvaluateController.refuseApply}"
+						oncomplete="optionDialogHide(xhr,status,args)"
+						styleClass="commonbtn" value="保存"
+						update=":applicationForm,:message,:detailForm">
+					</p:commandButton>
+					<p:commandButton onclick="optionDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<script type="text/javascript">
+			function optionDialogShow(xhr, status, args) {
+				if (args.show) {
+					optionDialog.show();
+				}
+			}
+			function optionDialogHide(xhr, status, args) {
+				if (args.success) {
+					optionDialog.hide();
+				}
+			}
+			/*  取消滚动条
+			 */
+			jQuery(document).ready(function() {
+				cleanBar();
+			});
+		</script>
+	</h:body>
+</f:view>
+</html>

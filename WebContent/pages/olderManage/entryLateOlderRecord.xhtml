@@ -1,0 +1,361 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages" widgetVar="message"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<!-- 输入起始时间和截止时间 -->
+				<h:outputText value="&nbsp;&nbsp;预返院时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{entryLateOlderRecordController.startDate}" />
+				<h:outputText value="至:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{entryLateOlderRecordController.endDate}" />
+				<h:outputLabel value="老人姓名:" for="headForm:nameText" />
+				<h:panelGroup>
+					<p:inputText id="nameText" style="width:127px" />
+					<his:IME for="headForm:nameText" fitcol="inputCode" resultcol="0"
+						lock="true" rawSQL="true"
+						SQL="#{entryLateOlderRecordController.olderNameSql}"
+						SQLResult="老人姓名:0,大厦:1,楼层:2,房间:3,床位:4,老人Id:5:hide,输入码:6"
+						multiresult="headForm:olderIdHd;5" />
+					<h:inputHidden id="olderIdHd"
+						value="#{entryLateOlderRecordController.olderId}" />
+				</h:panelGroup>
+				<h:outputLabel value="是否返院:" for="backFlagText" />
+				<h:selectOneMenu value="#{entryLateOlderRecordController.backFlag}"
+					id="backFlagText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="" />
+					<f:selectItem itemLabel="已返院" itemValue="1" />
+					<f:selectItem itemLabel="未返院" itemValue="2" />
+				</h:selectOneMenu>
+				<p:commandButton id="searchButton"
+					action="#{entryLateOlderRecordController.selectLateOlderRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:vacationApplicationTable,:maintainForm,:messages" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{entryLateOlderRecordController.clearSelectForm}"
+					update=":headForm" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="vacationAppalicationRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="vacationApplicationTable" rowIndexVar="row"
+					value="#{entryLateOlderRecordController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{entryLateOlderRecordController.selectedRow}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{entryLateOlderRecordController.selectRecord}"
+						update=":dataTableForm,:maintainForm" />
+					<p:ajax event="rowUnselect"
+						listener="#{entryLateOlderRecordController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm" />
+					<p:column headerText="姓名">
+						<h:outputText value="#{record.olderName}" />
+					</p:column>
+					<p:column headerText="大厦">
+						<h:outputText value="#{record.buildName}" />
+					</p:column>
+					<p:column headerText="房间">
+						<h:outputText value="#{record.roomName}" />
+					</p:column>
+					<p:column headerText="床位">
+						<h:outputText value="#{record.bedName}" />
+					</p:column>
+					<p:column headerText="离院时间">
+						<h:outputText value="#{record.realleavetime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="预返院时间">
+						<h:outputText value="#{record.oldbacktime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="推迟时间">
+						<h:outputText value="#{record.newbacktime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="推迟原因">
+						<h:outputText value="#{record.reason}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton styleClass="addbtn" value=""
+					action="#{entryLateOlderRecordController.clearInsertForm}"
+					oncomplete="insertRecordDialog.show()" update=":insertForm" />
+				<p:commandButton styleClass="deletebtn" value=""
+					disabled="#{entryLateOlderRecordController.disDeleteAndUpdateButton}"
+					onclick="confirmDialog.show()" type="button" />
+				<p:commandButton styleClass="modifybtn" value=""
+					disabled="#{entryLateOlderRecordController.disDeleteAndUpdateButton}"
+					action="#{entryLateOlderRecordController.copyRecordUpdatedRow}"
+					oncomplete="updateRecordDialog.show()" update=":updateForm" />
+				<p:commandButton value=""
+					style="visibility:hidden" id="hiddenBtn" ajax="true"
+					process="@this" action="#{entryLateOlderRecordController.checkInit}"
+					oncomplete="afterCheckInit(xhr,status,args)"
+					update=":insertForm,:messages">
+				</p:commandButton>
+			</div>
+		</h:form>
+		<p:dialog header="新增" widgetVar="insertRecordDialog" resizable="false"
+			appendTo="@(body)" position="center" modal="true">
+			<h:form id="insertForm">
+				<table class="hengbiaoge" width="100%" id="insertTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="nameText">老人姓名:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="nameText"
+								style="width:127px"
+								value="#{entryLateOlderRecordController.insertedRow.olderName}">
+								<p:ajax event="blur"
+									listener="#{entryLateOlderRecordController.fillField}"
+									update=":insertForm" process="@this,olderIdHd,leaveIdHd" />
+							</p:inputText> <his:IME for="insertForm:nameText" fitcol="inputCode"
+								resultcol="0" lock="true" rawSQL="true"
+								SQL="#{entryLateOlderRecordController.leaveSql}"
+								SQLResult="老人姓名:0,离院时间:1,应返院时间:2,陪同人:3,联系方式:4,输入码:5,leaveId:6:hide,olderId:7:hide,大厦:8:hide,楼层:9:hide,房间:10:hide,床位:11:hide"
+								multiresult="insertForm:nameText;0,insertForm:leaveDate;1,insertForm:returnDate;2,insertForm:returnDateHd;2,insertForm:companionNameText;3,insertForm:telephoneNoText;4
+									 ,insertForm:leaveIdHd;6,insertForm:olderIdHd;7,insertForm:buildingText;8,insertForm:roomText;10,insertForm:bedNoText;11" />
+
+							<h:inputHidden id="olderIdHd"
+								value="#{entryLateOlderRecordController.insertedRow.olderId}" />
+							<h:inputHidden id="leaveIdHd"
+								value="#{entryLateOlderRecordController.insertedRow.leaveId}" />
+							<h:inputHidden id="returnDateHd"
+								value="#{entryLateOlderRecordController.insertedRow.oldbacktime}">
+								<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+							</h:inputHidden></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="大厦:"
+								for="buildingText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="buildingText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.insertedRow.buildName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="房间:"
+								for="roomText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="roomText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.insertedRow.roomName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="床位号:"
+								for="bedNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="bedNoText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.insertedRow.bedName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="陪同人姓名:"
+								for="companionNameText" /></td>
+						<td class="hengbiaogedata"><p:inputText
+								id="companionNameText" style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.insertedRow.escortname}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="联系方式:"
+								for="telephoneNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="telephoneNoText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.insertedRow.escortphone}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="离院时间:" /></td>
+						<td class="hengbiaogedata"><p:calendar id="leaveDate"
+								pattern="yyyy-MM-dd HH:mm" disabled="true" size="18"
+								value="#{entryLateOlderRecordController.insertedRow.realleavetime}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="应返院时间:" /></td>
+						<td class="hengbiaogedata"><p:calendar id="returnDate"
+								pattern="yyyy-MM-dd HH:mm" disabled="true" size="18"
+								value="#{entryLateOlderRecordController.insertedRow.oldbacktime}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="lateDate_input">推迟时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar id="lateDate"
+								pattern="yyyy-MM-dd HH:mm" size="18" showButtonPanel="true"
+								value="#{entryLateOlderRecordController.insertedRow.newbacktime}" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="reasonText">推迟原因:</label></td>
+						<td class="hengbiaogedata"><p:inputTextarea id="reasonText"
+								autoResize="true" cols="14" rows="1"
+								value="#{entryLateOlderRecordController.insertedRow.reason}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						onstart="return checkNulls('insertForm','redfont',true);"
+						action="#{entryLateOlderRecordController.insertLateOlderRecord}"
+						oncomplete="handleInsertComplete(xhr, status, args)"
+						update=":insertForm,:dataTableForm,:messages" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="insertRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="修改" widgetVar="updateRecordDialog" resizable="false"
+			appendTo="@(body)" position="center" modal="true">
+			<h:form id="updateForm">
+				<table class="hengbiaoge" width="100%" id="updateTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="老人姓名:"
+								for="nameText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="nameText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.updatedRow.olderName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="大厦:"
+								for="buildingText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="buildingText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.updatedRow.buildName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="房间:"
+								for="roomText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="roomText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.updatedRow.roomName}" /></td>
+
+						<td class="hengbiaogeHeader1"><h:outputLabel value="床位号:"
+								for="bedNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="bedNoText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.updatedRow.bedName}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="陪同人姓名:"
+								for="companionNameText" /></td>
+						<td class="hengbiaogedata"><p:inputText
+								id="companionNameText" style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.updatedRow.escortname}" /></td>
+
+						<td class="hengbiaogeHeader1"><h:outputLabel value="联系方式:"
+								for="telephoneNoText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="telephoneNoText"
+								style="width:127px" readonly="true"
+								value="#{entryLateOlderRecordController.updatedRow.escortphone}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="离院时间:" /></td>
+						<td class="hengbiaogedata"><p:calendar id="leaveDate"
+								pattern="yyyy-MM-dd HH:mm" disabled="true" size="18"
+								value="#{entryLateOlderRecordController.updatedRow.realleavetime}" /></td>
+
+						<td class="hengbiaogeHeader1"><h:outputText value="应返院时间:" /></td>
+						<td class="hengbiaogedata"><p:calendar id="returnDate"
+								pattern="yyyy-MM-dd HH:mm" disabled="true" size="18"
+								value="#{entryLateOlderRecordController.updatedRow.oldbacktime}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="lateDate_input">推迟时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar id="lateDate"
+								pattern="yyyy-MM-dd HH:mm" size="18" showButtonPanel="true"
+								value="#{entryLateOlderRecordController.updatedRow.newbacktime}" /></td>
+
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="reasonText">推迟原因:</label></td>
+						<td class="hengbiaogedata"><p:inputTextarea id="reasonText"
+								autoResize="true" cols="14" rows="1"
+								value="#{entryLateOlderRecordController.updatedRow.reason}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						onstart="return checkNulls('updateForm','redfont',true);"
+						action="#{entryLateOlderRecordController.updateLateOlderRecord}"
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":updateForm,:dataTableForm,:messages" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="updateRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:confirmDialog modal="true" appendTo="@(body)"
+			widgetVar="confirmDialog" message="确定要删除此项目记录吗？">
+			<h:form>
+				<p:commandButton styleClass="commonbtn" value="确定"
+					action="#{entryLateOlderRecordController.deleteLateOlderRecord}"
+					update=":dataTableForm,:messages"
+					oncomplete="confirmDialog.hide();">
+				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="取消" type="reset"
+					onclick="confirmDialog.hide();"></p:commandButton>
+			</h:form>
+		</p:confirmDialog>
+		<script type="text/javascript">
+		$(document).ready(function() {
+			jQuery("#maintainForm\\:hiddenBtn").click();
+		});
+		
+		function afterCheckInit(xhr, status, args) {
+			if (args.validate) {
+				insertRecordDialog.show();
+				jQuery("#insertForm\\:nameText").focus();
+			}
+		}
+		// 聚焦到项目编号文本框 
+		function focusNameText(){
+			jQuery("#insertForm\\:nameText").focus();
+		}	
+		function handleUpdateComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				updateRecordDialog.hide();
+            }	
+		}
+		function handleInsertComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				insertRecordDialog.hide();
+            }	
+		}
+		
+		//清空 selectForm
+		function clearSelectForm(){
+			document.getElementById("headForm:startDate").value="";
+			document.getElementById("headForm:endDate").value="";
+			document.getElementById("headForm:nameText").value="";
+			return true;
+		}
+
+	</script>
+	</h:body>
+</f:view>
+</html>

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">护理员:</td>
+					<td><h:inputHidden value="#{ringManageController.nurseID}"
+							id="nurseID" /> <p:inputText
+							value="#{ringManageController.nurseName}" id="nurseName" /> <his:IME
+							for="searchForm:nurseName" fitcol="name,inputCode" resultcol="1"
+							lock="true" rawSQL="true" SQL="#{ringManageController.nurseSQL}"
+							SQLResult="编号:0:hide,姓名:1,输入码:2:hide"
+							multiresult="searchForm:nurseID;0,searchForm:nurseName;1">
+						</his:IME></td>
+
+					<td class="leftcell">房间号:</td>
+					<td><h:inputHidden value="#{ringManageController.roomID}"
+							id="roomID" /> <p:inputText id="roomNumber"
+							value="#{ringManageController.roomNumber}" /> <his:IME
+							for="searchForm:roomNumber" fitcol="name" resultcol="1"
+							rawSQL="true" SQL="#{bedManageController.roomSQL}"
+							SQLResult="ID:0:hide,#{pageConfig.roomName}:1,#{pageConfig.floorName}:5,#{pageConfig.buildName}:4"
+							multiresult="searchForm:roomID;0,searchForm:roomNumber;1">
+						</his:IME></td>
+
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value=""
+							actionListener="#{ringManageController.selectRingRecords}"
+							update=":form,:message,:maintainForm" /></td>
+					<td class="leftcell"><p:commandButton styleClass="blankbtn"
+							value="" process="@this"
+							actionListener="#{ringManageController.clearSearchForm}"
+							update=":form,:message,:maintainForm,:searchForm" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="form" style="width:100%">
+			<p:dataTable id="Ring" var="result" rowKey="#{result.id}"
+				value="#{ringManageController.pensionRingList}"
+				selection="#{ringManageController.pensionRingNow}"
+				selectionMode="single" cellspacing="8" rows="10"
+				style="white-space:nowrap;width:100%" rowIndexVar="row"
+				paginatorAlwaysVisible="false" emptyMessage="#{pageConfig.noRow}"
+				paginator="true" paginatorPosition="bottom"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+
+				<p:ajax event="rowSelect"
+					listener="#{ringManageController.setEnableFlag}"
+					update=":maintainForm,:addForm" />
+				<p:ajax event="rowUnselect"
+					listener="#{ringManageController.setUnableFlag}"
+					update=":maintainForm,:addForm" />
+
+				<p:column headerText="房间">  
+		            #{result.roomNumber}   
+		        </p:column>
+
+				<p:column headerText="护理员">  
+		            #{result.nurseName}   
+		        </p:column>
+
+				<p:column headerText="呼叫器编号">  
+		            #{result.hardaddress}   
+		        </p:column>
+				<p:column headerText="备注">  
+		            #{result.notes}   
+		        </p:column>
+
+			</p:dataTable>
+
+		</h:form>
+		<div align="center">
+			<h:form id="maintainForm">
+				<p:commandButton styleClass="addbtn" value=""
+					actionListener="#{ringManageController.showAddForm}"
+					oncomplete="addDialog.show()" update=":form,:maintainForm,:addForm" />
+				<p:commandButton styleClass="modifybtn" value="" id="modifybtn"
+					actionListener="#{ringManageController.showEditForm}"
+					disabled="#{ringManageController.disabledFlag}"
+					oncomplete="addDialog.show()" update=":form" />
+				<p:commandButton styleClass="deletebtn" value="" id="deletebtn"
+					onclick="confirmDelDialog.show()"
+					disabled="#{ringManageController.disabledFlag}" type="button" />
+			</h:form>
+		</div>
+		<p:dialog header="呼叫器编辑" widgetVar="addDialog" resizable="false"
+			appendTo="@(body)" modal="true" position="top">
+			<h:form id="addForm">
+				<table class="hengbiaoge">
+					<tr>
+
+						<td class="hengbiaogeHeader1"><h:outputText value="呼叫器编号:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								required="true" requiredMessage="呼叫器编号" id="hardaddress"
+								value="#{ringManageController.pensionRingNow.hardaddress}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="房间号:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><h:inputHidden
+								value="#{ringManageController.pensionRingNow.roomId}"
+								id="roomID" /> <p:inputText style="width:220px" required="true"
+								requiredMessage="房间号不能为空" id="roomNumber"
+								value="#{ringManageController.pensionRingNow.roomNumber}">
+							</p:inputText> <his:IME for="addForm:roomNumber" fitcol="name" resultcol="1"
+								rawSQL="true" SQL="#{bedManageController.roomSQL}"
+								SQLResult="ID:0:hide,#{pageConfig.roomName}:1,#{pageConfig.floorName}:5,#{pageConfig.buildName}:4"
+								multiresult="addForm:roomID;0,addForm:roomNumber;1">
+							</his:IME></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="护理员:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><h:inputHidden
+								value="#{ringManageController.pensionRingNow.nurseId}"
+								id="nurseID" /> <p:inputText style="width:220px"
+								required="true" requiredMessage="护理员不能为空"
+								value="#{ringManageController.pensionRingNow.nurseName}"
+								id="nurseName" /> <his:IME for="addForm:nurseName"
+								fitcol="name,inputCode" resultcol="1" lock="true" rawSQL="true"
+								SQL="#{ringManageController.nurseSQL}"
+								SQLResult="编号:0:hide,姓名:1,输入码:2:hide"
+								multiresult="addForm:nurseID;0,addForm:nurseName;1">
+							</his:IME></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" />
+						</td>
+						<td class="hengbiaogedata"><p:inputText style="width:220px"
+								id="notes" value="#{ringManageController.pensionRingNow.notes}">
+							</p:inputText></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton action="#{ringManageController.insertRingRecord}"
+						styleClass="commonbtn" value="保存"
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":form,:message,:maintainForm">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{ringManageController.clearAddForm}"
+						update=":addForm" />
+					<p:commandButton onclick="addDialog.hide()" process="@this"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true"
+			header="#{pageConfig.deleteRow}" widgetVar="confirmDelDialog"
+			width="170" resizable="fasle">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="#{pageConfig.sureDelete}?"
+							style="font-size:14px;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{ringManageController.deleteRingRecord}"
+							update=":form,:message,:maintainForm"
+							oncomplete="confirmDelDialog.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();"
+							update=":form,:message,:maintainForm">
+						</p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</h:body>
+	<script type="text/javascript">
+		function handleUpdateComplete(xhr, status, args) {
+			if (!args.validationFailed) {
+				addDialog.hide();
+			}
+
+		}
+	</script>
+
+</f:view>
+</html>

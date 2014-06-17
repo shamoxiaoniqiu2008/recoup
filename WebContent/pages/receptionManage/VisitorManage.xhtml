@@ -1,0 +1,398 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<f:view contentType="text/html">
+	<h:head>
+		<title>访客登记</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+
+	</h:head>
+
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm" styleClass="noDisable">
+			<table>
+				<tr>
+					<td class="leftcell">来访类型:</td>
+					<td><h:selectOneMenu style="width:90px;" id="guestStyle"
+							value="#{visitorManageController.styleId}"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItems value="#{visitorManageController.visitStyleList}"
+								var="style" rowKey="#{style.id}" itemLabel="#{style.visittype}"
+								itemValue="#{style.id}"></f:selectItems>
+							<p:ajax event="valueChange" process="@this,searchForm:guestStyle"
+								listener="#{visitorManageController.changFlag}"
+								update=":searchForm"></p:ajax>
+						</h:selectOneMenu></td>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText id="olderName" style="width:80px;"
+							disabled="#{visitorManageController.olderFlag}"
+							value="#{visitorManageController.olderName}" /> <his:IME
+							for="searchForm:olderName" rawSQL="true" sortcol="id"
+							SQL="#{visitorManageController.olderSQL}" fitcol="inputCode"
+							multiresult="searchForm:olderName;1,searchForm:olderId;0"
+							SQLResult="编号:0,姓名:1,输入码:2,大厦:6,楼层:5,房间:4,床位:3" resultcol="1"
+							lock="false" /> <h:inputHidden
+							value="#{visitorManageController.olderId}" id="olderId" /></td>
+					<td class="leftcell">来访日期:</td>
+					<td><p:calendar size="9"
+							value="#{visitorManageController.searchStartDate}" locale="zh_CN"
+							pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar size="9"
+							value="#{visitorManageController.searchEndDate}"
+							pattern="yyyy-MM-dd"></p:calendar></td>
+
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value=""
+							actionListener="#{visitorManageController.searchVisitRecords}"
+							update=":guestForm:guestTable,:message" /></td>
+					<td class="leftcell"><p:commandButton styleClass="blankbtn"
+							value="" process="@this"
+							actionListener="#{visitorManageController.clearSearchForm}"
+							update=":searchForm" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="guestForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="8" rows="10" style="width:100%"
+							id="guestTable"
+							selection="#{visitorManageController.selectedRow}"
+							value="#{visitorManageController.guestRecordList}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="guest" rowKey="#{guest.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+							<p:ajax event="rowSelect"
+								listener="#{visitorManageController.setEnableFlag}" />
+							<p:ajax event="rowUnselect"
+								listener="#{visitorManageController.setUnableFlag}" />
+							<p:column headerText="访客姓名" style="width:80px">
+								<h:outputText value="#{guest.name}">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="来访时间" style="width:120px">
+								<h:outputText value="#{guest.visittime}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+							<p:column headerText="离开时间" style="width:120px">
+								<h:outputText value="#{guest.leavetime}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+							<p:column headerText="访客类型" style="width:80px">
+								<h:outputText value="#{guest.visitTypeName}" />
+							</p:column>
+							<p:column headerText="车牌号" style="width:60px">
+								<h:outputText value="#{guest.carno}" />
+							</p:column>
+							<p:column headerText="老人姓名" style="width:60px">
+								<h:outputText value="#{guest.olderName}" />
+							</p:column>
+							<p:column headerText="关系" style="width:30px">
+								<h:outputText value="#{guest.relationShip}" />
+							</p:column>
+							<p:column headerText="床位号" style="width:60px">
+								<h:outputText value="#{guest.bedName}" />
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+			<div align="center">
+				<p:commandButton oncomplete="addgGuestDialog.show()" id="addButton"
+					actionListener="#{visitorManageController.showAddForm}"
+					styleClass="addbtn" value=""
+					update=":addGuestForm,:addGuestForm:visitTypeValue"></p:commandButton>
+				<p:commandButton oncomplete="addDialogShow(xhr,status,args)"
+					id="editButton"
+					actionListener="#{visitorManageController.showEditForm}"
+					update=":addGuestForm,:message,:addGuestForm:relation,:addGuestForm:visitTypeValue"
+					styleClass="modifybtn" value=""></p:commandButton>
+				<p:commandButton oncomplete="viewDialogShow(xhr,status,args)"
+					id="viewButton" value="查看"
+					actionListener="#{visitorManageController.showViewForm}"
+					update=":message,:viewGuestForm" styleClass="commonbtn"></p:commandButton>
+				<p:commandButton oncomplete="statisticsDialog.show()"
+					id="statisticsButton"
+					actionListener="#{visitorManageController.searchstatistics}"
+					styleClass="commonbtn" value="统计"
+					update=":statisticsForm,:selectForm,:pieForm"></p:commandButton>
+			</div>
+		</h:form>
+		<p:dialog appendTo="@(body)" modal="true" header="访客统计"
+			widgetVar="statisticsDialog" width="720" height="400">
+			<h:form id="selectForm">
+				<table>
+					<tr>
+						<td class="leftcell">老人姓名:</td>
+						<td><p:inputText id="oldName" style="width:80px;"
+								value="#{visitorManageController.oldName}" /> <his:IME
+								for="selectForm:oldName" rawSQL="true" sortcol="id"
+								SQL="#{visitorManageController.olderSQL}" fitcol="inputCode"
+								multiresult="selectForm:oldName;1,selectForm:oldId;0"
+								SQLResult="编号:0,姓名:1,输入码:2" resultcol="1" lock="false" /> <h:inputHidden
+								value="#{visitorManageController.oldId}" id="oldId" /></td>
+						<td class="leftcell">探望日期:</td>
+						<td><p:calendar value="#{visitorManageController.startDate}"
+								pattern="yyyy-MM-dd"></p:calendar></td>
+						<td class="leftcell">至:</td>
+						<td><p:calendar value="#{visitorManageController.endDate}"
+								pattern="yyyy-MM-dd"></p:calendar></td>
+						<td class="leftcell"><p:commandButton styleClass="commonbtn"
+								value="统计"
+								actionListener="#{visitorManageController.searchstatistics}"
+								update=":statisticsForm,:pieForm,:message" /></td>
+						<td class="leftcell"><p:commandButton styleClass="blankbtn"
+								process="@this" value=""
+								actionListener="#{visitorManageController.clearSearchStatistics}"
+								update=":selectForm" /></td>
+					</tr>
+				</table>
+			</h:form>
+			<table>
+				<tr>
+					<td><h:form id="statisticsForm">
+
+							<h:outputText
+								style="text-align: center;font-family: simsun;font-size: 16px;font-weight:bold;position:absolute;left:20px;top:77px"
+								value="老人总数:#{visitorManageController.totalOlderNumber}&nbsp;&nbsp;探访人次:#{visitorManageController.totalVisitCount}"></h:outputText>
+							<table>
+								<tr>
+									<td style="height: 230px; width: 300px;"><p:dataTable
+											style="position:absolute;left:20px;top:110px" cellspacing="8"
+											rows="5" id="statisticsTable"
+											value="#{visitorManageController.guestStatisticsList}"
+											paginator="true" paginatorPosition="bottom"
+											paginatorAlwaysVisible="false"
+											paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+											var="statistics" emptyMessage="没有相应记录">
+											<p:column headerText="老人姓名" style="width:80px">
+												<h:outputText value="#{statistics.olderName}">
+												</h:outputText>
+											</p:column>
+											<p:column headerText="探望人次" style="width:120px">
+												<h:outputText value="#{statistics.countNo}">
+												</h:outputText>
+											</p:column>
+										</p:dataTable></td>
+								</tr>
+							</table>
+						</h:form></td>
+					<td valign="top"><br></br> <br></br> <font
+						style="font-size: 20pt; font-weight: bold">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>
+						<br></br> <br></br> <br></br> <h:form id="pieForm">
+							<p:pieChart id="visitOlderPie"
+								rendered="#{fn:length(visitorManageController.visitOlderPie.data) > 0}"
+								value="#{visitorManageController.visitOlderPie}"
+								legendPosition="e" fill="true" showDataLabels="true"
+								title="探访人次统计图"
+								style="width:280px;height:#{fn:length(visitorManageController.visitOlderPie.data)*25&gt;250?fn:length(visitorManageController.visitOlderPie.data)*25:250}px" />
+						</h:form> <br></br></td>
+				</tr>
+			</table>
+			<div align="center">
+				<p:commandButton styleClass="commonbtn" value="关闭"
+					update=":statisticsForm,:selectForm"
+					actionListener="#{visitorManageController.clearSearchStatistics}"
+					oncomplete="statisticsDialog.hide()"></p:commandButton>
+			</div>
+		</p:dialog>
+
+		<p:dialog header="访客登记" widgetVar="addgGuestDialog" resizable="false"
+			appendTo="@(body)" modal="true" position="top">
+			<h:form id="addGuestForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="500px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="visitTypeValue">来访类型:</label></td>
+						<td class="hengbiaogedata"><h:selectOneMenu
+								id="visitTypeValue" style="width:150px"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+								disabled="#{visitorManageController.editFlag}"
+								value="#{visitorManageController.addGuestRecord.visittype}">
+								<f:selectItems
+									value="#{visitorManageController.addVisitStyleList}"
+									var="style" rowKey="#{style.id}" itemLabel="#{style.visittype}"
+									itemValue="#{style.id}"></f:selectItems>
+								<p:ajax event="valueChange"
+									process="@this,addGuestForm:visitTypeValue"
+									listener="#{visitorManageController.changAddFlag}"
+									update=":addGuestForm"></p:ajax>
+							</h:selectOneMenu></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="visitorName">访客姓名:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="visitorName"
+								value="#{visitorManageController.addGuestRecord.name}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label
+							class="#{visitorManageController.addGuestRecord.visittype.equals(4)?'redfont':null}"
+							for="addOlderName">老人姓名:</label></td>
+						<td class="hengbiaogedata"><p:inputText
+								disabled="#{visitorManageController.addOlderFlag}"
+								id="addOlderName"
+								value="#{visitorManageController.addGuestRecord.olderName}">
+							</p:inputText> <his:IME for="addGuestForm:addOlderName" rawSQL="true"
+								SQL="#{visitorManageController.addOlderSQL}" fitcol="inputCode"
+								sortcol="id" resultcol="1" lock="true"
+								multiresult="addGuestForm:addOlderId;0"
+								SQLResult="编号:0,姓名:1,输入码:2,大厦:6,楼层:5,房间:4,床位:3" /> <h:inputHidden
+								id="addOlderId"
+								value="#{visitorManageController.addGuestRecord.olderId}" /></td>
+						<td class="hengbiaogeHeader1"><label
+							class="#{visitorManageController.addGuestRecord.visittype.equals(4)?'redfont':null}"
+							for="relation">关系:</label></td>
+						<td class="hengbiaogedata"><h:selectOneMenu id="relation"
+								style="width:150px"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+								disabled="#{visitorManageController.addOlderFlag}"
+								value="#{visitorManageController.addGuestRecord.relationId}">
+								<f:selectItems
+									value="#{visitorManageController.relationshipList}"
+									var="family" rowKey="#{family.id}" itemValue="#{family.id}"
+									itemLabel="#{family.relationship}"></f:selectItems>
+							</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="车牌号:" /></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{visitorManageController.addGuestRecord.carno}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="离开时间:" /></td>
+						<td class="hengbiaogedata"><p:calendar
+								converterMessage="离开时间：请输入正确的时间格式" locale="zh_CN"
+								value="#{visitorManageController.addGuestRecord.leavetime}"
+								id="leaveDate" pattern="yyyy-MM-dd HH:mm" showButtonPanel="true" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+						<td class="hengbiaogedata" colspan="3"><p:inputTextarea
+								style="width:390px;height:50px"
+								value="#{visitorManageController.addGuestRecord.notes}">
+							</p:inputTextarea></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton id="submitbtn"
+						onstart="return checkNulls('addGuestForm','redfont',true);"
+						actionListener="#{visitorManageController.saveGuestRecord}"
+						disabled="#{visitorManageController.disableFlag}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="submitbtn"
+						value="" update=":guestForm:guestTable,:message,:addGuestForm">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value=""
+						process="@this,addGuestForm:leaveDate"
+						disabled="#{visitorManageController.blankFlag}"
+						actionListener="#{visitorManageController.clearAddForm}"
+						update=":addGuestForm" id="clearBtn" />
+					<p:commandButton onclick="addgGuestDialog.hide()"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="访客登记查看" widgetVar="viewGuestDialog"
+			resizable="false" appendTo="@(body)" modal="true" position="top">
+			<h:form id="viewGuestForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="500px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="来访类型:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{visitorManageController.addGuestRecord.visitTypeName}" />
+						</td>
+						<td class="hengbiaogeHeader1"><h:outputText value="访客姓名:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{visitorManageController.addGuestRecord.name}" /></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="老人姓名:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{visitorManageController.addGuestRecord.olderName}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="关系: " /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{visitorManageController.addGuestRecord.relationShip}" />
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="车牌号:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{visitorManageController.addGuestRecord.carno}">
+							</h:outputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="离开时间:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{visitorManageController.addGuestRecord.leavetime}">
+								<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+							</h:outputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+						<td class="hengbiaogedata" colspan="3"><h:outputText
+								value="#{visitorManageController.addGuestRecord.notes}"></h:outputText>
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton onclick="viewGuestDialog.hide()"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			function addConfirm(xhr, status, args) {
+				if (args.success) {
+					addgGuestDialog.hide();
+
+				}
+			}
+			function addDialogShow(xhr, status, args) {
+				if (args.show) {
+					addgGuestDialog.show();
+				}
+			}
+
+			function addDialogShow(xhr, status, args) {
+				if (args.show) {
+					addgGuestDialog.show();
+				}
+			}
+
+			function viewDialogShow(xhr, status, args) {
+				if (args.show) {
+					viewGuestDialog.show();
+
+				}
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

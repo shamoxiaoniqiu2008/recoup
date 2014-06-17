@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.sendDrugPaper}</title>
+
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+		<p:growl id="messages"></p:growl>
+
+		<h:form id="searchForm">
+			<!-- 输入起始时间和截止时间 -->
+			<table>
+				<tr>
+					<td class="leftcell">配药时间:</td>
+					<td><p:calendar id="startDate" pattern="yyyy-MM-dd" size="9"
+							value="#{unPassDrugPaperController.startDate}" /></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar id="endDate" pattern="yyyy-MM-dd" size="9"
+							value="#{unPassDrugPaperController.endDate}" /></td>
+					<td><p:commandLink
+							actionListener="#{unPassDrugPaperController.selectNextDay}"
+							update=":searchForm,:listForm">
+							<p:graphicImage value="/images/minus_alt.png"
+								style="border:0px;width: 20px;height: 20px;" />
+							<p:commandLink
+								actionListener="#{unPassDrugPaperController.selectLastDay}"
+								update=":searchForm,:listForm">
+								<p:graphicImage value="/images/plus_alt.png"
+									style="border:0px;width: 20px;height: 20px;" />
+							</p:commandLink>
+						</p:commandLink></td>
+					<td class="leftcell"><p:commandButton id="searchButton"
+							action="#{unPassDrugPaperController.search}"
+							styleClass="searchbtn" value=""
+							update=":listForm,:showForm,:messages" /></td>
+					<td class="leftcell"><p:commandButton
+							action="#{unPassDrugPaperController.clearSearchForm}"
+							styleClass="commonbtn" value="清空" update=":searchForm,:messages" />
+						<h:inputHidden value="checkSearchDate" id="checkSearchDate"
+							validator="#{unPassDrugPaperController.checkSearchDate}" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="listForm">
+			<p:dataTable rows="10" style="white-space:nowrap;width:100%"
+				id="listTable" value="#{unPassDrugPaperController.dosages}"
+				var="dosage" rowKey="#{dosage.id}" selectionMode="single"
+				emptyMessage="没有相应记录" paginatorAlwaysVisible="false"
+				selection="#{unPassDrugPaperController.selectDosage}"
+				paginator="true" paginatorPosition="bottom"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:ajax event="rowSelect"
+					listener="#{unPassDrugPaperController.onDosageSelect}"
+					update=":showForm,:messages" />
+				<p:ajax event="rowUnselect"
+					listener="#{unPassDrugPaperController.onDosageUnselect}"
+					update=":showForm,:messages" />
+				<p:column headerText="配送分组" style="text-align:center;">
+					<h:outputText value="#{dosage.deliveryname}" />
+				</p:column>
+				<p:column headerText="护理部" style="text-align:center;">
+					<h:outputText value="#{dosage.nursedeptname}" />
+				</p:column>
+				<p:column headerText="负责人" style="text-align:center;">
+					<h:outputText value="#{dosage.chartername}" />
+				</p:column>
+				<p:column headerText="配药人" style="text-align:center;">
+					<h:outputText value="#{dosage.senderName}" />
+				</p:column>
+				<p:column headerText="配药时间" style="text-align:center;">
+					<h:outputText value="#{dosage.sendtime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="备注" style="text-align:center;">
+					<h:outputText value="#{dosage.notes}" />
+				</p:column>
+			</p:dataTable>
+			<div align="center">
+				<p:commandButton value="重新发送"
+					action="#{unPassDrugPaperController.sendMessages}"
+					styleClass="commonbtn" update=":messages,:listForm,:showForm" />
+			</div>
+		</h:form>
+
+		<h:form id="showForm">
+			<p:dataTable rows="4" style="white-space:nowrap;width:100%"
+				id="showTable" value="#{unPassDrugPaperController.dosageDetails}"
+				var="dosageDetail" rowKey="#{dosageDetail.id}" emptyMessage="没有相应记录"
+				paginator="true" paginatorPosition="bottom"
+				paginatorAlwaysVisible="false"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:column headerText="老人姓名" style="text-align:center;">
+					<h:outputText value="#{dosageDetail.olderName}" />
+				</p:column>
+				<p:column headerText="药品名称" style="text-align:center;">
+					<h:outputText value="#{dosageDetail.drugName}" />
+				</p:column>
+				<p:column headerText="单次剂量" style="text-align:center;">
+					<h:outputText value="#{dosageDetail.singleDose}" />
+				</p:column>
+				<p:column headerText="单位" style="text-align:center;">
+					<h:outputText value="#{dosageDetail.unit}" />
+				</p:column>
+				<p:column headerText="服药日期" style="text-align:center;">
+					<h:outputText value="#{dosageDetail.eattime}">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="时段" style="text-align:center;">
+					<h:outputText value="早上" rendered="#{dosageDetail.period == 1}" />
+					<h:outputText value="中午" rendered="#{dosageDetail.period == 2}" />
+					<h:outputText value="晚上" rendered="#{dosageDetail.period == 3}" />
+				</p:column>
+				<p:column headerText="饭前/后" style="text-align:center;">
+					<h:outputText value="饭前" rendered="#{dosageDetail.iseatfood == 1}" />
+					<h:outputText value="饭后" rendered="#{dosageDetail.iseatfood == 2}" />
+					<h:outputText value="均可"
+						rendered="#{dosageDetail.iseatfood != 1 and dosageDetail.iseatfood != 2}" />
+				</p:column>
+				<p:column headerText="是否核对" style="text-align:center;">
+					<h:outputText value="是" rendered="#{dosageDetail.ischeck == 1}" />
+					<h:outputText value="否" rendered="#{dosageDetail.ischeck != 1}" />
+				</p:column>
+				<p:column headerText="核对结果" style="text-align:center;">
+					<h:outputText value="通过"
+						rendered="#{dosageDetail.checkresult == 1}" />
+					<h:outputText value="未通过"
+						rendered="#{dosageDetail.checkresult == 2}" />
+					<h:outputText value=" "
+						rendered="#{dosageDetail.checkresult != 1 and dosageDetail.checkresult != 2}" />
+				</p:column>
+				<p:column headerText="备注" style="text-align:center;">
+					<h:outputText value="#{dosageDetail.notes}" />
+				</p:column>
+			</p:dataTable>
+			<h:outputText value="&nbsp;"></h:outputText>
+		</h:form>
+	</h:body>
+</f:view>
+</html>

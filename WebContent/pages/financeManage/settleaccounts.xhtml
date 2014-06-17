@@ -1,0 +1,383 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<f:view contentType="text/html">
+
+<h:head>
+			<title>#{pageConfig.settelAccounts}</title>
+			
+			
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/default.css" />
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/skin.css" />
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/layout.css"></link>
+			<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+				type="text/css" />
+			<link rel="stylesheet" href="#{request.contextPath}/css/style.css" ></link>
+
+			<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+			
+		    <script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		</h:head>
+<h:body>
+	<p:growl id="messages"></p:growl>
+	<h:form id="searchForm" >
+		<h:inputHidden value="#{settleAccountsController.olderId}" id="olderId"/>
+		<h:outputText value="&nbsp;&nbsp;老人姓名" />
+		<p:inputText value="#{settleAccountsController.olderName}" id="olderName"/>
+		<his:IME for="searchForm:olderName"
+					fitcol="id,inputCode"
+					resultcol="1"
+					lock="true"
+					rawSQL="true"
+					SQL="#{settleAccountsController.selectSQL}"
+					SQLResult="编号:0,姓名:1,输入码:2:hide,性别:3,大厦:4,楼层:5,房间:6,床位:7,同意:8" 
+					multiresult="searchForm:olderId;0,searchForm:olderName;1,searchForm:bedName;7" />
+		<h:outputText value="床号" />
+		<p:inputText value="#{settleAccountsController.bedName}" id="bedName" readonly="true"/>
+		<p:commandButton styleClass="searchbtn" value="" action="#{settleAccountsController.search}"
+			update=":payListForm,:messages">
+		</p:commandButton>
+		<p:commandButton styleClass="commonbtn" value="清空" onclick="clearSearchForm()"
+			update=":searchForm,:messages" type="button">
+		</p:commandButton>
+	</h:form>
+	<h:form id="payListForm">
+		<p:dataTable id="list"
+			value="#{settleAccountsController.pensionDepartregisters}"
+			var="pensionDepartregister" rowKey="#{pensionDepartregister.id}"
+			emptyMessage="当前无信息"
+			selection="#{settleAccountsController.selectPensionDepartregister}"
+			selectionMode="single"
+			paginator="true"
+			paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+			rows="10" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+				<p:ajax event="rowSelect" listener="#{settleAccountsController.onPensionDepartregisterSelect}" update=":messages"/>
+				<p:ajax event="rowUnselect" listener="#{settleAccountsController.onPensionDepartregisterUnselect}" update=":messages"/>
+				<p:column headerText="姓名" >
+					<h:outputText
+						value="#{pensionDepartregister.name}" />
+				</p:column>
+				<p:column headerText="大厦" >
+					<h:outputText
+						value="#{pensionDepartregister.building_name}" />
+				</p:column>
+				<p:column headerText="楼层" >
+					<h:outputText
+						value="#{pensionDepartregister.floor_name}" />
+				</p:column>
+				<p:column headerText="房间" >
+					<h:outputText
+						value="#{pensionDepartregister.room_name}" />
+				</p:column>
+				<p:column headerText="床位" >
+					<h:outputText
+						value="#{pensionDepartregister.bed_name}" />
+				</p:column>
+				<p:column headerText="预计离院时间" >
+					<h:outputText
+						value="#{pensionDepartregister.leavetime}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="离院时间" >
+					<h:outputText
+						value="#{pensionDepartregister.realLeavetime}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="离院原因" >
+					<h:outputText
+						value="#{pensionDepartregister.leavereason}" />
+				</p:column>
+				<p:column headerText="老人状态" >
+				<h:outputText
+						value="#{pensionDepartregister.approveResultStr}" />
+				</p:column>
+				<p:column headerText="总费用" >
+					<h:outputText
+						value="#{pensionDepartregister.money}" />
+				</p:column>
+			</p:dataTable>
+			<div align="center" >  
+				<p:commandButton value="结算" styleClass="commonbtn" ajax="true" process="@this,payListForm:checkSelectPayData"
+					action="#{settleAccountsController.beforeSettle}"
+					oncomplete="afterCheckSelectPayData(xhr,status,args)"
+					update=":settleForm,:tabView:paidNormalForm,:tabView:paidTempForm,:tabView:unpaidNormalForm,:tabView:unpaidTempForm,:settleForm,:messages">
+				</p:commandButton>
+				<p:commandButton value="撤销结算" styleClass="commonbtn" ajax="true" process="@this,payListForm:checkSelectCloseData"
+					oncomplete="afterCheckSelectCloseData(xhr,status,args)"
+					update=":messages">
+				</p:commandButton>
+				<h:inputHidden value="checkSelectPayData" id="checkSelectPayData" validator="#{settleAccountsController.checkSelectPayData}"/>
+				<h:inputHidden value="checkSelectCloseData" id="checkSelectCloseData" validator="#{settleAccountsController.checkSelectCloseData}"/>
+				<h:inputHidden value="checkSelectData" id="checkSelectData" validator="#{settleAccountsController.checkSelectData}"/>
+			</div>
+	</h:form>
+	<p:confirmDialog message="是否确认撤销老人离院结算？" severity="alert" modal="true" 
+		widgetVar="redoSettleConfirm" appendTo="@(body)">
+		<h:form>
+			<p:commandButton styleClass="submitbtn" value="" style="margin-left:80px;"
+				actionListener="#{settleAccountsController.redoSettleAccounts}"
+				update=":payListForm,:messages" 
+				ajax="true"
+				oncomplete="redoSettleConfirm.hide()" />
+			<p:commandButton styleClass="cancelbtn" value=""
+				onclick="redoSettleConfirm.hide()" 
+				type="button" />
+		</h:form>
+	</p:confirmDialog>
+	<p:dialog widgetVar="detailDig"   header="在院期间缴费明细" appendTo="@(body)" resizable="true" modal="true">
+		<p:tabView style="height:250px;" id="tabView" tabChangeListener="#{settleAccountsController.onChangeTab}">
+		<p:tab title="已缴费日常项目" id="paidNormal">
+			<h:form id="paidNormalForm">
+				<p:dataTable id="paidNormalList"
+					value="#{settleAccountsController.paidNormals}"
+					var="paidNormal" rowKey="#{paidNormal.id}"
+					emptyMessage="当前无记录"
+					paginator="true"
+					rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+						<p:column headerText="总费用" >
+							<h:outputText
+								value="#{paidNormal.totalfees}" />
+						</p:column>
+						<p:column headerText="开单人" >
+							<h:outputText
+								value="#{paidNormal.generatorName}" />
+						</p:column>
+						<p:column headerText="开单日期" >
+							<h:outputText
+								value="#{paidNormal.generatetime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="收款人" >
+							<h:outputText
+								value="#{paidNormal.payeeName}" />
+						</p:column>
+						<p:column headerText="收款日期" >
+							<h:outputText
+								value="#{paidNormal.paytime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+				</p:dataTable>
+			</h:form>
+		</p:tab>
+		<p:tab title="已缴费临时项目" id="paidTemp">
+			<h:form id="paidTempForm">
+				<p:dataTable id="paidTempList"
+					value="#{settleAccountsController.paidTemps}"
+					var="paidTemp" rowKey="#{paidTemp.id}"
+					emptyMessage="当前无记录"
+					paginator="true"
+					rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+						<p:column headerText="总费用" >
+							<h:outputText
+								value="#{paidTemp.totalfees}" />
+						</p:column>
+						<p:column headerText="开始时间" >
+							<h:outputText
+								value="#{paidTemp.starttime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="结束时间" >
+							<h:outputText
+								value="#{paidTemp.endtime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="开单人" >
+							<h:outputText
+								value="#{paidTemp.generatorName}" />
+						</p:column>
+						<p:column headerText="开单日期" >
+							<h:outputText
+								value="#{paidTemp.generatetime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+				</p:dataTable>
+			</h:form>
+		</p:tab>
+		<p:tab title="未缴费日常项目" id="unpaidNormal">
+			<h:form id="unpaidNormalForm">
+				<p:dataTable id="unpaidNormalList"
+					value="#{settleAccountsController.unPaidNormals}"
+					var="unPaidNormal" rowKey="#{unPaidNormal.id}"
+					emptyMessage="当前无记录"
+					paginator="true"
+					rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+						<p:column headerText="总费用" >
+							<h:outputText
+								value="#{unPaidNormal.totalfees}" />
+						</p:column>
+						<p:column headerText="开单人" >
+							<h:outputText
+								value="#{unPaidNormal.generatorName}" />
+						</p:column>
+						<p:column headerText="开单日期" >
+							<h:outputText
+								value="#{unPaidNormal.generatetime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="收款人" >
+							<h:outputText
+								value="#{unPaidNormal.payeeName}" />
+						</p:column>
+						<p:column headerText="收款日期" >
+							<h:outputText
+								value="#{unPaidNormal.paytime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+				</p:dataTable>
+			</h:form>
+		</p:tab>
+		<p:tab title="未缴费临时项目" id="unpaidTemp" >
+			<h:form id="unpaidTempForm">
+				<p:dataTable id="unpaidTempList"
+					value="#{settleAccountsController.unPaidTemps}"
+					var="unPaidTemp" rowKey="#{unPaidTemp.id}"
+					emptyMessage="当前无记录"
+					paginator="true"
+					rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+						<p:column headerText="总费用" >
+							<h:outputText
+								value="#{unPaidTemp.totalfees}" />
+						</p:column>
+						<p:column headerText="开始时间" >
+							<h:outputText
+								value="#{unPaidTemp.starttime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="结束时间" >
+							<h:outputText
+								value="#{unPaidTemp.endtime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="开单人" >
+							<h:outputText
+								value="#{unPaidTemp.generatorName}" />
+						</p:column>
+						<p:column headerText="开单日期" >
+							<h:outputText
+								value="#{unPaidTemp.generatetime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+				</p:dataTable>
+			</h:form>
+		</p:tab>
+		</p:tabView>
+		<div align="center" >  
+		<h:form id="settleForm">
+		<h1 style="font-size:18px;font-weight:bold">
+			<font color="green">已交金额：#{settleAccountsController.totalFees}&nbsp;&nbsp;</font>
+			<font color="red">欠款：#{settleAccountsController.left}&nbsp;&nbsp;</font>
+		</h1>
+		<p:commandButton value="结算" styleClass="commonbtn" ajax="true" process="@this,settleForm:checkBeforeSettle"
+			oncomplete="afterCheckSettle(xhr,status,args)"
+			update=":messages">
+		</p:commandButton>
+		<p:commandButton value="关闭" styleClass="commonbtn" onclick="detailDig.hide()"
+			type="button"></p:commandButton>
+		<h:inputHidden value="checkBeforeSettle" id="checkBeforeSettle" validator="#{settleAccountsController.checkBeforeSettle}"/>
+		</h:form>
+		</div>
+	</p:dialog>
+	<p:confirmDialog message="是否确认老人离院结算？" severity="alert"
+		widgetVar="settleConfirm" appendTo="@(body)">
+		<h:form>
+			<p:commandButton styleClass="submitbtn" value="" style="margin-left:80px;"
+				actionListener="#{settleAccountsController.settleAccounts}"
+				update=":payListForm,:messages" 
+				ajax="true"
+				oncomplete="settleConfirm.hide(),afterSettleAccounts(xhr,status,args)" />
+			<p:commandButton styleClass="cancelbtn" value=""
+				onclick="settleConfirm.hide()" 
+				type="button" />
+		</h:form>
+	</p:confirmDialog>
+	<p:dialog widgetVar="approveDig"  header="离院审批详情" appendTo="@(body)" resizable="true" modal="true">
+			<h:form id="approveForm">
+				<p:dataTable id="approveList"
+					value="#{settleAccountsController.approves}"
+					var="approve" rowKey="#{approve.id}"
+					emptyMessage="当前无记录"
+					paginator="true"
+					rows="10" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+						<p:column headerText="部门" >
+							<h:outputText
+								value="#{approve.departName}" />
+						</p:column>
+						<p:column headerText="审批人" >
+							<h:outputText
+								value="#{approve.approveName}" />
+						</p:column>
+						<p:column headerText="审批结果" >
+							<h:outputText value="同意" rendered="#{approve.approveresult == 1}"/>
+							<h:outputText value="不同意" rendered="#{approve.approveresult == 2}"/>
+							<h:outputText value="正在审批" rendered="#{approve.approveresult != 1 and approve.approveresult != 2}"/>
+						</p:column>
+						<p:column headerText="审批日期" >
+							<h:outputText
+								value="#{approve.approvetime}" >
+								<f:convertDateTime pattern="yyyy-MM-dd"/>
+							</h:outputText>
+						</p:column>
+				</p:dataTable>
+				<div align="center" >  
+		<p:commandButton value="关闭" styleClass="commonbtn" onclick="approveDig.hide()" type="button"></p:commandButton>
+		</div>
+			</h:form>
+			</p:dialog>
+	<script type="text/javascript">
+	function afterCheckSelectCloseData(xhr,status,args){
+		if(args.validate){
+			redoSettleConfirm.show();
+			}
+	}
+	function afterCheckSelectPayData(xhr,status,args){
+		if(args.validate){
+			detailDig.show();
+			}
+	}
+	
+	function afterSettleAccounts(xhr,status,args){
+		if(args.validate){
+			detailDig.hide();
+			}
+	}
+	function afterCheckSettle(xhr,status,args){
+		if(args.validate){
+			settleConfirm.show();
+			}
+	}
+	function afterCheckSelectData(xhr,status,args){
+		if(args.validate){
+			approveDig.show();
+			}
+	}
+	
+		function clearSearchForm(){
+			jQuery("#searchForm\\:olderName").val("");
+			jQuery("#searchForm\\:bedName").val("");
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

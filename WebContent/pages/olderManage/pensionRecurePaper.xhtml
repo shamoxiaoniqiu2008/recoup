@@ -1,0 +1,889 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.pensionRecurePaperTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+<style>
+.old {
+	background-color:#99FF99;
+	background-image: none !important;
+	color: #000000 !important;
+}
+
+.overdiv{
+	cursor:pointer;
+	display:block;
+	font-size:12px;
+	overflow:hidden;
+	height:18px;
+	width:150px;
+	border:0px solid #e6e6e6;
+}
+.overdivscroll{
+	cursor:pointer;
+	display:block;
+	font-size:12px;
+	overflow:auto;
+	height:230px; 
+	width:150px; 
+	border:0px solid #e6e6e6;
+}
+#addFormDetail tr td{
+vertical-align:top;
+}
+</style>
+	<h:body>
+		<p:growl id="message" widgetVar="message" ></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText id="olderName" style="width:145px;" onblur="clearHide(this,'searchForm:olderId')"
+						value="#{pensionRecureController.olderName}" /> <his:IME
+						for="searchForm:olderName" rawSQL="true"
+						SQL="#{pensionRecureController.olderSQL}" fitcol="inputCode"
+						multiresult="searchForm:olderId;0,searchForm:olderName;1"
+						SQLResult="编号:0,姓名:1,输入码:2,大厦:6,楼层:5,房间:4,床位:3" resultcol="1"
+						lock="false" /> <p:inputText  style="display:none;"
+						value="#{pensionRecureController.olderId}" id="olderId" /></td>
+					<td class="leftcell">项目名称:</td>
+					<td><p:inputText id="recureitemName" style="width:145px;" onblur="clearHide(this,'searchForm:recureitemId')"
+						value="#{pensionRecureController.recureitemName}" /> <his:IME
+						for="searchForm:recureitemName" rawSQL="true"
+						SQL="select p.id,p.itemName,p.inputCode from pension_dic_recure_item p  where p.invalided = 1" 
+						fitcol="inputCode,itemName"
+						multiresult="searchForm:recureitemId;0,searchForm:recureitemName;1"
+						SQLResult="编号:0,名称:1,输入码:2" resultcol="1"
+						lock="false" /> <p:inputText style="display:none;"
+						value="#{pensionRecureController.recureitemId}" id="recureitemId" /></td>
+
+					<td>老人状态:</td>
+					<td><h:selectOneMenu style="width:145px;"
+						class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+						value="#{pensionRecureController.handle}">
+						<f:selectItem itemValue="1" itemLabel="新开" />
+						<f:selectItem itemValue="2" itemLabel="完成" />
+					</h:selectOneMenu></td>
+					
+					<td class="leftcell"><p:commandButton styleClass="searchbtn" value=""
+						actionListener="#{pensionRecureController.searchRecureRecords}"
+						update=":olderRecureForm,:message" /></td>
+					<td class="leftcell"><p:commandButton
+						actionListener="#{pensionRecureController.clearSearchForm}"
+						update=":searchForm" styleClass="blankbtn" value="" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="olderRecureForm">
+			<table width="100%">
+				<tr>
+					<td>
+					<p:dataTable cellspacing="8" rows="10" style="width:100%"
+						id="olderRecureMainTable"
+						selection="#{pensionRecureController.olderRecureMainExtendSel}"
+						value="#{pensionRecureController.olderRecureMainExtendList}"
+						paginator="true" paginatorPosition="bottom"
+						paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						var="record" rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录">
+
+						<p:column headerText="老人姓名" style="width:80px">
+							<h:outputText value="#{record.olderName}">
+							</h:outputText>
+						</p:column>
+						<p:column headerText="康复类别" style="width:160px">
+							<h:outputText value="#{record.recureitemName}" />
+						</p:column>
+						<p:column headerText="开始时间" style="width:120px">
+							<h:outputText value="#{record.starttime}">
+								<f:convertDateTime pattern="yyyy-MM-dd" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="录入时间" style="width:120px">
+							<h:outputText value="#{record.inputtime}">
+								<f:convertDateTime pattern="yyyy-MM-dd" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="录入人" style="width:160px">
+							<h:outputText value="#{record.inputerName}" />
+						</p:column>
+						<p:column headerText="备注" style="width:160px">
+							<h:outputText title="#{record.notes}" value="#{fn:substring(record.notes,0,10)}#{fn:length(record.notes) gt 10?'..':''}" />
+						</p:column>
+					</p:dataTable>
+					
+					</td>
+				</tr>
+			</table>
+
+			<div align="center">
+				<p:commandButton
+					oncomplete="addRecureDialog.show()" id="addButton"
+					
+					actionListener="#{pensionRecureController.showAdd}"
+					styleClass="addbtn" value="" update=":addForm,:message,:addFormDetail">
+				</p:commandButton> 
+				<!-- 按项目添加为另一种生产康复计划的方式，以后扩充，如果需要显示，修改rendered=为true-->
+				<p:commandButton rendered="true"
+					oncomplete="AddByItemDialog.show()" id="addByItemButton"
+					actionListener="#{pensionRecureController.beforeAddOlderRecureMain}"
+					update=":addForm,:message,:addFormDetail,:olderRecureForm"
+					styleClass="commonbtn" value="按项目添加"> 
+				</p:commandButton> 
+				<p:commandButton
+					oncomplete=" showDetailHande(xhr,status,args)" id="showButton"
+					actionListener="#{pensionRecureController.showDetail}"
+					update=":addForm,:message,:addFormDetail,:olderRecureForm"
+					styleClass="commonbtn" value="修改"> 
+				</p:commandButton> 
+				<p:commandButton
+					id="delButton"
+					onstart="return confirm('确认要删除吗？')"
+					actionListener="#{pensionRecureController.delRecure}"
+					update=":addForm,:message,:addFormDetail,:olderRecureForm"
+					styleClass="commonbtn" value="删除"> 
+				</p:commandButton> 
+			</div>
+		</h:form>
+		<!-- 新增康复信息 -->
+		<p:dialog header="康复计划维护" widgetVar="addRecureDialog"
+			resizable="true"  appendTo="@(body)" modal="true">
+			<h:form id="addForm" styleClass="noDisable">
+			<table class="hengbiaoge" width="100%" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont" for="olderName">老人姓名:</label></td>
+						<td class="hengbiaogedata"><p:inputText style="width:100%"
+							disabled="#{pensionRecureController.olderRecureMainExtend.id eq null?'false':'true'}"
+							id="olderName" value="#{pensionRecureController.olderRecureMainExtend.olderName}">
+						</p:inputText><his:IME for="addForm:olderName" rawSQL="true"
+							SQL="#{pensionRecureController.newOlderSQL}" fitcol="inputCode"
+							multiresult="addForm:olderName;1,addForm:olderId;0"
+							SQLResult="编号:0,姓名:1,输入码:2,大厦:6,楼层:5,房间:4,床位:3,状态:7"
+							resultcol="1" lock="false" /> <h:inputHidden
+							value="#{pensionRecureController.olderRecureMainExtend.olderId}"
+							id="olderId" /></td>
+						<td class="hengbiaogeHeader1"><label class="redfont" for="itemName">康复项目:</label></td>
+						<td class="hengbiaogedata">
+							<p:inputText  id="itemName" style="width:100%"
+								disabled="#{pensionRecureController.olderRecureMainExtend.id eq null?'false':'true'}"
+								value="#{pensionRecureController.olderRecureMainExtend.recureitemName}">
+							</p:inputText>
+							<his:IME for="addForm:itemName" rawSQL="true"
+							SQL="#{pensionRecureController.itemSQL}" fitcol="inputCode"
+							multiresult="addForm:itemName;1,addForm:itemId;0"
+							SQLResult="项目ID:0:hide,项目类别:1,项目价格:3"
+							resultcol="1" lock="false" /> 
+							<h:inputHidden
+							value="#{pensionRecureController.olderRecureMainExtend.recureitemId}"
+							id="itemId" />
+						</td>
+						<td class="hengbiaogeHeader1"><label class="redfont" for="starttime_input">康复计划开始时间:</label></td>
+						<td class="hengbiaogedata"><p:calendar id="starttime" size="50"
+							disabled="#{pensionRecureController.olderRecureMainExtend.id eq null?'false':'true'}"
+							value="#{pensionRecureController.olderRecureMainExtend.starttime}" pattern="yyyy-MM-dd"/></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+						<td class="hengbiaogedata" colspan="5"><p:inputTextarea style="width:99%;height:20px"
+							value="#{pensionRecureController.olderRecureMainExtend.notes}" /></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton
+					 onstart="return checkNulls('addForm','redfont',true);"
+						action="#{pensionRecureController.countRecureDetail}"
+						oncomplete="addRecureDialogHide(xhr,status,args)"
+						styleClass="submitbtn" value=""
+						disabled="#{pensionRecureController.olderRecureMainExtend.id eq null?'false':'true'}"
+						update=":olderRecureForm,:addForm,:message,:addFormDetail">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{pensionRecureController.clearAddForm}"
+						update=":addForm"
+						disabled="#{pensionRecureController.olderRecureMainExtend.id eq null?'false':'true'}"
+						oncomplete="addRecureDialogHide(xhr,status,args)" />
+					<p:commandButton onclick="addRecureDialog.hide()" style="display:none;"
+						styleClass="cancelbtn" value="" />
+					
+					<p:commandButton
+					 onstart="return checkNulls('addForm','redfont',true);"
+						action="#{pensionRecureController.saveNotes}"
+						oncomplete="addRecureDialogHide(xhr,status,args)"
+						styleClass="commonbtn"  value="保存备注"
+						disabled="#{pensionRecureController.olderRecureMainExtend.id eq null?'true':'false'}"
+						update=":olderRecureForm,:addForm,:message,:addFormDetail">
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+			<h:form id="addFormDetail" style="width:100%">
+			<p:dataTable	
+						id="olderRecureDetailTable" rowIndexVar="index" scrollable="true" scrollHeight="280"
+						value="#{pensionRecureController.olderRecureDetailList}"  rowSelectMode="add"
+						rowStyleClass="#{record.steps%2 eq 1? null: 'old'}"
+						style="width:100%"  selectionMode="multiple" selection="#{pensionRecureController.selectedRecureDetailList}"
+						var="record" rowKey="#{record.id}" emptyMessage="没有相应记录">	
+											
+						<p:column headerText="康复步骤" style="width:100%" valign="top">
+							<h:outputText  value="#{record.recuredetailName}" ></h:outputText>
+						</p:column>
+						
+						<p:column headerText="描述" style="width:100%">
+						<div title="双击显示所有..."  onDblClick="changeme(this);"  onselectstart="return false" class="overdiv" >
+							#{record.recuredetailDetails}
+						</div>
+						</p:column>
+						<p:column headerText="计划时间" style="width:100%" valign="top">
+							<p:calendar
+								value="#{record.plantime}" pattern="yyyy-MM-dd"/>
+						</p:column>
+						<p:column headerText="实际责任人" style="width:100%">
+							<p:inputText id="realnurseName" onfocus="showPME(this)"  value="#{record.realnurseName}" ></p:inputText><p:inputText 
+							id="realnurse" style="display:none;"  value="#{record.realnurse}" ></p:inputText>
+							
+						</p:column>
+						<p:column headerText="备注" style="width:100%">
+						<p:inputText  value="#{record.notes}" ></p:inputText>	
+						</p:column>
+					</p:dataTable>
+					
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton
+						oncomplete="confirmAddDialog.show()"
+						styleClass="commonbtn" value="保存修改">
+					</p:commandButton>
+					<p:commandButton
+						action="#{pensionRecureController.initAddRow}"
+						oncomplete="addDialog.show()" update=":addnewForm"
+						disabled="#{pensionRecureController.olderRecureMainExtend.id eq null?'true':'false'}"
+						styleClass="commonbtn" value="新增计划">
+					</p:commandButton>
+					<p:commandButton
+						oncomplete="confirmDelDialog.show()"
+						styleClass="commonbtn" value="删除选中记录">
+					</p:commandButton>
+					<p:commandButton onclick="addRecureDialog.hide()"
+						styleClass="commonbtn" value="关闭"/>
+				</h:panelGrid>
+			</h:form>
+			
+		</p:dialog>
+
+		<!-- 确认保存记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="保存计划"
+			widgetVar="confirmAddDialog">
+			<h:form id="confirmAddForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="确定保存此计划?" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{pensionRecureController.saveRecureDetail}"
+							update=":olderRecureForm,:message,:addFormDetail"
+							oncomplete="confirmAddDialog.hide()">
+						</p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmAddDialog.hide();">
+						</p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 新增记录的dialog -->
+		<p:dialog header="新增计划" widgetVar="addDialog" resizable="false" appendTo="@(body)" modal="true">
+			<h:form id="addnewForm">
+				<table class="hengbiaoge">
+					<tr>
+						<td class="hengbiaogeHeader1">
+							<h:outputText value="老人姓名:" styleClass="redfont" />
+						</td>
+						<td class="hengbiaogedata">
+							<p:inputText readonly="true" size="42" 
+								value="#{pensionRecureController.olderRecureMainExtend.olderName}">
+							</p:inputText>
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1">
+							<h:outputText value="康复项目名称:" styleClass="redfont" />
+						</td>
+						<td class="hengbiaogedata">
+							<p:inputText readonly="true" size="42" 
+								value="#{pensionRecureController.olderRecureMainExtend.recureitemName}">
+							</p:inputText>
+						</td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1">
+							<label class="redfont" for="recuredetailName">康复步骤名称:</label>
+						</td>
+						<td class="hengbiaogedata">
+							<p:inputText id="recuredetailName" size="42" 
+							required="true" requiredMessage="康复步骤名称不能为空"
+							value="#{pensionRecureController.addRow.recuredetailName}" ></p:inputText>
+						</td>
+					</tr>
+					<tr>					
+						<td class="hengbiaogeHeader1">
+							<label class="redfont" for="detail">康复详细描述:</label>
+						</td>
+						<td class="hengbiaogedata">
+							<p:inputTextarea id="detail" cols="32" 
+							required="true" requiredMessage="康复详细描述不能为空"
+							value="#{pensionRecureController.addRow.recuredetailDetails}" ></p:inputTextarea>
+						</td>
+					</tr>
+					<tr>					
+						<td class="hengbiaogeHeader1">
+							<label class="redfont"  for="plantime">计划日期:</label>
+						</td>
+						<td class="hengbiaogedata">
+							<p:calendar id="plantime" size="42"  
+							required="true" requiredMessage="计划日期不能为空"
+							value="#{pensionRecureController.addRow.plantime}" pattern="yyyy-MM-dd"/>
+						</td>
+					</tr>
+					<tr>					
+						<td class="hengbiaogeHeader1">
+							<label class="redfont" for="realnurseName">实际责任人:</label>
+						</td>
+						<td class="hengbiaogedata">
+							<p:inputText id="realnurseName" size="42" onfocus="showPME(this)" 
+								required="true" requiredMessage="实际责任人不能为空"
+							value="#{pensionRecureController.addRow.realnurseName}" >
+							</p:inputText>
+							<p:inputText 
+								id="realnurse" style="display:none;"  value="#{pensionRecureController.addRow.realnurse}" >
+							</p:inputText>
+						</td>
+					</tr>
+					<tr>					
+						<td class="hengbiaogeHeader1">
+							<label>备注:</label>
+						</td>
+						<td class="hengbiaogedata">
+							<p:inputText size="42"  id="notes" value="#{pensionRecureController.addRow.notes}" 
+							></p:inputText>	
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton action="#{pensionRecureController.saveSingleRecureDetail}"
+						styleClass="submitbtn" value="" oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":olderRecureForm,:message,:addFormDetail" 
+						>
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" value="" process="@this"
+						actionListener="#{pensionRecureController.initAddRow}"
+						update=":addnewForm" />
+					<p:commandButton onclick="addDialog.hide()" process="@this"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<!-- 确认删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="#{pageConfig.deleteRow}"
+			widgetVar="confirmDelDialog">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="#{pageConfig.sureDelete}?" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{pensionRecureController.deleteRecureDetail}"
+							update=":olderRecureForm,:message,:addFormDetail"
+							oncomplete="confirmDelDialog.hide()">
+						</p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();">
+						</p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		
+		<p:dialog widgetVar="detailDig" appendTo="@(body)" 
+			resizable="true" header="" modal="true">
+			<h:form id="recureDetailForm">
+			<table>
+			<tr>
+			<td class="hengbiaogeHeader1 ">
+				<h:outputText value="项目名称"></h:outputText>
+			</td>
+			<td class="hengbiaogedata">
+				<p:inputText value="#{pensionRecureController.copyRecureDetailExtend.name}" 
+					id="name" readonly="true"></p:inputText>
+			</td>
+			</tr>
+			<tr>
+			<td class="hengbiaogeHeader1 redfont">
+				<h:outputText value="开始时间"></h:outputText>
+			</td>
+			<td class="hengbiaogedata">
+				<p:calendar value="#{pensionRecureController.copyRecureDetailExtend.starttime}" 
+					id="starttime" size="10" pattern="yyyy-MM-dd"
+					required="true" requiredMessage="请选择开始时间！"/>
+			</td>
+			</tr>
+			<tr>
+			<td class="hengbiaogeHeader1 redfont">
+				<h:outputText value="持续时间"></h:outputText>
+			</td>
+			<td class="hengbiaogedata">
+				<p:spinner id="totalday"   
+                    value="#{pensionRecureController.copyRecureDetailExtend.totalday}" 
+                    min="1" max="100"
+                    required="true" requiredMessage="请输入持续时间！"/> 
+			</td>
+			</tr>
+			<tr>
+			<td class="hengbiaogeHeader1 redfont">
+				<h:outputText value="服务次数"></h:outputText>
+			</td>
+			<td class="hengbiaogedata">
+				<p:spinner id="number"   
+                    value="#{pensionRecureController.copyRecureDetailExtend.number}" 
+                    min="1" max="100"
+                    required="true" requiredMessage="请输入服务次数！"/> 
+			</td>
+			</tr>
+			<tr>
+			<td class="hengbiaogeHeader1 redfont">
+				<h:outputText value="负责人"></h:outputText>
+			</td>
+			<td class="hengbiaogedata">
+				<h:inputHidden value="#{pensionRecureController.copyRecureDetailExtend.dutynurse}" id="dutynurse"></h:inputHidden>
+				<p:inputText value="#{pensionRecureController.copyRecureDetailExtend.dutynurseName}" 
+					id="dutynurseName"
+					required="true" requiredMessage="请选择负责人！"></p:inputText>
+				<his:IME for="recureDetailForm:dutynurseName"
+					fitcol="userId,inputCode" resultcol="1"
+					lock="false" rawSQL="true" 
+					SQL="#{pensionRecureController.recoverToSql}"
+					SQLResult="编号:0:hide,姓名:1,输入码:2"
+					multiresult="recureDetailForm:dutynurse;0,recureDetailForm:dutynurseName;1"  />
+			</td>
+			</tr>
+			</table>
+			<div align="center">
+			<p:commandButton styleClass="submitbtn" value=""
+				action="#{pensionRecureController.saveEditRecureDetail}"
+				update=":addItemForm,:message" 
+				oncomplete="detailDig.hide()" />
+			<p:commandButton styleClass="cancelbtn" value=""
+				onclick="detailDig.hide()" type="button" />
+			</div>
+			</h:form>
+		</p:dialog>
+		<!-- 查看康复信息 -->
+		<p:dialog header="康复训练计划制定" widgetVar="AddByItemDialog" position="top" 
+				  resizable="false"  appendTo="@(body)" modal="true">
+			<h:form id="addItemForm">
+			<div align="center">
+			    <p:wizard backLabel="上一步" nextLabel="下一步" 
+			    	flowListener="#{pensionRecureController.handleFlow}">  
+        			<p:tab id="personal" title="第一步：项目选项"> 
+	            		<p:panel header="项目详情" closeTitle="true">
+		            		<table class="hengbiaoge" width="280px" align="center">
+								<tr>
+									<td class="hengbiaogeHeader1"><label class="redfont" for="olderName">老人姓名:</label></td>
+									<td class="hengbiaogedata"><p:inputText
+										id="olderName" value="#{pensionRecureController.olderRecureMainExtend.olderName}"
+										required="true" requiredMessage="请选择老人姓名！">
+										<p:ajax event="blur" 
+											process="@this,addItemForm:olderName,addItemForm:olderId"></p:ajax>
+									</p:inputText><his:IME for="addItemForm:olderName" rawSQL="true"
+										SQL="#{pensionRecureController.newOlderSQL}" fitcol="inputCode"
+										multiresult="addItemForm:olderName;1,addItemForm:olderId;0"
+										SQLResult="编号:0,姓名:1,输入码:2,大厦:6,楼层:5,房间:4,床位:3,状态:7"
+										resultcol="1" lock="false" /> 
+									<h:inputHidden
+										value="#{pensionRecureController.olderRecureMainExtend.olderId}"
+										id="olderId" /></td>
+									<td class="hengbiaogeHeader1"><label class="redfont" for="itemName">康复项目:</label></td>
+									<td class="hengbiaogedata">
+										<p:inputText  id="itemName"
+											disabled="#{pensionRecureController.olderRecureMainExtend.id eq null?'false':'true'}"
+											value="#{pensionRecureController.olderRecureMainExtend.recureitemName}"
+											required="true" requiredMessage="请选择康复项目！">
+											<p:ajax event="blur" 
+												process="@this,addItemForm:itemName,addItemForm:itemId"
+												listener="#{pensionRecureController.updateItemList}" update=":addItemForm,:message"></p:ajax>
+										</p:inputText>
+										<his:IME for="addItemForm:itemName" rawSQL="true"
+											SQL="#{pensionRecureController.itemSQL}" fitcol="inputCode"
+											multiresult="addItemForm:itemName;1,addItemForm:itemId;0"
+											SQLResult="项目ID:0:hide,项目类别:1,项目价格:3"
+											resultcol="1" lock="false" /> 
+										<h:inputHidden
+										value="#{pensionRecureController.olderRecureMainExtend.recureitemId}"
+										id="itemId" />
+									</td>
+									<p:watermark value="请输入老人名称" for=":addItemForm:olderName"></p:watermark>
+									<p:watermark value="请输入项目名称" for=":addItemForm:itemName"></p:watermark>
+								</tr>
+							</table>
+				       			<p:pickList id="pojoPickList" value="#{pensionRecureController.items}" var="items" effect="bounce"  
+				                    itemValue="#{items}" itemLabel="#{items.name}"  converter="#{pensionRecureController.recureConveter}"
+				                    addLabel="添加单项" addAllLabel="添加所有" removeLabel="移除单项" removeAllLabel="移除所有"
+				                    moveUpLabel="向上" moveTopLabel="顶端" moveDownLabel="向下" moveBottomLabel="底端"
+				                    showSourceControls="true" showTargetControls="true" showCheckbox="true"  
+				                    showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" >  
+				  
+							        <f:facet name="sourceCaption">可选项目</f:facet>  
+							        <f:facet name="targetCaption">已选项目</f:facet>  
+							  
+							        <p:ajax event="transfer" listener="#{pensionRecureController.onTransfer}" />  
+							  
+							        <p:column style="width:90%;">  
+							            #{items.name}  
+							        </p:column>  
+							        
+							  
+							    </p:pickList>  
+	            		</p:panel>
+            		</p:tab>
+        			<p:tab id="personal1" title="第二步：计划方案"> 
+	            		<p:panel header="方案详情">
+	            			<h:form id="planDetailsForm" > 
+	            			<p:dataTable value="#{pensionRecureController.recureList_tar}" 
+	            				id="availableItems" var="recureItem" 
+	            				scrollable="true"  scrollHeight="250">
+						            <p:column headerText="项目名称" width="20%">
+						                <h:outputText value="#{recureItem.name}" />  
+						            </p:column>  
+						  			<p:column headerText="开始时间" >
+							  			<p:calendar value="#{recureItem.starttime}" size="10" pattern="yyyy-MM-dd">
+							  			</p:calendar> 
+									</p:column>
+						            <p:column headerText="持续时间" >
+							             <h:outputText value="#{recureItem.totalday}" style="width:85%"/> 
+						            </p:column>  
+						  
+						            <p:column headerText="服务次数"> 
+					                    <h:outputText value="#{recureItem.number}"  style="width:85%" /> 
+						            </p:column>  
+						  
+						            <p:column headerText="护理员"> 
+										<h:outputText  value="#{recureItem.dutynurseName}" />
+						            </p:column>  
+						            <p:column headerText="操作">
+										<p:commandLink process="@this," 
+											ajax="true" rendered="true"
+											actionListener="#{pensionRecureController.editRecureDetail(recureItem)}"
+											oncomplete="detailDig.show()"
+											update=":recureDetailForm,:message">
+											<p:graphicImage value="/css/images/edit_btn.jpg" style="margin: 5px 5px 5px 0;border:0px;border-radius: 3px;width: 50px;height: 23px;"></p:graphicImage>
+										</p:commandLink>	
+									</p:column>
+	            				</p:dataTable>
+	            			</h:form>
+	            		</p:panel>
+            		</p:tab>
+        			<p:tab id="personal2" title="第三步：计划确定"> 
+	            		<p:panel header="计划列表" >
+							<h:form id="addFormDetail">
+								<p:dataTable id="olderRecureDetailTable" 
+									rowIndexVar="index" scrollable="true"  scrollHeight="250"
+									value="#{pensionRecureController.olderRecureDetailList}"
+									selection="#{pensionRecureController.selectOlderRecure}"
+									selectionMode="single"
+									rowStyleClass="#{record.steps%2 eq 1? null: 'old'}"
+									var="record" rowKey="#{record.id}" emptyMessage="没有相应记录">						
+									<p:column headerText="计划日期">
+										<h:outputText value="#{record.plantime}">
+											<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+										</h:outputText>
+									</p:column>
+									<p:column headerText="步骤名称">
+										<h:outputText value="#{record.recuredetailName}"></h:outputText>
+									</p:column>
+									<p:column headerText="步骤详情">
+										<h:outputText value="#{record.recuredetailDetails}"></h:outputText>
+									</p:column>
+									<p:column headerText="责任人">
+										<h:outputText value="#{record.realnurseName}"></h:outputText>
+									</p:column>
+								</p:dataTable>
+								<div align="center">
+									<p:commandButton styleClass="commonbtn" value="新增"
+										action="#{pensionRecureController.beforeAddOlderRecure}"
+										update=":olderRecureDetailForm,:message" 
+										ajax="true" process="@this"
+										oncomplete="detailDig.hide()" />
+									<p:commandButton styleClass="commonbtn" value="修改"
+										action="#{pensionRecureController.beforeModifyOlderRecure}"
+										update=":olderRecureDetailForm,:message" 
+										ajax="true" process="@this"
+										oncomplete="checkModifyData(xhr, status, args)" />
+									<p:commandButton styleClass="commonbtn" value="删除"
+										action="#{pensionRecureController.deleteOlderRecure}"
+										update=":addItemForm,:message" 
+										ajax="true" process="@this"/>
+									<p:commandButton styleClass="commonbtn" value="保存"
+										action="#{pensionRecureController.saveOlderRecures}"
+										oncomplete="afterSaveOlderRecureByProgram(xhr, status, args)"
+										update=":message" 
+										ajax="true" process="@this" />
+								</div>
+							</h:form>	            		
+	            		</p:panel>
+            		</p:tab>
+            	</p:wizard>
+            </div>
+            </h:form>
+		</p:dialog>
+		<p:dialog widgetVar="recureDig" 
+			appendTo="@(body)" resizable="true" header="康复计划明细" modal="true">
+			<h:form id="olderRecureDetailForm">
+			<table>
+			<tr>
+			<td class="hengbiaogeHeader1 redfont">
+				<label class="redfont" for="starttime">计划时间:</label>
+			</td>
+			<td class="hengbiaogedata">
+				<p:calendar value="#{pensionRecureController.selectOlderRecure.plantime}" 
+					id="starttime" size="10" pattern="yyyy-MM-dd"/>
+			</td>
+			</tr>
+			<tr>
+			<td class="hengbiaogeHeader1 redfont">
+				<label class="redfont" for="recuredetailName">康复步骤:</label>
+			</td>
+			<td class="hengbiaogedata">
+				<h:inputHidden value="#{pensionRecureController.selectOlderRecure.recuredetailId}" id="recuredetailId"></h:inputHidden>
+				<p:inputText value="#{pensionRecureController.selectOlderRecure.recuredetailName}" 
+					id="recuredetailName" ></p:inputText>
+				<his:IME for="olderRecureDetailForm:recuredetailName"
+					fitcol="name" resultcol="1"
+					lock="false" rawSQL="true" 
+					SQL="#{pensionRecureController.recureDetailSql}"
+					SQLResult="编号:0:hide,名称:1,详情:2,详情hide:3:hide,责任人ID:4:hide,责任人:5"
+					multiresult="olderRecureDetailForm:recuredetailId;0,olderRecureDetailForm:recuredetailName;1,olderRecureDetailForm:recuredetailDetails;3,olderRecureDetailForm:realnurse;4,olderRecureDetailForm:realnurseName;5"  />
+			</td>
+			</tr>
+			<tr>
+			<td class="hengbiaogeHeader1">
+				<label class="redfont" for="recuredetailDetails">康复详情:</label>
+			</td>
+			<td class="hengbiaogedata">
+				<p:inputTextarea id="recuredetailDetails"   
+                    value="#{pensionRecureController.selectOlderRecure.recuredetailDetails}" 
+                    scrollHeight="20"/> 
+			</td>
+			</tr>
+			<tr>
+			<td class="hengbiaogeHeader1 redfont">
+				<label class="redfont" for="realnurseName">负责人:</label>
+			</td>
+			<td class="hengbiaogedata">
+				<h:inputHidden value="#{pensionRecureController.selectOlderRecure.realnurse}" id="realnurse"></h:inputHidden>
+				<p:inputText value="#{pensionRecureController.selectOlderRecure.realnurseName}" 
+					id="realnurseName"></p:inputText>
+				<his:IME for="olderRecureDetailForm:realnurseName"
+					fitcol="userId,inputCode" resultcol="1"
+					lock="false" rawSQL="true" 
+					SQL="#{pensionRecureController.recoverToSql}"
+					SQLResult="编号:0:hide,姓名:1,输入码:2"
+					multiresult="olderRecureDetailForm:realnurse;0,olderRecureDetailForm:realnurseName;1"  />
+			</td>
+			</tr>
+			<tr>
+			<td class="hengbiaogeHeader1">
+				<h:outputText value="备注"></h:outputText>
+			</td>
+			<td class="hengbiaogedata">
+				<p:inputTextarea id="notes"   
+                    value="#{pensionRecureController.selectOlderRecure.notes}" 
+                    scrollHeight="15"/> 
+			</td>
+			</tr>
+			</table>
+			<div align="center">
+			<p:commandButton styleClass="submitbtn" value=""
+				onstart="return checkNulls('olderRecureDetailForm','redfont',true)"
+				action="#{pensionRecureController.saveOlderRecure}"
+				update=":addFormDetail,:addItemForm,:message" 
+				oncomplete="recureDig.hide()" />
+			<p:commandButton styleClass="cancelbtn" value=""
+				onclick="recureDig.hide()" type="button" />
+			</div>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+		function addRecureDialogHide(xhr,status,args){
+			if(args.hide)
+			{
+				addRecureDialog.hide();
+			}
+		}
+		function afterSaveOlderRecureByProgram(xhr, status, args){
+			if (args.validate) {
+				AddByItemDialog.hide();
+			}
+		}
+		function afterSaveOlderRecureByOlder(xhr, status, args){
+			if (args.validate) {
+				confirmAddDialog.hide();
+			}
+		}
+		function afterCheckModifyDate(xhr, status, args){
+			if (args.validate) {
+				recureDig.show();
+			}
+		}
+		function afterCheckDeleteDate(xhr, status, args){
+			if (args.validate) {
+				confirmDelDialog.show();
+			}
+		}
+		function checkModifyData(xhr, status, args) {
+			if (args.validate) {
+				recureDig.show();
+			}
+		}
+function handleUpdateComplete(xhr, status, args)
+{
+	if(!args.validationFailed) 
+	{
+		addDialog.hide();
+		updateDialog.hide();
+		confirmDelDialog.hide();
+    }	
+          
+}
+function addRecureDialogShow(xhr,status,args){
+	if(args.showEdit)
+	{
+		addRecureDialog.show();
+	}
+}
+function confirmDelDialogShow(xhr,status,args){
+if(args.del){
+	confirmDelDialog.show();
+}
+}
+thisObj =""
+function showPME(obj){
+
+	/* var ev  =  getEvent(e);
+	inputobj = getSrcElement(ev);
+	var posvec = this.GetPopPos(obj); */
+	document.getElementById("inputDiv").style.display="";
+	DisplayResult(obj);
+	thisObj = obj;
+	document.getElementById("inputForm:inputName").value = thisObj.value;
+
+	document.getElementById("inputForm:inputId").value = jQuery(thisObj).next().val();
+	
+	document.getElementById("inputForm:inputName").focus();
+	//document.getElementById("showDiv").innerHTML+= inputobj.id;
+}
+
+function blurMe() {
+	document.getElementById("inputDiv").style.display="none";
+	thisObj.value=document.getElementById("inputForm:inputName").value;
+	jQuery(thisObj).next().val(document.getElementById("inputForm:inputId").value);
+}
+
+document.onkeydown = function (evt) {
+    var isie = (document.all) ? true : false;
+    var key;
+    var srcobj;
+    if (isie) // IE下
+    {
+        key = event.keyCode;
+       srcobj = event.srcElement;
+    } else // 火狐浏览器下
+
+    {
+        key = evt.which;
+        srcobj = evt.target;
+    }
+   
+	switch(key)
+	{
+		case 13:
+			if(srcobj.id=="inputForm:inputName"){
+				document.getElementById("inputDiv").style.display="none";
+				//document.getElementById("inputForm:inputName").style.display="";
+				thisObj.value=document.getElementById("inputForm:inputName").value;
+				jQuery(thisObj).next().val(document.getElementById("inputForm:inputId").value);
+				return false;	
+			} 		
+	}
+}
+function clearHide(obj,id) {
+	if(obj.value == "") {
+		document.getElementById(id).value = "";
+	}
+}				
+function showDetailHande(xhr,status,args){
+	if(args.show)
+	{
+		addRecureDialog.show();
+	}
+}	
+
+function changeme(obj){
+	if(obj.className=="overdiv"){
+		obj.className="overdivscroll";
+		obj.title = "双击合并...";
+		//nowheightflage=true;
+	}else{
+		obj.scrollTop=0;
+		obj.className="overdiv";
+		obj.title = "双击显示所有...";
+	//	nowheightflage=false;
+	}
+}
+
+</script>
+
+	<div id="inputDiv" style="position:absolute; z-index:999999; display: none;">	
+		<h:form id="inputForm">
+			<p:inputText onblur="blurMe()"
+					id="inputName" value="#{pensionRecureController.inputDivName}">
+				</p:inputText><his:IME for="inputForm:inputName" rawSQL="true"
+					SQL="select id ,name, if(sex = 1 ,'男','女' ) as sex,inputCode from pension_employee  where cleared=2 " 
+					fitcol="inputCode,name"
+					multiresult="inputForm:inputName;1,inputForm:inputId;0"
+					SQLResult="编号:0,姓名:1,性别:2,输入码:3"
+					resultcol="1" lock="false" /> <p:inputText style="display:none;"
+					value="#{pensionRecureController.inputDivId}"
+					id="inputId" />
+	 	</h:form>
+	 </div>
+			 
+	</h:body>
+</f:view>
+</html>

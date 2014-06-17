@@ -1,0 +1,455 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+
+<style>
+.ui-chkbox-box {
+	margin-bottom: -4px;
+}
+</style>
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<style>
+.B1 {
+	background-color: green
+}
+
+.B2 {
+	background-color: red
+}
+</style>
+	<h:body>
+		<p:growl id="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText id="olderName" style="width:145px;"
+							value="#{familyManageController.olderName}" /> <his:IME
+							for="searchForm:olderName" rawSQL="true"
+							SQL="#{familyManageController.olderSQL}" fitcol="inputCode"
+							multiresult="searchForm:olderId;0" sortcol="olderId"
+							SQLResult="编号:0,姓名:1,输入码:2,大厦:6,楼层:5,房间:4,床位:3" resultcol="1"
+							lock="true" /> <h:inputHidden
+							value="#{familyManageController.olderId}" id="olderId" /></td>
+					<td class="leftcell">入住日期:</td>
+					<td><p:calendar value="#{familyManageController.startDate}"
+							style="width:145px;" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar value="#{familyManageController.endDate}"
+							style="width:145px;" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value=""
+							actionListener="#{familyManageController.searchLivingRecords}"
+							update=":olderLivingForm,:message" /></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{familyManageController.clearSearchForm}"
+							update=":searchForm" styleClass="blankbtn" value="" /></td>
+
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="olderLivingForm">
+			<div style="width: 1140px;">
+				<table width="100%">
+					<tr>
+						<td><p:dataTable cellspacing="2" rows="6" style="width:100%"
+								id="olderLivingTable"
+								selection="#{familyManageController.selectedRow}"
+								value="#{familyManageController.livingRecordList}"
+								paginator="true" paginatorPosition="bottom"
+								paginatorAlwaysVisible="false"
+								paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+								var="record" rowKey="#{record.id}" selectionMode="single"
+								emptyMessage="没有相应记录">
+								<p:ajax event="rowSelect"
+									listener="#{familyManageController.selectRow}" />
+								<p:ajax event="rowUnselect"
+									listener="#{familyManageController.setUnableFlag}" />
+								<p:column headerText="编号" styleClass="width50">
+									<h:outputText value="#{record.olderId}">
+									</h:outputText>
+								</p:column>
+								<p:column headerText="合同号" styleClass="width50">
+									<h:outputText value="#{record.contractnum}">
+									</h:outputText>
+								</p:column>
+								<p:column headerText="姓名" styleClass="width50">
+									<h:outputText value="#{record.olderName}" />
+								</p:column>
+								<p:column headerText="性别" styleClass="width50">
+									<h:outputText value="男" rendered="#{record.sex==1}" />
+									<h:outputText value="女" rendered="#{record.sex==2}" />
+								</p:column>
+								<p:column headerText="民族" styleClass="width50">
+									<h:outputText value="#{record.nationName}" />
+								</p:column>
+								<p:column headerText="入住日期" styleClass="width80">
+									<h:outputText value="#{record.visittime}">
+										<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+									</h:outputText>
+								</p:column>
+								<p:column headerText="状态" styleClass="width50">
+									<h:outputText value="入住" rendered="#{record.statuses==3}" />
+									<h:outputText value="请假" rendered="#{record.statuses==4}" />
+									<h:outputText value="离院" rendered="#{record.statuses==5}" />
+									<h:outputText value="结算" rendered="#{record.statuses==6}" />
+								</p:column>
+								<p:column headerText="类型" styleClass="width60">
+									<h:outputText value="自理" rendered="#{record.types==1}" />
+									<h:outputText value="半自理" rendered="#{record.types==2}" />
+									<h:outputText value="不能自理" rendered="#{record.types==3}" />
+								</p:column>
+							
+							</p:dataTable></td>
+					</tr>
+				</table>
+			</div>
+		</h:form>
+		<!-- 申请信息维护 -->
+		<h:form id="maintainForm">
+
+			<div align="center">
+				<p:commandButton oncomplete="addLivingDialogShow(xhr,status,args)"
+					id="addButton"
+					actionListener="#{familyManageController.showAddForm}"
+					styleClass="addbtn" value="" update=":addForm,:message"></p:commandButton>
+				<p:commandButton oncomplete="addLivingDialogShow(xhr,status,args)"
+					id="editButton"
+					actionListener="#{familyManageController.showEditForm}"
+					update=":addForm,:message" styleClass="modifybtn" value=""></p:commandButton>
+				<p:commandButton id="confirmNoticeButton" value="发送入住通知"
+					actionListener="#{familyManageController.confirmSend}"
+					styleClass="commonbtn" update=":message"></p:commandButton>
+			</div>
+		</h:form>
+
+		<p:dialog header="家属信息" widgetVar="addFamilyDialog" position="center"
+			resizable="false" appendTo="@(body)" modal="true">
+			<h:form id="addFamilyForm">
+				<table class="hengbiaoge" width="650px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="姓名:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText required="true"
+								requiredMessage="家属姓名不能为空"
+								value="#{familyManageController.addFamily.name}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="性别:" /></td>
+						<td class="hengbiaogedata"><h:selectOneMenu
+								style="width:150px"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+								value="#{familyManageController.addFamily.sex}">
+								<f:selectItem itemValue="1" itemLabel="男" />
+								<f:selectItem itemValue="2" itemLabel="女" />
+							</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="关系:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><h:selectOneMenu
+								style="width:150px"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+								value="#{familyManageController.addFamily.relationship}">
+								<f:selectItems value="#{familyManageController.relationDicList}"
+									var="relation" rowKey="#{relation.id}"
+									itemLabel="#{relation.relationship}" itemValue="#{relation.id}" />
+							</h:selectOneMenu></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="联系电话1:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText required="true"
+								requiredMessage="联系电话1不能为空" validatorMessage="联系电话1格式不正确"
+								value="#{familyManageController.addFamily.phonenum1}">
+								<f:validateRegex pattern="^1([\d]{10})$" />
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="联系电话2:" /></td>
+						<td class="hengbiaogedata"><p:inputText
+								validatorMessage="联系电话2格式不正确"
+								value="#{familyManageController.addFamily.phonenum2}">
+								<f:validateRegex pattern="^1([\d]{10})$" />
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="身份证号:" /></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{familyManageController.addFamily.idcard}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="单位:" /></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{familyManageController.addFamily.company}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="住址:" /></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{familyManageController.addFamily.address}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="紧急" /></td>
+						<td class="hengbiaogedata"><h:selectBooleanCheckbox
+								value="#{familyManageController.addFamily.defaultFamily}" /></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注" /></td>
+						<td class="hengbiaogedata"><p:inputText
+								value="#{familyManageController.addFamily.notes}">
+							</p:inputText></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						actionListener="#{familyManageController.saveRelationshipRecord}"
+						oncomplete="addFamilyDialogHide(xhr,status,args)" value=""
+						styleClass="submitbtn"
+						update=":addForm:tabView:famlyTable,:addFamilyForm,:message">
+					</p:commandButton>
+					<p:commandButton styleClass="blankbtn" process="@this"
+						actionListener="#{familyManageController.initFamily}"
+						update=":addFamilyForm" value=""
+						disabled="#{familyManageController.blankRelationFlag}" />
+					<p:commandButton onclick="addFamilyDialog.hide()"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<!-- 新增入住信息 -->
+		<p:dialog header="老人入住" widgetVar="addLivingDialog" position="top"
+			resizable="false" appendTo="@(body)" modal="true">
+			<h:form id="addForm" styleClass="noDisable">
+				<p:tabView style="height:250px;" id="tabView">
+					<p:tab title="老人入住信息">
+						<table class="hengbiaoge" width="650px" align="center">
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="合同号:" /></td>
+								<td class="hengbiaogedata"><p:inputText
+										value="#{familyManageController.addLivingOlder.contractnum}">
+									</p:inputText></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="入住时间:"
+										styleClass="redfont" /></td>
+								<td class="hengbiaogedata"><p:calendar required="true"
+										requiredMessage="入住时间不可为空"
+										value="#{familyManageController.addLivingOlder.visittime}"
+										pattern="yyyy-MM-dd HH:mm" showButtonPanel="true"></p:calendar></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="状态:" /></td>
+								<td class="hengbiaogedata"><h:selectOneMenu
+										disabled="#{familyManageController.addOlderStatuseFlag}"
+										style="width:150px"
+										class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+										value="#{familyManageController.addLivingOlder.statuses}">
+										<f:selectItem itemValue="3" itemLabel="入住" />
+										<f:selectItem itemValue="4" itemLabel="请假" />
+										<f:selectItem itemValue="5" itemLabel="离院" />
+										<f:selectItem itemValue="6" itemLabel="结算" />
+									</h:selectOneMenu></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="老人姓名:"
+										styleClass="redfont" /></td>
+								<td class="hengbiaogedata"><p:inputText required="true"
+										requiredMessage="老人姓名不能为空" id="olderName"
+										disabled="#{familyManageController.olderNameFlag}"
+										value="#{familyManageController.addLivingOlder.olderName}">
+									</p:inputText> <his:IME for="addForm:tabView:olderName" rawSQL="true"
+										SQL="#{familyManageController.addOlderSQL}" fitcol="inputCode"
+										multiresult="addForm:tabView:olderName;1,addForm:tabView:olderId;0,addForm:tabView:applyId;4"
+										SQLResult="编号:0,姓名:1,输入码:2,状态:3,申请编号:4:hide,养老类别:5"
+										resultcol="1" lock="false" sortcol="id" /> <h:inputHidden
+										value="#{familyManageController.addLivingOlder.olderId}"
+										id="olderId" /> <h:inputHidden
+										value="#{familyManageController.addLivingOlder.applyId}"
+										id="applyId" /></td>
+							</tr>
+					
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="医疗保险:" /></td>
+								<td class="hengbiaogedata"><h:selectOneMenu
+										style="width:150px"
+										class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover"
+										value="#{familyManageController.addLivingOlder.insurance}">
+										<f:selectItem itemValue="自费" itemLabel="自费" />
+										<f:selectItem itemValue="省医疗保险" itemLabel="省医疗保险" />
+										<f:selectItem itemValue="市医疗保险" itemLabel="市医疗保险" />
+										<f:selectItem itemValue="城镇居民医疗保险" itemLabel="城镇居民医疗保险" />
+										<f:selectItem itemValue="新农合医疗保险" itemLabel="新农合医疗保险" />
+									</h:selectOneMenu></td>
+								<td class="hengbiaogeHeader1"><h:outputText value="办理人:" /></td>
+								<td class="hengbiaogedata"><p:inputText disabled="true"
+										value="#{familyManageController.userName}" /></td>
+							</tr>
+							<tr>
+								<td class="hengbiaogeHeader1"><h:outputText value="家庭地址:" /></td>
+								<td class="hengbiaogedata" colspan="3"><p:inputText
+										style="width:471px"
+										value="#{familyManageController.addLivingOlder.notes}" /></td>
+							</tr>
+						</table>
+						<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+							<p:commandButton
+								action="#{familyManageController.saveLivingRecord}"
+								oncomplete="addConfirm(xhr,status,args)" styleClass="submitbtn"
+								value="" update=":olderLivingForm:olderLivingTable,:message">
+							</p:commandButton>
+							<p:commandButton styleClass="blankbtn" value="" process="@this"
+								actionListener="#{familyManageController.clearAddForm}"
+								update=":addForm" disabled="#{familyManageController.blankFlag}" />
+							<p:commandButton onclick="addLivingDialog.hide()"
+								styleClass="cancelbtn" value="" />
+						</h:panelGrid>
+					</p:tab>
+					<p:tab title="家属信息">
+						<table class="hengbiaoge" width="700px" align="center">
+							<tr>
+								<td><p:dataTable rows="6" style="width:100%"
+										id="famlyTable"
+										selection="#{familyManageController.selectedFamilyRow}"
+										value="#{familyManageController.familyList}" paginator="true"
+										paginatorPosition="bottom" paginatorAlwaysVisible="false"
+										paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+										var="family" rowKey="#{family.name}" selectionMode="single"
+										emptyMessage="没有相应记录">
+										<p:ajax event="rowSelect"
+											listener="#{familyManageController.selectFamilyRow}"></p:ajax>
+										<p:ajax event="rowUnselect"
+											listener="#{familyManageController.unselectFamilyRow}"></p:ajax>
+										<p:column headerText="姓名" styleClass="width50">
+											<h:outputText value="#{family.name}">
+											</h:outputText>
+										</p:column>
+										<p:column headerText="性别" styleClass="width50">
+											<h:outputText value="男" rendered="#{family.sex==1}" />
+											<h:outputText value="女" rendered="#{family.sex==2}" />
+										</p:column>
+										<p:column headerText="关系" styleClass="width50">
+											<h:outputText value="#{family.relationShipStr}" />
+										</p:column>
+										<p:column headerText="联系电话1" styleClass="width70">
+											<h:outputText value="#{family.phonenum1}">
+											</h:outputText>
+										</p:column>
+										<p:column headerText="联系电话2" styleClass="width70">
+											<h:outputText value="#{family.phonenum2}">
+											</h:outputText>
+										</p:column>
+										<p:column headerText="身份证号" styleClass="width60">
+											<h:outputText value="#{family.idcard}">
+											</h:outputText>
+										</p:column>
+										<p:column headerText="工作单位" styleClass="width60">
+											<h:outputText value="#{family.company}" />
+										</p:column>
+										<p:column headerText="住址" styleClass="width60">
+											<h:outputText value="#{family.address}" />
+										</p:column>
+										<p:column headerText="紧急" styleClass="width50">
+											<h:selectBooleanCheckbox value="#{family.defaultFamily}"
+												disabled="true" />
+										</p:column>
+									</p:dataTable></td>
+							</tr>
+						</table>
+						<h:panelGrid columns="3" style="margin:0px auto">
+							<p:commandButton process="@this,"
+								actionListener="#{familyManageController.initFamily}" value=""
+								oncomplete="addFamilyDialog.show()" styleClass="addbtn"
+								update=":addFamilyForm,:message">
+							</p:commandButton>
+							<p:commandButton
+								oncomplete="addFamilyDialogshow(xhr,status,args)" value=""
+								actionListener="#{familyManageController.showEditFamily}"
+								update=":addFamilyForm,:message" styleClass="modifybtn"></p:commandButton>
+							<p:commandButton value="删除" process="@this"
+								actionListener="#{familyManageController.delFamily}"
+								update=":addForm:tabView:famlyTable,:message"
+								styleClass="commonbtn"></p:commandButton>
+						</h:panelGrid>
+					</p:tab>
+				</p:tabView>
+			</h:form>
+		</p:dialog>
+		<!--是否发送入住通知的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="入住通知"
+			widgetVar="confirmSendDialog" width="220">
+			<h:form id="confirmForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="是否发送入住通知？" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							actionListener="#{familyManageController.sentMessage}"
+							oncomplete="confirmSendDialog.hide();"
+							update=":message,:olderLivingForm:olderLivingTable"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							update=":olderLivingForm:olderLivingTable"
+							onclick="confirmSendDialog.hide();addApplyDialog.hide()"></p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		
+		<script type="text/javascript">
+		
+			function addConfirm(xhr, status, args) {
+				if (args.addSuccess) {
+					confirmSendDialog.show();
+					addLivingDialog.hide();
+				} else if (args.success) {
+					addLivingDialog.hide();
+				}
+
+			}
+
+			function addLivingDialogShow(xhr, status, args) {
+				if (args.showEdit) {
+					addLivingDialog.show();
+				}
+			}
+
+			function addFamilyDialogshow(xhr, status, args) {
+				if (args.edit) {
+					addFamilyDialog.show();
+				}
+			}
+			function addFamilyDialogHide(xhr, status, args) {
+				if (args.modifySuccess) {
+					addFamilyDialog.hide();
+				}
+			}
+			 
+			/*  取消滚动条
+			 */
+			jQuery(document).ready(function() {
+				cleanBar();
+			});
+		</script>
+	</h:body>
+</f:view>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css">
+		</link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		</meta>
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="msg"></p:growl>
+		<h:form id="storageShowForm">
+			<h:outputText value="&nbsp;食材名称:"></h:outputText>
+			<p:inputText id="itemInputText"
+				value="#{ingredientStorageController.itemName}"></p:inputText>
+			<his:IME for="storageShowForm:itemInputText"
+				fitcol="#{ingredientStorageController.fitcolItemName}" resultcol="1"
+				lock="false" rawSQL="true"
+				SQL="#{ingredientStorageController.itemNameToSql}"
+				SQLResult="#{ingredientStorageController.displaycolItemName}"
+				multiresult="storageShowForm:itemInputTextHidden;0,storageShowForm:itemInputText;1" />
+			<h:inputHidden id="itemInputTextHidden"
+				value="#{ingredientStorageController.itemId}"></h:inputHidden>
+			<h:outputText value="零库存:"></h:outputText>
+			<h:selectBooleanCheckbox id="zeroStorageBoolean"
+				value="#{ingredientStorageController.zeroStorageFlag}"></h:selectBooleanCheckbox>
+			<p:commandButton styleClass="searchbtn" value=""
+				action="#{ingredientStorageController.getRecordByCondition}"
+				update=":msg,:storageShowForm:dataShowTable,:storageShowForm:itemInputTextHidden"></p:commandButton>
+			<p:commandButton styleClass="blankbtn" value=""
+				action="#{ingredientStorageController.initSearchPara}"
+				update=":msg,:storageShowForm"></p:commandButton>
+			<p:dataTable id="dataShowTable" emptyMessage="没有找到记录！" rows="10"
+				value="#{ingredientStorageController.pensionStorageList}"
+				var="storageList" paginatorAlwaysVisible="false">
+				<p:column headerText="食材名称">
+					<h:outputText value="#{storageList.itemName}"></h:outputText>
+				</p:column>
+				<p:column headerText="单价">
+					<h:outputText value="#{storageList.purchasePrice}"></h:outputText>
+				</p:column>
+				<p:column headerText="库存数">
+					<h:outputText value="#{storageList.storageQty}"></h:outputText>
+				</p:column>
+				<p:column headerText="单位">
+					<h:outputText value="#{storageList.unit}"></h:outputText>
+				</p:column>
+				<p:column headerText="有效期">
+					<h:outputText value="#{storageList.expireDate}">
+						<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+			<h:outputText value="&nbsp;"></h:outputText>
+		</h:form>
+	</h:body>
+</f:view>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css" ></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	    <script type="text/javascript" src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		 <script type="text/javascript" src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="GroupHeadForm">
+			<h:panelGrid columns="15">
+				<h:outputLabel value="分组负责人:" for="nameText"/>
+				<h:panelGroup>
+						<p:inputText id="nameText" style="width:120px"/>
+						<his:IME for="GroupHeadForm:nameText"
+							fitcol="inputCode" resultcol="0" lock="true"
+							rawSQL="true"
+							SQL="#{medicalRegisterController.groupSql}"
+							SQLResult="负责人:0,车牌号:1,出发时间:2,返回时间:3,分组id:4:hide,输入码:6"
+							multiresult="GroupHeadForm:groupIdHd;4" />
+						<h:inputHidden id="groupIdHd" value="#{countMedicalItemController.groupId}" />
+				</h:panelGroup>
+				<p:commandButton id="searchButton"
+					action="#{countMedicalItemController.selectGroupRecords}"
+					styleClass="searchbtn" value=""
+					update=":GroupDataTableForm,:groupMaintainForm,:messages" />
+				<p:commandButton  oncomplete="clearSelectForm()" styleClass="blankbtn" value="" 
+							action="#{countMedicalItemController.clearSelectForm}" update=":GroupHeadForm"/>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="GroupDataTableForm">
+			<h:panelGrid id="medicalGroupRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="medicalRegisterTable" rowIndexVar="row"
+					value="#{countMedicalItemController.records}"
+					var="record" rowKey="#{record.id}" selectionMode="multiple" emptyMessage="没有相应记录"
+					selection="#{countMedicalItemController.selectedGroupRows}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					
+					
+					
+					>
+					<p:ajax event="rowSelect" listener="#{countMedicalItemController.selectRecord}" update=":GroupDataTableForm,:groupMaintainForm"/>
+					<p:ajax event="rowUnselect" listener="#{countMedicalItemController.unSelectRecord}" update=":GroupDataTableForm,:groupMaintainForm"/>
+					<p:column headerText="负责人">
+						<h:outputText value="#{record.managerName}" />
+					</p:column>
+					<p:column headerText="车牌号">
+						<h:outputText value="#{record.carnumber}" />
+					</p:column>
+					<p:column headerText="出发时间">
+						<h:outputText value="#{record.leavetime}" >
+							<f:convertDateTime pattern="yyyy年MM月dd日" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="返回时间">
+						<h:outputText value="#{record.backtime}" >
+							<f:convertDateTime pattern="yyyy年MM月dd日" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="是否生成统计单">
+						<h:outputText value="已生成" rendered="#{record.generated == 1}" />
+						<h:outputText value="未生成" rendered="#{record.generated != 1}" />
+					</p:column>
+					<p:column headerText="查看">
+						<p:commandButton styleClass="commonbtn" value="查看" 
+						action="#{countMedicalItemController.selectMedicalItemRecords(record)}"
+						oncomplete="itemDialog.show()"
+						update=":itemDataTableForm,:messages,:itemDetailForm" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="groupMaintainForm">
+			<div align="center">
+				<p:commandButton styleClass="commonbtn"  value="生成统计单"
+					action="#{countMedicalItemController.generateItemCountPapers}"
+					disabled="#{countMedicalItemController.disGenerateButton}"
+					update=":GroupDataTableForm,:messages" />
+				<p:commandButton styleClass="commonbtn"  value="生成并发送统计单"
+					action="#{countMedicalItemController.generateAndSendItemCountPapers}"
+					disabled="#{countMedicalItemController.disGenerateButton}"
+					update=":GroupDataTableForm,:messages" />
+			</div>
+		</h:form>	
+		<p:dialog header="项目统计" widgetVar="itemDialog"  
+		appendTo="@(body)" position="center" modal="true">
+		<h:form id="itemDataTableForm">
+			<h:panelGrid id="itemRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="itemTable" rowIndexVar="row"
+					value="#{countMedicalItemController.itemRecords}"
+					selection="#{countMedicalItemController.selectedItemCountRow}"
+					
+					
+					
+					
+					var="record" rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					paginator="true" paginatorPosition="bottom"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect" listener="#{countMedicalItemController.selectDetail}" update=":itemDetailForm"/>
+					<p:ajax event="rowUnselect" listener="#{countMedicalItemController.unSelectDetail}" update=":itemDetailForm"/>
+					<p:column headerText="项目名">
+						<h:outputText value="#{record.itemName}" />
+					</p:column>
+					<p:column headerText="人数">
+						<h:outputText value="#{record.number}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="itemDetailForm">
+		  <p:fieldset legend="详情">
+			<h:panelGrid id="itemDetailRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="itemDetailTable" rowIndexVar="row"
+					value="#{countMedicalItemController.itemDetails}"
+					var="detail" rowKey="#{detail.id}" emptyMessage="没有相应记录"
+					paginator="true" paginatorPosition="bottom"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:column headerText="就医类型">
+						<h:outputText value="#{detail.type}" />
+					</p:column>
+					<p:column headerText="就医事项">
+						<h:outputText value="#{detail.hospitalizeissue}" />
+					</p:column>
+					<p:column headerText="姓名">
+						<h:outputText value="#{detail.olderName}" />
+					</p:column>
+					<p:column headerText="大厦">
+						<h:outputText value="#{detail.buildName}" />
+					</p:column>
+					<p:column headerText="房间">
+						<h:outputText value="#{detail.roomName}" />
+					</p:column>
+					<p:column headerText="床位">
+						<h:outputText value="#{detail.bedName}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		  </p:fieldset>
+		</h:form>
+		<h:form id="itemMaintainForm">
+			<div align="center">
+				<p:commandButton styleClass="commonbtn"  value="生成统计单"
+					action="#{countMedicalItemController.generateItemCountPaper}"
+					oncomplete="itemDialog.hide()"
+					update=":GroupDataTableForm,:messages" />
+				<p:commandButton styleClass="commonbtn"  value="生成并发送统计单"
+					action="#{countMedicalItemController.generateAndSendItemCountPaper}"
+					oncomplete="itemDialog.hide()"
+					update=":GroupDataTableForm,:messages" />
+				<p:commandButton styleClass="closebtn" value="" onclick="itemDialog.hide()" />
+			</div>
+		</h:form>	
+	</p:dialog>
+		<script type="text/javascript">
+		
+			function handleUpdateComplete(xhr, status, args){
+				if(!args.validationFailed) {
+					updateRecordDialog.hide();
+	            }	
+	            
+			}
+			//清空 selectForm
+			function clearSelectForm(){
+
+				document.getElementById("GroupHeadForm:nameText").value="";
+				return true;
+			}
+	
+		</script>
+	</h:body>
+</f:view>
+</html>

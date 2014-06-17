@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.userManage}</title>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+
+
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">指纹类型:</td>
+					<td><h:selectOneMenu value="#{fingerPrintLogController.type}"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItem itemValue="1" itemLabel="员工指纹" />
+							<f:selectItem itemValue="2" itemLabel="老人指纹" />
+							<p:ajax event="change"
+								listener="#{fingerPrintLogController.updateFlag}"
+								update=":searchForm,:userListForm"></p:ajax>
+						</h:selectOneMenu></td>
+					<td class="leftcell">房间号:</td>
+					<td><p:inputText id="roomNumber" size="10"
+							value="#{fingerPrintLogController.roomNumber}" /> <his:IME
+							for="searchForm:roomNumber" rawSQL="true" fitcol="name"
+							SQL="select pr.id,pr.name,pr.floorName,pr.buildName from pension_room pr where pr.cleared=2"
+							SQLResult="编号:0,房间:1,分楼层:2,大厦:3" resultcol="1" lock="true" />
+					</td>
+					<td class="leftcell">#{fingerPrintLogController.randerName}</td>
+					<td><p:inputText id="userName" size="10"
+							rendered="#{fingerPrintLogController.randerFalg}"
+							value="#{fingerPrintLogController.peopleName}" /> <his:IME
+							for="searchForm:userName" rawSQL="true" fitcol="name"
+							SQL="select e.name ,d.name as deptName from pension_employee e left join pension_dept d on e.dept_id = d.id where e.cleared = 2"
+							SQLResult="员工姓名:0,部门:1" resultcol="0" lock="true" /> <p:inputText
+							id="olderName" size="10"
+							rendered="#{!fingerPrintLogController.randerFalg}"
+							value="#{fingerPrintLogController.peopleName}" /> <his:IME
+							for="searchForm:olderName" rawSQL="true" fitcol="name"
+							SQL="select o.name from pension_older o where o.cleared = 2 and o.statuses in (3,4)"
+							SQLResult="老人姓名:0" resultcol="0" lock="true" /></td>
+					<td class="leftcell">记录时间:</td>
+					<td><p:calendar value="#{fingerPrintLogController.startTime}"
+							style="width:145px;" pattern="yyyy-MM-dd HH:mm:ss"
+							showButtonPanel="true">
+						</p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar value="#{fingerPrintLogController.endTime}"
+							showButtonPanel="true" style="width:145px;"
+							pattern="yyyy-MM-dd HH:mm:ss">
+						</p:calendar></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{fingerPrintLogController.searchFingerPrints}"
+							update=":searchForm,:userListForm" styleClass="searchbtn"
+							value="" /></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{fingerPrintLogController.clearSearchForm}"
+							update=":searchForm" styleClass="blankbtn" value="" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="userListForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="8" style="width:100%"
+							id="applicationTable" paginatorAlwaysVisible="false"
+							value="#{fingerPrintLogController.fingerPrintList}" rows="10"
+							paginatorPosition="bottom" rowKey="#{sysUser.id}"
+							paginator="true" selectionMode="single" var="sysUser"
+							emptyMessage="没有相应记录">
+							<p:column headerText="房间号">
+								<h:outputText value="#{sysUser.roomNumber}" />
+							</p:column>
+
+							<p:column headerText="指纹类型">
+								<h:outputText value="#{sysUser.type == 1?'员工指纹':'老人指纹'}" />
+							</p:column>
+							<p:column headerText="员工姓名"
+								rendered="#{fingerPrintLogController.randerFalg}">
+								<h:outputText value="#{sysUser.peopleName}" />
+							</p:column>
+							<p:column headerText="老人姓名"
+								rendered="#{!fingerPrintLogController.randerFalg}">
+								<h:outputText value="#{sysUser.peopleName}" />
+							</p:column>
+							<p:column headerText="记录时间">
+								<h:outputText value="#{sysUser.anLogDate}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+
+		</h:form>
+
+
+	</h:body>
+</f:view>
+
+
+<script>
+	function editConfirm(xhr, status, args) {
+		if (args.edit) {
+			addUserDialog.show();
+		}
+	}
+
+	function delConfirm(xhr, status, args) {
+		if (args.edit) {
+			confirmDelDialog.show();
+		}
+	}
+	function saveConfirm(xhr, status, args) {
+		if (args.close) {
+			addUserDialog.hide();
+		}
+	}
+
+	/*  取消滚动条
+	jQuery(document).ready(function(){ 
+		 cleanBar();
+	}); */
+</script>
+
+
+</html>

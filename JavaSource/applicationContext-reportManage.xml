@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-lazy-init ="true"  xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						   http://www.springframework.org/schema/context
+						   http://www.springframework.org/schema/context/spring-context-3.0.xsd
+						   http://www.springframework.org/schema/tx
+						   http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+						   http://www.springframework.org/schema/aop 
+						   http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+						   http://www.springframework.org/schema/jee 
+						   http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+	<!-- 注入Controller实例，同时注入Controller的依赖Service实例-->
+	<!-- 总体工作情况周报   Mary 2013-11-14 -->
+	<bean id="totalNurseWeeklyController"
+		class="controller.reportManage.TotalNurseWeeklyController"  
+		scope="view">
+		<property name="totalNurseWeeklyService" ref="totalNurseWeeklyService"></property>
+	</bean>
+	<!-- 老人欠费情况一览   Mary 2013-11-19 -->
+	<bean id="paidReportController"
+		class="controller.reportManage.PaidReportController"  
+		scope="view">
+		<property name="paidReportService" ref="paidReportService"></property>
+	</bean>
+	<!-- 老人缴费情况一览   Mary 2013-11-19 -->
+	<bean id="unpaidReportController"
+		class="controller.reportManage.UnpaidReportController"  
+		scope="view">
+		<property name="paidReportService" ref="paidReportService"></property>
+	</bean>
+	<!-- 老人事故记录   Mary 2013-11-20 -->
+	<bean id="accidentReportController"
+		class="controller.reportManage.AccidentReportController"  
+		scope="view">
+		<property name="accidentReportService" ref="accidentReportService"></property>
+	</bean>
+	<!-- 老人在院情况记录   Mary 2013-11-20 -->
+	<bean id="olderLiquidityController"
+		class="controller.reportManage.OlderLiquidityController"  
+		scope="view">
+		<property name="olderLiquidityService" ref="olderLiquidityService"></property>
+	</bean>
+	<!-- 老人流动情况记录   Mary 2013-11-20 -->
+	<bean id="olderLiquidity1Controller"
+		class="controller.reportManage.OlderLiquidity1Controller"  
+		scope="view">
+		<property name="olderLiquidity1Service" ref="olderLiquidity1Service"></property>
+	</bean>
+	<!-- 现金流动情况记录   Mary 2013-11-20 -->
+	<bean id="capitalFlowController"
+		class="controller.reportManage.CapitalFlowController"  
+		scope="view">
+		<property name="capitalFlowService" ref="capitalFlowService"></property>
+	</bean>
+	<!-- 维修情况   Mary 2013-11-20 -->
+	<bean id="repairReportController"
+		class="controller.reportManage.RepairReportController"  
+		scope="view">
+		<property name="repairReportService" ref="repairReportService"></property>
+	</bean>
+</beans>
+

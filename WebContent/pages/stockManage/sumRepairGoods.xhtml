@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="consumptionHeadForm">
+			<table>
+				<tr>
+					<td class="leftcell">起始时间:</td>
+					<td><p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+							value="#{sumStorageController.consumptionStartDate}" /></td>
+					<td class="leftcell">截止时间:</td>
+					<td><p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+							value="#{sumStorageController.consumptionEndDate}" /></td>
+					<td class="leftcell">物资类型:</td>
+					<td><h:selectOneMenu value="#{sumStorageController.typeId}"
+							id="itemType"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItems value="#{sumStorageController.itemTypeList}"
+								var="type" rowKey="#{type.id}" itemLabel="#{type.itemName}"
+								itemValue="#{type.id}">
+							</f:selectItems>
+							<p:ajax event="valueChange"
+								process="@this,consumptionHeadForm:itemType"
+								listener="#{sumStorageController.changeSql}"></p:ajax>
+						</h:selectOneMenu></td>
+					<td class="leftcell">物资名称:</td>
+					<td><p:inputText id="itemName" /> <his:IME
+							for="consumptionHeadForm:itemName" rawSQL="true"
+							SQL="#{sumStorageController.goodsSql}" fitcol="input_code"
+							SQLResult="编号:0:hide,物资名称:1,输入码:2,类型ID:3:hide,类型:4" resultcol="1"
+							lock="true" multiresult="consumptionHeadForm:itemId;0" /> <h:inputHidden
+							value="#{sumStorageController.consumptionItemId}" id="itemId" />
+					</td>
+					<td class="leftcell"><p:commandButton id="searchButton"
+							actionListener="#{sumStorageController.selectStorageoutRecords}"
+							styleClass="searchbtn" value=""
+							update=":consumptionDataTableForm:consumptionTable,:messages" /></td>
+					<td class="leftcell"><p:commandButton
+							oncomplete="clearConsumptionSelectForm()" styleClass="blankbtn"
+							value=""
+							actionListener="#{sumStorageController.clearConsumptionSelectForm}"
+							update=":consumptionHeadForm,:messages,:consumptionHeadForm:itemType" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="consumptionDataTableForm">
+			<p:dataTable cellspacing="2" rows="10" style="width:100%"
+				id="consumptionTable" rowIndexVar="row"
+				value="#{sumStorageController.storageOutRecordList}" var="record"
+				rowKey="#{record.id}" emptyMessage="没有相应记录" paginator="true"
+				paginatorPosition="bottom" paginatorAlwaysVisible="false"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:column headerText="物资名称">
+					<h:outputText value="#{record.itemName}" />
+				</p:column>
+				<p:column headerText="物资类型">
+					<h:outputText value="#{record.typeName}" />
+				</p:column>
+				<p:column headerText="消耗量">
+					<h:outputText value="#{record.outQty}" />
+				</p:column>
+				<p:column headerText="单位">
+					<h:outputText value="#{record.unit}" />
+				</p:column>
+			</p:dataTable>
+		</h:form>
+		<div>
+			<p:outputLabel>&nbsp;</p:outputLabel>
+		</div>
+
+
+		<script type="text/javascript">
+			//清空 consumptionHeadForm
+			function clearConsumptionSelectForm() {
+				document.getElementById("consumptionHeadForm:startDate").value = "";
+				document.getElementById("consumptionHeadForm:endDate").value = "";
+				document.getElementById("consumptionHeadForm:itemName").value = "";
+
+				return true;
+			}
+			//清空 consumptionHeadForm
+			function clearRemainSelectForm() {
+				document.getElementById("remainHeadForm:startDate").value = "";
+				document.getElementById("remainHeadForm:itemName").value = "";
+
+				return true;
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

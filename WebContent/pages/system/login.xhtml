@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<f:view contectType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<style type="text/css">
+<!--
+body {
+	margin-left: 00px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	background-image: url();
+}
+
+.field{         
+	float: left;      
+	height: 22px;        
+	border: #c6e9fc 1px solid;        
+	padding-left: 5px;          
+	padding-right: 5px;        
+	border-radius:8px;
+	-webkit-border-radius: 8px;        
+	-moz-border-radius: 8px;        
+	font-size: 12px;          
+	color: #b1b1b1;     
+	outline:none;        
+	transition: all 0.5s ease-in-out;   
+	-webkit-transition: all 0.5s ease-in-out;  
+	-moz-transition: all 0.5s ease-in-out;          
+  }  
+.field:focus{    
+	border-color: #999;       
+	color: #333;     
+	box-shadow: 0 0 5px #4cdfff;  
+	-webkit-box-shadow: 0 0 5px #4cdfff; 
+	-moz-box-shadow: 0 0 5px #4cdfff;      
+}
+.login {color:#FFF; font-size:14px; font-weight:bold; line-height:22px;} 
+.banquan { font-size:12px; line-height:20px; color:#ffffff; text-align:center;}
+-->
+</style>
+<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+	<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+	<div id="showIE" style="display:none;"></div>
+
+		<h:form id="loginForm">
+			<p:growl id="messages" />
+			<div align="center">
+			<table style="background: url(../images/l_bg.png)" width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+				<td class="login_border"  style="height:100%; float: left; background-color: #ff0000;
+			background: url(../images/l_left.png) repeat-x;"></td>
+				<td valign="top">
+			<!-- <div class="login_border"  style="height:100%; float: left; background-color: #ff0000;
+			background: url(../images/l_left.png) repeat-x;"></div> -->
+			<table style="float: left; " width="1003" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td height="768" align="center" valign="top"
+						background="../images/login_bj.jpg" >
+					<table width="500" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td  height="338"></td>
+						</tr>
+						<tr>
+							<td height="159" align="center" >
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td width="48%">&nbsp;</td>
+									<td width="52%">
+									<table width="100%" border="0" cellspacing="0" cellpadding="0" class="login">
+										<tr>
+											<td width="30%" height="30" align="right"><strong>#{pageConfig.userName}：</strong></td>
+											<td width="70%" align="left"><h:inputText id="username" class="field"
+												value="#{loginController.userName}" size="20" /></td>
+										</tr>
+										<tr>
+											<td width="30%" height="30" align="right"><strong>#{pageConfig.passWord}：</strong></td>
+											<td width="70%" align="left"><h:inputSecret id="paword"  class="field"
+												required="true" requiredMessage="请输入密码！"
+												value="#{loginController.passWord}" size="20"></h:inputSecret></td>
+										</tr>
+										<tr>
+											<td height="50">&nbsp;</td>
+											<td>
+											<table width="100%" border="0" cellspacing="0"
+												cellpadding="0">
+												<tr>
+													<td width="49%" align="left">
+													<p:commandButton id="cd" onstart="return checkLogin()"
+														update=":loginForm:messages" action="#{loginController.fetchUser}"
+														type="submit" value="登录"
+														oncomplete="handleComplete(xhr, status, args);"
+														style="font-weight:bold;width:85px;height:29px;background: url(../images/btn-login.png) no-repeat;">
+														</p:commandButton>
+														
+														</td>
+													<td width="51%" align="left" >
+													<p:commandButton onclick="clean()"  value="清空"
+														style="font-weight:bold;width:85px;height:29px;background: url(../images/btn-login.png) no-repeat;" />
+													</td>
+												</tr>
+											</table>
+											</td>
+										</tr>
+									</table>
+									</td>
+								</tr>
+							</table>
+							</td>
+						</tr>
+						<tr>
+							<td align="center" height="90"></td>
+						</tr>
+						<tr>
+							<td align="center"  class="banquan"><span class="bluefont">Copyright ©
+							2013-2014 版权所有</span><br />
+							<span class="blue">技术支持：青岛百灵软件科技有限公司</span></td>
+						</tr>
+						<tr>
+							<td height="30" align="center">&nbsp;</td>
+						</tr>
+					</table>
+					</td>
+				</tr>
+			</table>
+			
+			</td>
+				<td class="login_border" style="height:100%; float: left;
+			background: url(../images/l_right.png) repeat-x;"></td>
+				</tr>
+			</table>
+			<!-- <div class="login_border" style="height:100%; float: left;
+			background: url(../images/l_right.png) repeat-x;"></div> -->
+			
+			</div>
+	</h:form>
+	<div style="display: none;">	
+<script>
+jQuery(document).ready(function(){
+	resizeWindow();
+	
+	if(top.window.location.href   !=   window.location.href ){
+		top.window.location.href   =   window.location.href;
+	}
+	
+	jQuery("#loginForm\\:username").focus();
+})
+function clean() {
+	jQuery("#loginForm\\:username").val('');
+	jQuery("#loginForm\\:paword").val('');
+	jQuery("#loginForm\\:username").focus();
+}
+jQuery(window).resize(function() {
+	resizeWindow();
+});
+function resizeWindow() {
+	tempWdith = (jQuery(document).width() - 1003)/2;
+	
+	var browser=navigator.appName
+	var b_version=navigator.appVersion
+	var trim_Version=b_version.replace(/[ ]/g,"");
+
+
+	 if(browser=="Microsoft Internet Explorer" )if(trim_Version.indexOf('MSIE8')>=0)
+	 {
+	   tempWdith = (jQuery(document).width() - 1026)/2;
+	  
+	 }
+	 if(browser=="Microsoft Internet Explorer" )if(trim_Version.indexOf('MSIE6')>=0){
+		 jQuery("#showIE").show();
+		 jQuery("#showIE").html("您的浏览器版本过低，请升级浏览器");
+	 }
+	 
+	if(tempWdith >0) {
+		jQuery(".login_border").show();
+		ht = jQuery(document).height();
+		if(browser=="Microsoft Internet Explorer" )if(trim_Version.indexOf('MSIE8')>=0)
+		{
+			if(ht > 790) {
+				ht = 1344;
+			} else {
+				ht = 768;
+			}
+		} 
+		jQuery(".login_border").css({width:tempWdith+"px", height:ht+"px"});
+	} else {
+		jQuery(".login_border").hide();
+	}
+}
+
+function checkLogin() {
+	if(jQuery("#loginForm\\:username").val() == "") {
+		jQuery("#loginForm\\:username").focus();
+		return false;
+	} 
+	if(jQuery("#loginForm\\:paword").val() == "") {
+		jQuery("#loginForm\\:paword").focus();
+		return false;
+	}
+	return true;
+}
+
+function handleComplete(xhr, status, args) { 
+/* 	if(args.login=="changPWD"){
+		document.location.href="sysmanage/pwmodify.jsf?usrId="+args.staffId;
+	} */
+	if(args.login=="success"){
+		if(document.all) 
+		{
+			var usrId = args.staffId;
+		    location.replace('main.jsf');
+		}
+		else
+		{
+			//var usrId = args.staffId;
+		    location.replace('main.jsf'); 
+		}
+	}
+	if(args.login=="fail"){
+		//confirmlogout.show();
+		//alert("dddddd");
+	}
+	/* if(args.login=="unfailed"){
+		jQuery("#loginForm\\:username").val("");
+		jQuery("#loginForm\\:paword").val("");
+		jQuery("#loginForm\\:username").select();
+		jQuery("#loginForm\\:username").focus();
+	}
+	if(args.login=="pwfailed"){
+		jQuery("#loginForm\\:paword").select();
+		jQuery("#loginForm\\:paword").focus();
+	} */
+}  
+
+</script>
+
+</div>	
+	</h:body>
+</f:view>
+</html>

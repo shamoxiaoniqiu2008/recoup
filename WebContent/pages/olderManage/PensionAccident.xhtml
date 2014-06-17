@@ -1,0 +1,346 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+	<h:head>
+		<title>#{pageConfig.loginTitle}</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<h:body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">老人姓名:</td>
+					<td><p:inputText id="olderName"
+							value="#{pensionAccidentController.olderName}" /> <his:IME
+							for="searchForm:olderName" rawSQL="true" resultcol="1"
+							SQLResult="编号:0,姓名:1,输入码:2" sortcol="older_id"
+							SQL="#{pensionAccidentController.selectOlderSql}"
+							fitcol="inputCode" lock="true" multiresult="searchForm:olderId;0" />
+						<h:inputHidden value="#{pensionAccidentController.olderId}"
+							id="olderId" /></td>
+					<td class="leftcell">事故日期:</td>
+					<td><p:calendar value="#{pensionAccidentController.startDate}"
+							style="width:145px;" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">至:</td>
+					<td><p:calendar value="#{pensionAccidentController.endDate}"
+							style="width:145px;" pattern="yyyy-MM-dd"></p:calendar></td>
+					<td class="leftcell">事故类型</td>
+					<td><h:selectOneMenu
+							value="#{pensionAccidentController.accidenttypeId}"
+							style="width:145px"
+							class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+							<f:selectItems var="type" itemValue="#{type.id}"
+								value="#{pensionAccidentController.accidenttypeList}"
+								itemLabel="#{type.accidenttypeName}"></f:selectItems>
+						</h:selectOneMenu></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{pensionAccidentController.searchAccidents}"
+							update=":accidentForm,:message" styleClass="searchbtn" value="" /></td>
+					<td class="leftcell"><p:commandButton
+							actionListener="#{pensionAccidentController.clearSearchForm}"
+							update=":searchForm" styleClass="blankbtn" value="" /></td>
+				</tr>
+			</table>
+		</h:form>
+
+		<h:form id="accidentForm">
+			<h:panelGrid style="width:100%">
+				<div style="width: 100%; margin-top: 10px">
+					<table style="width: 100%">
+						<tr>
+							<td><p:dataTable cellspacing="8" rows="10"
+									style="width:100%" id="accidentTable"
+									selection="#{pensionAccidentController.selectedRow}"
+									value="#{pensionAccidentController.accidentList}"
+									paginator="true" paginatorPosition="bottom"
+									paginatorAlwaysVisible="false"
+									paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+									var="accident" rowKey="#{accident.id}" selectionMode="single"
+									emptyMessage="没有相应记录">
+
+									<p:ajax event="rowSelect"
+										listener="#{pensionAccidentController.setEnableFlag}" />
+
+									<p:ajax event="rowUnselect"
+										listener="#{pensionAccidentController.setUnableFlag}" />
+
+
+									<p:column headerText="老人姓名" styleClass="width60">
+										<h:outputText value="#{accident.olderName}" />
+									</p:column>
+									<p:column headerText="责任护理员" styleClass="width70">
+										<h:outputText value="#{accident.dutynurserName}" />
+									</p:column>
+									<p:column headerText="事故时间" styleClass="width120">
+										<h:outputText value="#{accident.accidentTime}">
+											<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+										</h:outputText>
+									</p:column>
+
+									<p:column headerText="事故类型" styleClass="width60">
+										<h:outputText value="#{accident.accidenttypeName}" />
+									</p:column>
+									<p:column headerText="事故原因" styleClass="width60">
+										<h:outputText value="#{accident.accidentReason}" />
+									</p:column>
+									<p:column headerText="录入时间" styleClass="width120">
+										<h:outputText value="#{accident.inputTime}">
+											<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+										</h:outputText>
+									</p:column>
+									<p:column headerText="录入人" styleClass="width60">
+										<h:outputText value="#{accident.inputuserName}" />
+									</p:column>
+									<p:column headerText="已提交" styleClass="width60">
+										<h:outputText value="是" rendered="#{accident.sendFlag==1}" />
+										<h:outputText value="否" rendered="#{accident.sendFlag==2}" />
+									</p:column>
+
+								</p:dataTable></td>
+						</tr>
+					</table>
+				</div>
+			</h:panelGrid>
+			<div align="center">
+				<p:commandButton oncomplete="addDialogShow(xhr,status,args)"
+					id="addButton" styleClass="addbtn"
+					actionListener="#{pensionAccidentController.clearAddForm}" value=""
+					update=":addForm,:message"></p:commandButton>
+				<p:commandButton oncomplete="editDialogShow(xhr,status,args)"
+					id="editButton"
+					actionListener="#{pensionAccidentController.showEditForm}"
+					update=":editForm,:message" styleClass="modifybtn" value=""></p:commandButton>
+				<p:commandButton value="提交"
+					actionListener="#{pensionAccidentController.sentMessage}"
+					styleClass="commonbtn"
+					update=":accidentForm:accidentTable,:message"></p:commandButton>
+			</div>
+		</h:form>
+
+		<!-- 新增事故对话框 -->
+		<p:dialog header="新增事故" widgetVar="addDialog" resizable="false"
+			appendToBody="true" modal="true">
+			<h:form id="addForm" styleClass="noDisable">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="addOlderName">老人姓名:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="addOlderName"
+								value="#{pensionAccidentController.addAccident.olderName}">
+							</p:inputText> <his:IME for="addForm:addOlderName" rawSQL="true" resultcol="1"
+								SQLResult="编号:0,姓名:1,输入码:2,护理员编号:3,护理员姓名:4"
+								SQL="#{pensionAccidentController.olderSql}" fitcol="inputCode"
+								lock="true" sortcol="id"
+								multiresult="addForm:addOlderId;0,addForm:dutynurserId;3,addForm:dutyName;4" />
+							<h:inputHidden
+								value="#{pensionAccidentController.addAccident.olderId}"
+								id="addOlderId" /></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="事故类型:" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><h:selectOneMenu
+								value="#{pensionAccidentController.addAccident.accidenttypeId}"
+								style="width:150px"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+								<f:selectItems
+									value="#{pensionAccidentController.addAccidenttypeList}"
+									var="type" itemValue="#{type.id}"
+									itemLabel="#{type.accidenttypeName}"></f:selectItems>
+							</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="accidentTime_input">事故时间:</label></td>
+						<td style="padding: 0 0 0 0" class="hengbiaogedata"><p:calendar
+								pattern="yyyy-MM-dd HH:mm" id="accidentTime"
+								showButtonPanel="true"
+								value="#{pensionAccidentController.addAccident.accidentTime}">
+							</p:calendar></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="dutyName">责任人:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="dutyName"
+								value="#{pensionAccidentController.addAccident.dutynurserName}" />
+							<his:IME for="addForm:dutyName" rawSQL="true" resultcol="1"
+								SQLResult="编号:0,姓名:1,输入码:2" sortcol="id"
+								SQL="select p.id,p.name,p.inputCode from pension_employee p where p.cleared=2"
+								fitcol="inputCode" lock="true"
+								multiresult="addForm:dutynurserId;0" /> <h:inputHidden
+								value="#{pensionAccidentController.addAccident.dutynurserId}"
+								id="dutynurserId" /></td>
+					</tr>
+
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="accidentReason">事故原因:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0" colspan="3"><p:inputTextarea
+								autoResize="true" cols="43" rows="2" id="accidentReason"
+								value="#{pensionAccidentController.addAccident.accidentReason}">
+							</p:inputTextarea></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="录入人:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{pensionAccidentController.addAccident.inputuserName}">
+							</h:outputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								value="#{pensionAccidentController.addAccident.note}">
+							</p:inputText></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton
+						onstart="return checkNulls('addForm','redfont',true);"
+						actionListener="#{pensionAccidentController.saveAndSendAccident}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="提交" update=":accidentForm:accidentTable,:message">
+					</p:commandButton>
+					<p:commandButton
+						onstart="return checkNulls('addForm','redfont',true);"
+						actionListener="#{pensionAccidentController.saveAccident}"
+						oncomplete="addConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="保存" update=":accidentForm:accidentTable,:message">
+					</p:commandButton>
+					<p:commandButton
+						actionListener="#{pensionAccidentController.clearAddForm}"
+						styleClass="blankbtn" process="@this" value="" update=":addForm">
+					</p:commandButton>
+					<p:commandButton onclick="addDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 修改事故对话框 -->
+		<p:dialog header="修改事故" widgetVar="editDialog" resizable="false"
+			appendToBody="true" modal="true">
+			<h:form id="editForm">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="老人姓名:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{pensionAccidentController.editAccident.olderName}">
+							</h:outputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="事故类型:" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><h:selectOneMenu
+								value="#{pensionAccidentController.editAccident.accidenttypeId}"
+								style="width:150px"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+								<f:selectItems var="type" itemValue="#{type.id}"
+									value="#{pensionAccidentController.addAccidenttypeList}"
+									itemLabel="#{type.accidenttypeName}"></f:selectItems>
+							</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="acciTime_input">事故时间:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:calendar
+								showButtonPanel="true" pattern="yyyy-MM-dd HH:mm" id="acciTime"
+								value="#{pensionAccidentController.editAccident.accidentTime}">
+							</p:calendar></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="editDutyName">责任人:</label></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								id="editDutyName"
+								value="#{pensionAccidentController.editAccident.dutynurserName}">
+							</p:inputText> <his:IME for="editForm:editDutyName" rawSQL="true" resultcol="1"
+								SQLResult="编号:0,姓名:1,输入码:2" sortcol="id"
+								SQL="select p.id,p.name,p.inputCode from pension_employee p where p.cleared=2"
+								fitcol="inputCode" lock="true"
+								multiresult="editForm:editDutynurserId;0" /> <h:inputHidden
+								value="#{pensionAccidentController.editAccident.dutynurserId}"
+								id="editDutynurserId" /></td>
+					</tr>
+
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="acciReason">事故原因:</label></td>
+						<td class="hengbiaogedata" colspan="3" style="padding: 0 0 0 0"><p:inputTextarea
+								autoResize="true" cols="43" rows="2" id="acciReason"
+								value="#{pensionAccidentController.editAccident.accidentReason}">
+							</p:inputTextarea></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="录入人:" /></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{pensionAccidentController.editAccident.inputuserName}">
+							</h:outputText></td>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:" /></td>
+						<td class="hengbiaogedata" style="padding: 0 0 0 0"><p:inputText
+								value="#{pensionAccidentController.editAccident.note}">
+							</p:inputText></td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton
+						onstart="return checkNulls('editForm','redfont',true);"
+						actionListener="#{pensionAccidentController.saveAndSendEditAccident}"
+						oncomplete="editConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="提交" update=":accidentForm:accidentTable,:message">
+					</p:commandButton>
+					<p:commandButton
+						onstart="return checkNulls('editForm','redfont',true);"
+						actionListener="#{pensionAccidentController.saveEditAccident}"
+						oncomplete="editConfirm(xhr,status,args)" styleClass="commonbtn"
+						value="保存" update=":accidentForm:accidentTable,:message">
+					</p:commandButton>
+					<p:commandButton onclick="editDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			function addDialogShow(xhr, status, args) {
+				if (args.showAdd) {
+					addDialog.show();
+				}
+			}
+			function editDialogShow(xhr, status, args) {
+				if (args.editshow) {
+					editDialog.show();
+				}
+			}
+			function addConfirm(xhr, status, args) {
+				if (args.addsuccess) {
+					addDialog.hide();
+				}
+			}
+			function editConfirm(xhr, status, args) {
+				if (args.editsuccess) {
+					editDialog.hide();
+				}
+			}
+			/*  取消滚动条
+			 */
+			jQuery(document).ready(function() {
+				cleanBar();
+			});
+		</script>
+	</h:body>
+</f:view>
+</html>

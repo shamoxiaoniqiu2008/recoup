@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+	<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<style>
+.overdiv{
+	cursor:pointer;
+	display:block;
+	font-size:12px;
+	overflow:hidden;
+	height:18px;
+	width:150px;
+	border:0px solid #e6e6e6;
+}
+.overdivscroll{
+	cursor:pointer;
+	display:block;
+	font-size:12px;
+	overflow:auto;
+	height:230px; 
+	width:150px; 
+	border:0px solid #e6e6e6;
+}
+.addFormDetail tr td{
+vertical-align:top;
+}
+</style>
+	<h:body>
+		<p:growl id="msg"></p:growl>
+		<h:form id="searchForm">
+			<h:outputText value="康复类别："></h:outputText>
+			<h:inputHidden id="recureIdHidden" value="#{recoverProgrammeController.recoverId}"></h:inputHidden>
+			<h:inputText id="recureId" value="#{recoverProgrammeController.recoverName}"></h:inputText>
+			<his:IME for="searchForm:recureId"
+				fitcol="#{recoverProgrammeController.fitcolItem}" resultcol="1"
+				lock="false" rawSQL="true" SQL="#{recoverProgrammeController.itemToSql}"
+				SQLResult="#{recoverProgrammeController.displaycolItem}"
+				multiresult="searchForm:recureIdHidden;0,searchForm:recureId;1" />
+			<p:watermark value="调用类别输入法" for="recureId"></p:watermark>
+			<p:commandButton styleClass="searchbtn" value="" action="#{recoverProgrammeController.searchListById}" update=":msg,:showForm"></p:commandButton>
+			<p:commandButton styleClass="blankbtn" value="" action="#{recoverProgrammeController.initParam}" update=":msg,:searchForm"></p:commandButton>
+		</h:form>
+		<h:form id="showForm" styleClass="addFormDetail">
+			<p:dataTable id="showDataTable" emptyMessage="没有找到记录" value="#{recoverProgrammeController.pensionRecureDetailExtendList}" var="recureList" rowKey="#{recureList.pensionRecureDetail.id}"
+			selectionMode="single" selection="#{recoverProgrammeController.selectedRow}"
+			paginator="true" paginatorPosition="bottom" rows="10"
+			paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+				<p:ajax event="rowSelect" listener="#{recoverProgrammeController.setRowSelectedPara}" update=":operateForm"/>
+				<p:ajax event="rowUnselect" listener="#{recoverProgrammeController.setRowUnSelectedPara}" update=":operateForm"/>
+				<p:column headerText="康复类别">
+					<h:outputText value="#{recureList.recureItemName}"></h:outputText>
+				</p:column>
+				<p:column headerText="计划名称">
+					<h:outputText value="#{recureList.pensionRecureDetail.name}"></h:outputText>
+				</p:column>
+				<p:column headerText="详细描述">
+				<div title="more..."  ondblclick="changeme(this);"  class="overdiv" >
+							#{recureList.pensionRecureDetail.detail}
+						</div>
+				</p:column>
+				<p:column headerText="持续时间">
+					<h:outputText value="#{recureList.pensionRecureDetail.totalday}"></h:outputText>
+				</p:column>
+				<p:column headerText="服务次数">
+					<h:outputText value="#{recureList.pensionRecureDetail.number}"></h:outputText>
+				</p:column>
+				<p:column headerText="服务步骤">
+					<h:outputText value="#{recureList.pensionRecureDetail.steps}" ></h:outputText>
+				</p:column>
+				<p:column headerText="执行方案">
+				<div title="more..."  ondblclick="changeme(this);"  class="overdiv" >
+							#{recureList.pensionRecureDetail.scheme}
+				</div>
+				</p:column>
+				<p:column headerText="康复责任人">
+					<h:outputText value="#{recureList.recoverName}" ></h:outputText>
+				</p:column>
+				<p:column headerText="备注">
+					<h:outputText value="#{recureList.pensionRecureDetail.notes}"></h:outputText>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+		<div align="center">
+			<h:form id="operateForm">
+				<p:commandButton styleClass="addbtn" value=""  id="addButton"
+					onclick="addDialog.show()" disabled="#{recoverProgrammeController.addButtonEnableFlag}"></p:commandButton>
+				<p:commandButton styleClass="modifybtn" value="" id="modifyButton"
+					onclick="modifyDialog.show()" disabled="#{recoverProgrammeController.modifyButtonEnableFlag}" update=":modifyForm"></p:commandButton>
+				<p:commandButton styleClass="deletebtn" value="" id="deleteButton"
+					onclick="deleteDialog.show()" disabled="#{recoverProgrammeController.deleteButtonEnableFlag}"></p:commandButton>
+			</h:form>
+		</div>
+	
+		<p:dialog id="addDia" header="新增康复计划" appendTo="@(body)"
+			 modal="true" position="center" resizable="false"
+			widgetVar="addDialog" width="500">
+			<h:form id="addForm">
+			<table class="hengbiaoge" width="480px">
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="康复类别:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputHidden id="recoverTypeId" value="#{recoverProgrammeController.pensionRecureDetail.recureitemId}"></h:inputHidden>
+					<p:inputText id="recoverTypeName" value="#{recoverProgrammeController.pensionRecureDetailExtendForAdd.recureItemName}" required="true" requiredMessage="请输入康复类别！"></p:inputText></td>
+					<td class="hengbiaogeHeader1"><h:outputText value="计划名称:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><p:inputText value="#{recoverProgrammeController.pensionRecureDetail.name}" required="true" requiredMessage="请输入计划名称！"></p:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="持续时间:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><p:inputText id="medicationId" value="#{recoverProgrammeController.pensionRecureDetail.totalday}" validatorMessage="持续时间请输入正整数！" converterMessage="持续时间请输入正整数！" required="true" requiredMessage="请输入持续时间！">
+						<p:ajax event="blur" update=":msg,:addForm:excutePlan" listener="#{recoverProgrammeController.autoGenerateExcPlanForAdd}" process="addForm:medicationId,addForm:serviceId"></p:ajax>
+					<f:validateLongRange minimum="1"></f:validateLongRange></p:inputText></td>
+					<td class="hengbiaogeHeader1"><h:outputText value="服务次数:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><p:inputText id="serviceId" value="#{recoverProgrammeController.pensionRecureDetail.number}"  validatorMessage="服务次数请输入正整数！" converterMessage="服务次数请输入正整数！" required="true" requiredMessage="请输入服务次数！"><f:validateLongRange minimum="1"></f:validateLongRange>
+					<p:ajax event="blur" update=":msg,:addForm:excutePlan" listener="#{recoverProgrammeController.autoGenerateExcPlanForAdd}" process="addForm:medicationId,addForm:serviceId"></p:ajax>
+					</p:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="康复责任人:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputHidden id="recoverId" value="#{recoverProgrammeController.pensionRecureDetail.dutynurse}"></h:inputHidden>
+						<p:inputText  id="recoverName" value="#{recoverProgrammeController.pensionRecureDetailExtendForAdd.recoverName}" required="true" requiredMessage="请输入康复负责人！"></p:inputText></td>
+					<td class="hengbiaogeHeader1"><h:outputText value="服务步骤:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><p:inputText value="#{recoverProgrammeController.pensionRecureDetail.steps}" validatorMessage="服务步骤请输入正整数！" converterMessage="服务步骤请输入正整数！" required="true" requiredMessage="请输入服务步骤！">
+					<f:validateLongRange minimum="1"></f:validateLongRange>
+					</p:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="执行方案:" styleClass="redfont" ></h:outputText></td>
+					<td class="hengbiaogedata"><p:inputText value="#{recoverProgrammeController.pensionRecureDetail.scheme}" required="true" requiredMessage="请输入执行方案！" id="excutePlan"></p:inputText></td>
+					<td class="hengbiaogeHeader1"><h:outputText value="备注:" ></h:outputText></td>
+					<td class="hengbiaogedata"><p:inputText value="#{recoverProgrammeController.pensionRecureDetail.notes}"></p:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="详细描述:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata" colspan="3"><p:inputTextarea rows="3" cols="44" autoResize="false" value="#{recoverProgrammeController.pensionRecureDetail.detail}" required="true" requiredMessage="请输入详细描述！"></p:inputTextarea></td>
+				</tr>
+			</table>
+			<his:IME for="addForm:recoverTypeName"
+				fitcol="#{recoverProgrammeController.fitcolItem}" resultcol="1"
+				lock="false" rawSQL="true" SQL="#{recoverProgrammeController.itemToSql}"
+				SQLResult="#{recoverProgrammeController.displaycolItem}"
+				multiresult="addForm:recoverTypeId;0,addForm:recoverTypeName;1" />
+				
+				<his:IME for="addForm:recoverName"
+				fitcol="#{recoverProgrammeController.fitcolRecover}" resultcol="1"
+				lock="false" rawSQL="true" SQL="#{recoverProgrammeController.recoverToSql}"
+				SQLResult="#{recoverProgrammeController.displaycolRecover}"
+				multiresult="addForm:recoverId;0,addForm:recoverName;1"  />
+				
+				<p:watermark value="调用类别输入法" for="recoverTypeName"></p:watermark>
+				<p:watermark value="调用姓名输入法" for="recoverName"></p:watermark>
+				<div align="center">
+					<p:commandButton styleClass="savebtn" value="" action="#{recoverProgrammeController.addPensionRecureDetail}" update=":msg,:showForm:showDataTable,:addForm"></p:commandButton>
+					<p:commandButton styleClass="closebtn" value="" onclick="addDialog.hide()"></p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="modifyDia" header="修改康复计划" appendTo="@(body)"
+			modal="true" position="center" resizable="false"
+			widgetVar="modifyDialog"  width="500">
+			<h:form id="modifyForm">
+			<table class="hengbiaoge" width="480px">
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="康复类别:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"> <h:inputHidden id="recoverTypeIdEdit" value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.recureitemId}"></h:inputHidden>
+					<h:inputText  id="recoverTypeNameEdit" value="#{recoverProgrammeController.selectedRow.recureItemName}" required="true" requiredMessage="请输入康复类别！"> </h:inputText></td>
+					<td class="hengbiaogeHeader1"><h:outputText value="计划名称:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputText value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.name}" required="true" requiredMessage="请输入计划名称！"></h:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="持续时间:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputText id="medicationIdEdit" value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.totalday}" validatorMessage="持续时间请输入正整数！" converterMessage="持续时间请输入正整数！" required="true" requiredMessage="请输入持续时间！">
+						<p:ajax event="blur" update=":msg,:modifyForm:excutePlanEdit" listener="#{recoverProgrammeController.autoGenerateExcPlanForEdit}" process="modifyForm:medicationIdEdit,modifyForm:serviceIdEdit"></p:ajax>
+					<f:validateLongRange minimum="1"></f:validateLongRange></h:inputText></td>
+					<td class="hengbiaogeHeader1"><h:outputText value="服务次数:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputText  id="serviceIdEdit"  value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.number}" validatorMessage="服务次数请输入正整数！" converterMessage="服务次数请输入正整数！" required="true" requiredMessage="请输入服务次数！">
+						<p:ajax event="blur" update=":msg,:modifyForm:excutePlanEdit" listener="#{recoverProgrammeController.autoGenerateExcPlanForEdit}" process="modifyForm:medicationIdEdit,modifyForm:serviceIdEdit"></p:ajax>
+					<f:validateLongRange minimum="1"></f:validateLongRange></h:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="康复责任人:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputHidden id="recoverIdEdit" value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.dutynurse}"></h:inputHidden>
+					<h:inputText id="recoverNameEdit" value="#{recoverProgrammeController.selectedRow.recoverName}" required="true" requiredMessage="请输入康复负责人！"></h:inputText></td>
+					<td class="hengbiaogeHeader1"><h:outputText value="服务步骤:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputText value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.steps}" validatorMessage="服务步骤请输入正整数！" converterMessage="服务步骤请输入正整数！" required="true" requiredMessage="请输入服务步骤！"><f:validateLongRange minimum="1"></f:validateLongRange></h:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="执行方案" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputText id="excutePlanEdit" value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.scheme}" required="true" requiredMessage="请输入执行方案！"></h:inputText></td>
+					<td class="hengbiaogeHeader1"><h:outputText value="备注:" ></h:outputText></td>
+					<td class="hengbiaogedata"><h:inputText value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.notes}"></h:inputText></td>
+				</tr>
+				<tr>
+					<td class="hengbiaogeHeader1"><h:outputText value="详细描述:" styleClass="redfont"></h:outputText></td>
+					<td class="hengbiaogedata" colspan="3"><p:inputTextarea rows="3" cols="45" autoResize="false" value="#{recoverProgrammeController.selectedRow.pensionRecureDetail.detail}" required="true" requiredMessage="请输入详细描述！"></p:inputTextarea></td>
+				</tr>
+			</table>
+			<his:IME for="modifyForm:recoverTypeNameEdit"
+				fitcol="#{recoverProgrammeController.fitcolItem}" resultcol="1"
+				lock="false" rawSQL="true" SQL="#{recoverProgrammeController.itemToSql}"
+				SQLResult="#{recoverProgrammeController.displaycolItem}"
+				multiresult="modifyForm:recoverTypeIdEdit;0,modifyForm:recoverTypeNameEdit;1" />
+			<his:IME for="modifyForm:recoverNameEdit"
+				fitcol="#{recoverProgrammeController.fitcolRecover}" resultcol="1"
+				lock="false" rawSQL="true" SQL="#{recoverProgrammeController.recoverToSql}"
+				SQLResult="#{recoverProgrammeController.displaycolRecover}"
+				multiresult="modifyForm:recoverIdEdit;0,modifyForm:recoverNameEdit;1" />
+			<p:watermark value="调用类别输入法" for="recoverTypeNameEdit"></p:watermark>
+			<p:watermark value="调用姓名输入法" for="recoverNameEdit"></p:watermark>
+			<div align="center">
+					<p:commandButton styleClass="savebtn" value="" action="#{recoverProgrammeController.updatePensionRecureDetail}" 
+					update=":msg,:showForm,:operateForm" oncomplete="handleModifyShow(xhr,status,args)"></p:commandButton>
+					<p:commandButton styleClass="closebtn" value="" onclick="modifyDialog.hide()"></p:commandButton>
+			</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="deleteDia" header="删除康复计划" appendTo="@(body)"
+			modal="true" position="center" resizable="false"
+			widgetVar="deleteDialog">
+			<h:outputText value="确实要删除此康复计划吗？"></h:outputText>
+			<div align="center">
+				<h:form>
+					<p:commandButton styleClass="submitbtn" value="" action="#{recoverProgrammeController.deletePensionRecureDetail}" update=":msg,:showForm,:operateForm" 
+					oncomplete="deleteDialog.hide()"></p:commandButton>
+					<p:commandButton styleClass="closebtn" value=""
+						onclick="deleteDialog.hide()"></p:commandButton>
+				</h:form>
+			</div>
+		</p:dialog>
+		<script>
+		function changeme(obj){
+			if(obj.className=="overdiv"){
+				obj.className="overdivscroll";
+				//nowheightflage=true;
+			}else{
+				obj.scrollTop=0;
+				obj.className="overdiv";
+			//	nowheightflage=false;
+			}
+		}
+		
+		function handleModifyShow(xhr,status,args){
+			if(args.closeFlag){
+				modifyDialog.hide();
+			}else{
+				
+			}
+		}
+		</script>
+	</h:body>
+</f:view>
+</html>

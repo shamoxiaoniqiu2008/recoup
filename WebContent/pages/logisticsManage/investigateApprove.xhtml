@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:outputText value="&nbsp;&nbsp;排查时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{investigateApproveController.startDate}" />
+				<h:outputText value="至:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{investigateApproveController.endDate}" />
+				<h:outputLabel value="是否审批:" for="approveFlagText" />
+				<h:selectOneMenu value="#{investigateApproveController.ensureFlag}"
+					id="approveFlagText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="0" />
+					<f:selectItem itemLabel="已审批" itemValue="1" />
+					<f:selectItem itemLabel="未审批" itemValue="2" />
+				</h:selectOneMenu>
+				<p:commandButton id="searchButton"
+					action="#{investigateApproveController.selectInvestigatationRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:repairApplicationTable,:maintainForm,:messages,:deptEvaluateForm" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{investigateApproveController.clearSelectForm}"
+					update=":headForm,:messages" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="repairAppalicationRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="8" style="width:100%"
+					id="repairApplicationTable" rowIndexVar="row"
+					value="#{investigateApproveController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{investigateApproveController.selectedRow}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{investigateApproveController.selectRecord}"
+						update=":dataTableForm,:maintainForm,:deptEvaluateForm" />
+					<p:ajax event="rowUnselect"
+						listener="#{investigateApproveController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm,:deptEvaluateForm" />
+
+					<p:column headerText="大厦">
+						<h:outputText value="#{record.buildName}" />
+					</p:column>
+					<p:column headerText="楼层">
+						<h:outputText value="#{record.floorName}" />
+					</p:column>
+					<p:column headerText="房间">
+						<h:outputText value="#{record.roomName}" />
+					</p:column>
+					<p:column headerText="排查时间">
+						<h:outputText value="#{record.checkTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="排查结果">
+						<h:outputText value="#{record.checkResult}" />
+					</p:column>
+					<p:column headerText="审批结果">
+						<h:outputText value="同意" rendered="#{record.approveResult == 1}" />
+						<h:outputText value="不同意" rendered="#{record.approveResult == 2}" />
+						<h:outputText value="未审批"
+							rendered="#{record.approveResult == null}" />
+					</p:column>
+					<p:column headerText="不同意原因">
+						<h:outputText value="#{record.refuseReason}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton value="同意" styleClass="commonbtn"
+					disabled="#{investigateApproveController.disEnsureButton}"
+					action="#{investigateApproveController.approve}"
+					update=":headForm,:dataTableForm,:maintainForm,:messages,:deptEvaluateForm" />
+				<p:commandButton value="不同意" styleClass="commonbtn"
+					disabled="#{investigateApproveController.disEnsureButton}"
+					action="#{investigateApproveController.checkApprovaled}"
+					oncomplete="handleRefuseInit(xhr, status, args)" update=":messages" />
+			</div>
+		</h:form>
+		<h:form id="deptEvaluateForm" style="margin-top: 20px">
+			<h:panelGrid style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="deptEvaluateTable" paginatorAlwaysVisible="false"
+					value="#{investigateApproveController.approves}" paginator="true"
+					paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					var="evaluate" rowKey="#{evaluate.id}" emptyMessage="没有相应记录">
+					<p:column headerText="部门" style="width:50px">
+						<h:outputText value="#{evaluate.deptName}" />
+					</p:column>
+					<p:column headerText="审批人" style="width:50px">
+						<h:outputText value="#{evaluate.approverName}" />
+					</p:column>
+					<p:column headerText="审批类别" style="width:50px">
+						<h:outputText rendered="#{evaluate.approveType == 1}" value="是否需修" />
+						<h:outputText rendered="#{evaluate.approveType == 2}" value="维修明细" />
+					</p:column>
+					<p:column headerText="审批时间" style="width:120px">
+						<h:outputText value="#{evaluate.approveTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="审批结果" style="width:50px">
+						<h:outputText rendered="#{evaluate.approveResult == 1}" value="同意" />
+						<h:outputText rendered="#{evaluate.approveResult == 2}"
+							value="不同意" />
+						<h:outputText rendered="#{evaluate.approveResult == null}"
+							value="未审核" />
+					</p:column>
+					<p:column headerText="不同意原因" style="width:50px">
+						<h:outputText value="#{evaluate.refuseReason}" />
+					</p:column>
+				</p:dataTable>
+				<h:outputText value="&nbsp;"></h:outputText>
+			</h:panelGrid>
+		</h:form>
+		<p:dialog header="不同意原因" widgetVar="reasonDialog" resizable="false"
+			appendToBody="true" position="center" modal="true">
+			<h:form id="reasonForm">
+				<table class="hengbiaoge" width="100%" id="reasonTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="不同意原因:"
+								for="reasonText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea id="reasonText"
+								style="width:125px" required="true" requiredMessage="请输入不同意原因!"
+								value="#{investigateApproveController.refuseReason}" /></td>
+					</tr>
+
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{investigateApproveController.refuse}"
+						update=":headForm,:dataTableForm,:maintainForm,:messages,:deptEvaluateForm"
+						oncomplete="handleRefuseComplete(xhr, status, args)" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="reasonDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+		//清空 selectForm
+		function clearSelectForm(){
+			document.getElementById("headForm:startDate").value="";
+			document.getElementById("headForm:endDate").value="";
+			
+			return true;
+		}
+
+		function handleRefuseComplete(xhr, status, args){
+			if(!args.validationFailed) {
+				reasonDialog.hide();
+            }
+		}
+
+		function handleRefuseInit(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				reasonDialog.show();
+            }
+		}
+	</script>
+	</h:body>
+</f:view>
+</html>

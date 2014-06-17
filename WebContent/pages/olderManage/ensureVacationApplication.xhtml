@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+
+	</h:head>
+	<h:body>
+		<p:growl id="message"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<!-- 输入起始时间和截止时间 -->
+				<h:outputText value="&nbsp;&nbsp;预离院时间:" style="width:80" />
+				<p:calendar id="startDate" pattern="yyyy-MM-dd" size="15"
+					value="#{ensureVacationApplicationController.startDate}" />
+				<h:outputText value="至:" style="width:80" />
+				<p:calendar id="endDate" pattern="yyyy-MM-dd" size="15"
+					value="#{ensureVacationApplicationController.endDate}" />
+				<h:outputLabel value="老人姓名:" for="headForm:nameText" />
+				<h:panelGroup>
+					<p:inputText id="nameText" style="width:120px"
+						value="#{ensureVacationApplicationController.olderName}" />
+					<his:IME for="headForm:nameText" fitcol="inputCode" resultcol="0"
+						lock="true" rawSQL="true"
+						SQL="#{entryVacationApplicationController.olderNameSql}"
+						SQLResult="老人姓名:0,大厦:1,楼层:2,房间:3,床位:4,老人Id:5:hide,输入码:6"
+						multiresult="headForm:olderIdHd;5" />
+					<h:inputHidden id="olderIdHd"
+						value="#{ensureVacationApplicationController.olderId}" />
+				</h:panelGroup>
+				<h:outputLabel value="是否审批:" for="ensureFlagText" />
+				<h:selectOneMenu
+					value="#{ensureVacationApplicationController.ensureFlag}"
+					id="ensureFlagText"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemLabel="全部" itemValue="0" />
+					<f:selectItem itemLabel="已审批" itemValue="1" />
+					<f:selectItem itemLabel="未审批" itemValue="2" />
+				</h:selectOneMenu>
+				<p:commandButton id="searchButton"
+					action="#{ensureVacationApplicationController.selectVacationApplicationRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm,:maintainForm,:deptEvaluateForm" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{ensureVacationApplicationController.clearSelectForm}"
+					update=":headForm,:message" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="vacationAppalicationRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="vacationApplicationTable" rowIndexVar="row"
+					value="#{ensureVacationApplicationController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{ensureVacationApplicationController.selectedRow}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{ensureVacationApplicationController.selectRecord}"
+						update=":dataTableForm,:maintainForm,:deptEvaluateForm" />
+					<p:ajax event="rowUnselect"
+						listener="#{ensureVacationApplicationController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm,:deptEvaluateForm" />
+					<p:column headerText="姓名">
+						<h:outputText value="#{record.olderName}" />
+					</p:column>
+					<p:column headerText="大厦">
+						<h:outputText value="#{record.buildName}" />
+					</p:column>
+					<p:column headerText="房间">
+						<h:outputText value="#{record.roomName}" />
+					</p:column>
+					<p:column headerText="床位">
+						<h:outputText value="#{record.bedName}" />
+					</p:column>
+					<p:column headerText="请假理由">
+						<h:outputText value="#{record.leavereason}" />
+					</p:column>
+					<p:column headerText="预离院时间">
+						<h:outputText value="#{record.expectleavetime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="预返院时间">
+						<h:outputText value="#{record.expectbacktime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT+8" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="陪同人">
+						<h:outputText value="#{record.escortname}" />
+					</p:column>
+					<p:column headerText="联系方式">
+						<h:outputText value="#{record.escortphone}" />
+					</p:column>
+					<p:column headerText="审批结果">
+						<h:outputText value="待审批" rendered="#{record.finalResult == 1}" />
+						<h:outputText value="审批中" rendered="#{record.finalResult == 2}" />
+						<h:outputText value="通过" rendered="#{record.finalResult== 3}" />
+						<h:outputText value="不通过" rendered="#{record.finalResult== 4}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton value="同意" styleClass="commonbtn"
+					disabled="#{ensureVacationApplicationController.disEnsureButton}"
+					action="#{ensureVacationApplicationController.approve}"
+					update=":headForm,:dataTableForm,:maintainForm,:message,:deptEvaluateForm" />
+				<p:commandButton value="不同意" styleClass="commonbtn"
+					disabled="#{ensureVacationApplicationController.disEnsureButton}"
+					action="#{ensureVacationApplicationController.selectCheck}"
+					oncomplete="optionDialogShow(xhr,status,args)"
+					update=":optionForm,:message" />
+			</div>
+		</h:form>
+		<!--查看其他部门意见-->
+		<h:form id="deptEvaluateForm" style="margin-top: 20px">
+			<h:panelGrid style="width:100%">
+				<div style="width: 100%; margin-top: 10px">
+					<table style="width: 100%">
+						<tr>
+							<td><p:dataTable cellspacing="8" rows="10"
+									style="width:100%" id="deptEvaluateTable"
+									value="#{ensureVacationApplicationController.deptEvaluateList}"
+									paginator="true" paginatorPosition="bottom"
+									paginatorAlwaysVisible="false"
+									paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+									var="evaluate" rowKey="#{evaluate.id}" selectionMode="single"
+									emptyMessage="没有相应记录">
+
+									<p:column headerText="评估部门" style="width:50px">
+										<h:outputText value="#{evaluate.deptName}">
+										</h:outputText>
+									</p:column>
+									<p:column headerText="评估人" style="width:120px">
+										<h:outputText value="#{evaluate.approverName}">
+										</h:outputText>
+									</p:column>
+									<p:column headerText="评估结果" style="width:50px">
+										<h:outputText value="同意"
+											rendered="#{evaluate.approveresult==1}" />
+										<h:outputText value="不同意"
+											rendered="#{evaluate.approveresult==2}" />
+									</p:column>
+									<p:column headerText="评估时间" style="width:120px">
+										<h:outputText value="#{evaluate.approvetime}">
+											<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+										</h:outputText>
+									</p:column>
+									<p:column headerText="备注" style="width:120px">
+										<h:outputText value="#{evaluate.notes}">
+										</h:outputText>
+									</p:column>
+								</p:dataTable></td>
+						</tr>
+					</table>
+				</div>
+			</h:panelGrid>
+		</h:form>
+
+		<p:dialog header="备注" widgetVar="optionDialog" resizable="false"
+			appendToBody="true" modal="true">
+			<h:form id="optionForm">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea required="true"
+								requiredMessage="备注不可为空！" autoResize="true" cols="40" rows="3"
+								value="#{ensureVacationApplicationController.approveRecord.notes}"></p:inputTextarea>
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="2" style="margin:0px auto">
+					<p:commandButton process="@this,optionForm"
+						actionListener="#{ensureVacationApplicationController.refuse}"
+						oncomplete="optionDialogHide(xhr,status,args)"
+						styleClass="commonbtn" value="保存"
+						update=":deptEvaluateForm,:dataTableForm,:message">
+					</p:commandButton>
+					<p:commandButton onclick="optionDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+			function optionDialogShow(xhr, status, args) {
+				if (args.show) {
+					optionDialog.show();
+				}
+			}
+			function optionDialogHide(xhr, status, args) {
+				if (args.hide) {
+					optionDialog.hide();
+				}
+			}
+			//清空 selectForm
+			function clearSelectForm() {
+				document.getElementById("headForm:startDate").value = "";
+				document.getElementById("headForm:endDate").value = "";
+				document.getElementById("headForm:nameText").value = "";
+
+				return true;
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>

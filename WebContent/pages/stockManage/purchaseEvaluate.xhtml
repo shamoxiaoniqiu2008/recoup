@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag" style="width:100%">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html" style="width:100%">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css">
+		</link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		</meta>
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+	</h:head>
+	<body>
+		<p:growl id="message" widgetVar="message"></p:growl>
+		<h:form id="searchForm">
+			<table>
+				<tr>
+					<td class="leftcell">采购单号:</td>
+					<td><p:inputText
+							value="#{purchaseEvaluateController.purchaseNo}"></p:inputText></td>
+					<td class="leftcell"><p:commandButton styleClass="searchbtn"
+							value=""
+							actionListener="#{purchaseEvaluateController.searchApplyRecord}"
+							update=":applyForm,:deptEvaluateForm,:message" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form id="applyForm">
+			<table width="100%">
+				<tr>
+					<td><p:dataTable cellspacing="2" rows="10" style="width:100%"
+							id="applyTable"
+							selection="#{purchaseEvaluateController.selectedRow}"
+							value="#{purchaseEvaluateController.applyRecordList}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							var="apply" rowKey="#{apply.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+
+							<p:ajax event="rowSelect" update=":deptEvaluateForm"
+								listener="#{purchaseEvaluateController.selectEvalDetail}" />
+							<p:ajax event="rowUnselect" update=":deptEvaluateForm"
+								listener="#{purchaseEvaluateController.clearEvalDetail}" />
+							<p:column headerText="采购单号" style="width:140px">
+								<h:outputText value="#{apply.purchaseNo}" />
+							</p:column>
+							<p:column headerText="生成时间">
+								<h:outputText value="#{apply.generateTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+							<p:column headerText="采购时间" styleClass="width60">
+								<h:outputText value="#{apply.purchaseTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:mm"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+							<p:column headerText="审核结果">
+								<h:outputText value="同意" rendered="#{apply.approveResult==1}" />
+								<h:outputText value="不同意" rendered="#{apply.approveResult==2}" />
+							</p:column>
+							<p:column headerText="详情" styleClass="width50">
+								<p:commandLink update=":purchaseRecordForm,:message"
+									oncomplete="pusrchaseRecordDialog.show()" title="查看"
+									action="#{purchaseEvaluateController.selectPurchaseRecords(apply)}">
+									<p:graphicImage value="/images/search.png" style="border:0px;" />
+								</p:commandLink>
+							</p:column>
+						</p:dataTable></td>
+				</tr>
+			</table>
+		</h:form>
+		<!-- 入库记录维护 -->
+		<h:form id="maintainForm">
+			<div align="center">
+				<h:panelGrid id="buttonGrid" columns="4" style="margin:0px auto">
+					<p:commandButton
+						actionListener="#{purchaseEvaluateController.passApplyRecord}"
+						styleClass="commonbtn" value="同意" process="@this"
+						update=":applyForm,:deptEvaluateForm,:message"></p:commandButton>
+					<p:commandButton oncomplete="optionDialogShow(xhr,status,args)"
+						update=":optionForm,:message"
+						actionListener="#{purchaseEvaluateController.refuseCheck}"
+						styleClass="commonbtn" value="不同意"></p:commandButton>
+				</h:panelGrid>
+			</div>
+		</h:form>
+
+		<p:dialog header="备注" widgetVar="optionDialog" resizable="false"
+			appendToBody="true" modal="true">
+			<h:form id="optionForm">
+				<table class="hengbiaoge" width="430px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputText value="备注:"
+								styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputTextarea required="true"
+								requiredMessage="备注不可为空！" autoResize="true" cols="44" rows="3"
+								value="#{purchaseEvaluateController.approveRecord.note}"></p:inputTextarea>
+						</td>
+					</tr>
+				</table>
+				<h:panelGrid id="buttonGrid" columns="2" style="margin:0px auto">
+					<p:commandButton process="@this,optionForm"
+						actionListener="#{purchaseEvaluateController.refusePurchase}"
+						oncomplete="optionDialogHide(xhr,status,args)"
+						styleClass="commonbtn" value="保存"
+						update=":deptEvaluateForm,:applyForm,:message">
+					</p:commandButton>
+					<p:commandButton onclick="optionDialog.hide()" type="button"
+						styleClass="commonbtn" value="关闭" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!--查看其他部门意见-->
+		<h:form id="deptEvaluateForm" style="margin-top: 20px">
+			<h:panelGrid style="width:100%">
+				<div style="width: 100%; margin-top: 10px">
+					<table style="width: 100%">
+						<tr>
+							<td><p:dataTable cellspacing="8" rows="10"
+									style="width:100%" id="deptEvaluateTable"
+									value="#{purchaseEvaluateController.deptEvaluateList}"
+									paginator="true" paginatorPosition="bottom"
+									paginatorAlwaysVisible="false"
+									paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+									var="evaluate" rowKey="#{evaluate.id}" selectionMode="single"
+									emptyMessage="没有相应记录">
+
+									<p:column headerText="审核部门" style="width:50px">
+										<h:outputText value="#{evaluate.deptName}">
+										</h:outputText>
+									</p:column>
+									<p:column headerText="审核人" style="width:120px">
+										<h:outputText value="#{evaluate.evaluatorName}">
+										</h:outputText>
+									</p:column>
+									<p:column headerText="审核结果" style="width:50px">
+										<h:outputText value="同意"
+											rendered="#{evaluate.evaluateResult==1}" />
+										<h:outputText value="不同意"
+											rendered="#{evaluate.evaluateResult==2}" />
+									</p:column>
+									<p:column headerText="审核时间" style="width:120px">
+										<h:outputText value="#{evaluate.evaluateDate}">
+											<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+										</h:outputText>
+									</p:column>
+									<p:column headerText="备注" style="width:120px">
+										<h:outputText value="#{evaluate.note}">
+										</h:outputText>
+									</p:column>
+								</p:dataTable></td>
+						</tr>
+					</table>
+				</div>
+			</h:panelGrid>
+		</h:form>
+
+		<p:dialog header="采购详情" widgetVar="pusrchaseRecordDialog"
+			resizable="false" appendTo="@(body)" modal="true">
+			<h:form id="purchaseRecordForm">
+				<table width="100%">
+					<tr>
+						<td><p:dataTable cellspacing="2" rows="10" style="width:100%"
+								id="detailTable"
+								value="#{purchaseEvaluateController.applyDetailList}"
+								paginator="true" paginatorPosition="bottom"
+								paginatorAlwaysVisible="false"
+								paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+								var="detail" rowKey="#{detail.id}" selectionMode="single"
+								emptyMessage="没有相应记录">
+								<p:column headerText="物资名称" styleClass="width60">
+									<h:outputText value="#{detail.itemName}" />
+								</p:column>
+								<p:column headerText="物资类型" styleClass="width60">
+									<h:outputText value="#{detail.typeName}" />
+								</p:column>
+
+								<p:column headerText="采购数量" styleClass="width60">
+									<h:outputText value="#{detail.purchaseQty}" />
+								</p:column>
+								<p:column headerText="单位" styleClass="width60">
+									<h:outputText value="#{detail.unit}" />
+								</p:column>
+							</p:dataTable></td>
+					</tr>
+				</table>
+			</h:form>
+		</p:dialog>
+
+
+
+		<script type="text/javascript">
+			/*  取消滚动条
+			 */
+			jQuery(document).ready(function() {
+				cleanBar();
+			});
+			function optionDialogShow(xhr, status, args) {
+				if (args.show) {
+					optionDialog.show();
+				}
+			}
+			function optionDialogHide(xhr, status, args) {
+				if (args.hide) {
+					optionDialog.hide();
+				}
+			}
+		</script>
+	</body>
+</f:view>
+</html>

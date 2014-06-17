@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+ 
+	<f:view contentType="text/html">
+<style>
+.B1 {
+	color: red
+}
+</style>
+	
+	
+		<h:head>
+			<title>#{pageConfig.paymentLog}</title>
+			
+			
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/default.css" />
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/skin.css" />
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/layout.css"></link>
+			<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+				type="text/css" />
+			<link rel="stylesheet" href="#{request.contextPath}/css/style.css" ></link>
+
+			<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+			
+		    <script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		</h:head>
+		
+		<h:body>
+	<p:growl id="messages"></p:growl>
+	<h:form id="searchForm" >
+		<h:outputText value="&nbsp;&nbsp;老人姓名" />
+		<h:inputHidden value="#{paymentLogController.olderId}" id="olderId"/>
+		<p:inputText value="#{paymentLogController.olderName}" id="olderName" />
+		<his:IME for="searchForm:olderName"
+					fitcol="olderId,inputCode"
+					resultcol="1"
+					lock="true"
+					rawSQL="true"
+					SQL="#{paymentLogController.selectSQL}"
+					SQLResult="编号:0,姓名:1,输入码:2:hide,大厦:3,楼层:4,房间:5,床位:6,状态 :7,状元hide:8:hide" 
+					multiresult="searchForm:olderId;0,searchForm:olderName;1,searchForm:status;8" />
+		<h:outputText value="老人状态:" style="text-align:right"/>
+		<h:selectOneMenu value="#{paymentLogController.status}" id="status" 
+		class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+				<f:selectItem itemLabel="全部"/>
+				<f:selectItem itemValue="3" itemLabel="在院"/>
+				<f:selectItem itemValue="4" itemLabel="请假"/>
+				<f:selectItem itemValue="5" itemLabel="待结算"/>
+				<f:selectItem itemValue="6" itemLabel="已离院"/>
+		</h:selectOneMenu>
+		<p:commandButton styleClass="searchbtn" value="" action="#{paymentLogController.search}"
+			update=":payListForm,:messages">
+		</p:commandButton>
+		<p:commandButton styleClass="commonbtn" value="清空" onclick="clearSearchForm()"
+			update=":searchForm,:messages">
+		</p:commandButton>
+	</h:form>
+	
+	<h:form id="payListForm">
+		<p:dataTable id="list"
+			value="#{paymentLogController.olders}"
+			var="older" rowKey="#{older.id}"
+			emptyMessage="当前无内容"
+			rows="10" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+			paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+			paginator="true">
+				<p:column headerText="老人姓名" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.name}" />
+				</p:column>
+				<p:column headerText="大厦" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.buildName}" />
+				</p:column>
+				<p:column headerText="楼层" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.floorName}" />
+				</p:column>
+				<p:column headerText="房间" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.roomName}" />
+				</p:column>
+				<p:column headerText="床位" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.bedName}" />
+				</p:column>
+				<p:column headerText="入住时间" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.visitDate}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="床位类型" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.bedLevel}" />
+				</p:column>
+				<p:column headerText="护理等级" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.nurseLevel}" />
+				</p:column>
+				<p:column headerText="状态" style="text-align:center"  >
+					<h:outputText 
+						value="#{older.statusName}" />
+				</p:column>
+				<p:column headerText="操作">
+					<p:commandLink process="@this," 
+						ajax="true" rendered="true"
+						action="#{paymentLogController.selectPaymentDetail(older)}"
+						oncomplete="detailsDig.show()"
+						update=":tabView:normalForm,:tabView:normalDetailForm,:tabView:tempForm,:tabView:tempDetailForm,:tabView:depositForm,:tabView:depositLogForm,:messages">
+						<p:graphicImage value="/css/images/detail_btn.jpg" style="margin: 5px 5px 5px 0;border:0px;border-radius: 3px;width: 50px;height: 23px;"></p:graphicImage>
+					</p:commandLink>	
+				</p:column>
+			</p:dataTable>
+	</h:form>
+	<p:dialog widgetVar="detailsDig" appendTo="@(body)" 
+		style="height:400px;width:900px"
+		resizable="true" header="缴费详情" modal="true">
+	<p:tabView style="height:400px;" id="tabView" 
+		tabChangeListener="#{paymentLogController.onChangeTab}">
+		<p:tab title="固定缴费项目" id="normal">
+	<h:form id="normalForm">
+	<p:dataTable id="normalList" styleClass="width:900px"
+			value="#{paymentLogController.normalPayments}"
+			var="normalPayment" rowKey="#{normalPayment.id}"
+			emptyMessage="当前无信息" 
+			selection="#{paymentLogController.selectNormal}"
+			selectionMode="single"
+			paginator="true"
+			rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+				<p:ajax event="rowSelect" listener="#{paymentLogController.onSelectNormalPayment}" update=":tabView:normalDetailForm,:messages"/>
+				<p:ajax event="rowUnselect" listener="#{paymentLogController.onUnselectNormalPayment}" />
+				<p:column headerText="收据号" >
+					<h:outputText
+						value="#{normalPayment.numberid}" />
+				</p:column>
+				<p:column headerText="总费用" >
+					<h:outputText
+						value="#{normalPayment.totalfees}" />
+				</p:column>
+				<p:column headerText="开单人" >
+					<h:outputText
+						value="#{normalPayment.generatorName}" />
+				</p:column>
+				<p:column headerText="开单时间" >
+					<h:outputText
+						value="#{normalPayment.generatetime}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="已收费" >
+					<h:outputText
+						value="#{normalPayment.isPayStr}" />
+				</p:column>
+				<p:column headerText="收费人" >
+					<h:outputText
+						value="#{normalPayment.payeeName}" />
+				</p:column>
+				<p:column headerText="已结算" >
+					<h:outputText
+						value="#{normalPayment.isCloseStr}" />
+				</p:column>
+				<p:column headerText="结算人" >
+					<h:outputText
+						value="#{normalPayment.closedName}" />
+				</p:column>
+	</p:dataTable>
+	</h:form>
+	<h:form id="normalDetailForm">
+	<p:dataTable id="normalDetailList" styleClass="width:900px"
+			value="#{paymentLogController.normalPaymentDetails}"
+			var="normalPaymentDetail" rowKey="#{normalPaymentDetail.id}"
+			emptyMessage="当前无信息" 
+			paginator="true"
+			rows="3" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+				<p:column headerText="项目名称" >
+					<h:outputText
+						value="#{normalPaymentDetail.itemName}" />
+				</p:column>
+				<p:column headerText="项目费用" >
+					<h:outputText
+						value="#{normalPaymentDetail.itemlfees}" />
+				</p:column>
+				<p:column headerText="数量" >
+					<h:outputText
+						value="#{normalPaymentDetail.number}" />
+				</p:column>
+				<p:column headerText="总额" >
+					<h:outputText
+						value="#{normalPaymentDetail.totalfees}" />
+				</p:column>
+				<p:column headerText="开单时间" >
+					<h:outputText
+						value="#{normalPaymentDetail.generatetime}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+	</p:dataTable>
+	</h:form>
+	</p:tab>
+	<p:tab title="临时缴费项目" id="temp">
+	<h:form id="tempForm">
+	<p:dataTable id="tempList" styleClass="width:900px"
+			value="#{paymentLogController.tempPayments}"
+			var="tempPayment" rowKey="#{tempPayment.id}"
+			emptyMessage="当前无信息" 
+			selection="#{paymentLogController.selectTemp}"
+			selectionMode="single"
+			paginator="true"
+			rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+				<p:ajax event="rowSelect" listener="#{paymentLogController.onSelectTempPayment}" update=":tabView:tempDetailForm,:messages"/>
+				<p:ajax event="rowUnselect" listener="#{paymentLogController.onUnselectTempPayment}" update=":tabView:tempDetailForm,:messages"/>
+				<p:column headerText="收据号" >
+					<h:outputText
+						value="#{tempPayment.numberid}" />
+				</p:column>
+				<p:column headerText="总费用" >
+					<h:outputText
+						value="#{tempPayment.totalfees}" />
+				</p:column>
+				<p:column headerText="开始时间" >
+					<h:outputText
+						value="#{tempPayment.starttime}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="结束时间" >
+					<h:outputText
+						value="#{tempPayment.endtime}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="开单人" >
+					<h:outputText
+						value="#{tempPayment.generatorName}" />
+				</p:column>
+				<p:column headerText="开单时间" >
+					<h:outputText
+						value="#{tempPayment.generatetime}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="已收费" >
+					<h:outputText
+						value="#{tempPayment.isPayStr}" />
+				</p:column>
+				<p:column headerText="收费人" >
+					<h:outputText
+						value="#{tempPayment.payeeName}" />
+				</p:column>
+				<p:column headerText="已结算" >
+					<h:outputText
+						value="#{tempPayment.isCloseStr}" />
+				</p:column>
+				<p:column headerText="结算人" >
+					<h:outputText
+						value="#{tempPayment.closedName}" />
+				</p:column>
+	</p:dataTable>
+	</h:form>
+	<h:form id="tempDetailForm">
+	<p:dataTable id="tempDetailList" styleClass="width:900px"
+			value="#{paymentLogController.tempPaymentDetails}"
+			var="tempPaymentDetail" rowKey="#{tempPaymentDetail.id}"
+			emptyMessage="当前无信息" 
+			paginator="true"
+			rows="3" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+				<p:column headerText="项目名称" >
+					<h:outputText
+						value="#{tempPaymentDetail.itemName}" />
+				</p:column>
+				<p:column headerText="项目费用" >
+					<h:outputText
+						value="#{tempPaymentDetail.itemlfees}" />
+				</p:column>
+				<p:column headerText="数量" >
+					<h:outputText
+						value="#{tempPaymentDetail.number}" />
+				</p:column>
+				<p:column headerText="总额" >
+					<h:outputText
+						value="#{tempPaymentDetail.totalfees}" />
+				</p:column>
+				<p:column headerText="开单时间" >
+					<h:outputText
+						value="#{tempPaymentDetail.generatetime}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+	</p:dataTable>
+	</h:form>
+	</p:tab>
+	<p:tab title="押金" id="deposit">
+	<h:form id="depositForm">
+	<table><tr>
+	<td class="hengbiaogeHeader1" width="100">
+	<h:outputText value="押金总额:" style="text-align:right" /></td>
+	<td class="hengbiaogedata" width="120">
+	<p:inputText value="#{paymentLogController.deposit.deposit}" readonly="true">
+		</p:inputText></td>
+	</tr></table>
+	</h:form>
+	<h:form id="depositLogForm">
+	<p:dataTable id="depositLogList" styleClass="width:900px"
+			value="#{paymentLogController.depositLogs}"
+			var="depositLog" rowKey="#{depositLog.id}"
+			emptyMessage="当前无信息" 
+			paginator="true"
+			rows="5" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+				<p:column headerText="押金类型" >
+					<h:outputText
+						value="#{depositLog.depositTypeName}" />
+				</p:column>
+				<p:column headerText="押金额" >
+					<h:outputText
+						value="#{depositLog.tradefee}" />
+				</p:column>
+				<p:column headerText="经办人" >
+					<h:outputText
+						value="#{depositLog.traderName}" />
+				</p:column>
+				<p:column headerText="经办时间" >
+					<h:outputText
+						value="#{depositLog.tradeDate}" >
+						<f:convertDateTime pattern="yyyy-MM-dd"/>
+					</h:outputText>
+				</p:column>
+	</p:dataTable>
+	</h:form>
+	</p:tab>
+	</p:tabView>
+	<div align="center">
+	<h:form>
+	<p:commandButton styleClass="closebtn" value="" oncomplete="detailsDig.hide()"
+			update=":messages"></p:commandButton>
+	</h:form>
+	</div>
+	</p:dialog>
+	<script type="text/javascript">
+	function clearSearchForm(){
+		jQuery("#searchForm\\:olderName").val("");
+		jQuery("#searchForm\\:status").val("");
+		}
+	</script>
+	
+
+		</h:body>
+	</f:view>
+	
+	
+	
+	
+	
+</html>

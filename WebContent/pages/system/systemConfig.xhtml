@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:his="http://centling.his.net/histag">
+
+<!-- 回车键，往下！引入的js文件 -->
+<f:view contentType="text/html">
+	<h:head>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+	</h:head>
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="headForm">
+			<h:panelGrid columns="15">
+				<h:outputLabel value="参数类型:" for=":headForm:selectType" />
+				<h:selectOneMenu id="selectType"
+					value="#{systemConfigController.type}"
+					class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+					<f:selectItem itemValue="1" itemLabel="消息发送至部门列表" />
+					<f:selectItem itemValue="2" itemLabel="消息发送至员工列表" />
+					<f:selectItem itemValue="3" itemLabel="特殊设置系统参数值" />
+					<p:ajax listener="#{systemConfigController.initSql}" event="blur"></p:ajax>
+				</h:selectOneMenu>
+				<h:outputLabel value="参数名:" for=":headForm:configNameText" />
+				<h:panelGroup>
+					<p:inputText id="configNameText" style="width:145px;" />
+					<his:IME for="headForm:configNameText"
+						fitcol="config_name,config_description" resultcol="1"
+						rawSQL="true" SQL="#{systemConfigController.systemConfigSql}"
+						SQLResult="参数主键ID:0:hide,参数名称:2,系统码:1"
+						multiresult="headForm:configIdHd;0">
+					</his:IME>
+					<h:inputHidden id="configIdHd"
+						value="#{systemConfigController.configId}" />
+				</h:panelGroup>
+				<p:commandButton id="searchButton"
+					action="#{systemConfigController.selectSystemConfigRecords}"
+					styleClass="searchbtn" value=""
+					update=":dataTableForm:vacationApplicationTable,:maintainForm,:messages" />
+				<p:commandButton oncomplete="clearSelectForm()"
+					styleClass="blankbtn" value=""
+					action="#{systemConfigController.clearSelectForm}"
+					update=":headForm,:messages" />
+			</h:panelGrid>
+		</h:form>
+		<h:form id="dataTableForm">
+			<h:panelGrid id="vacationAppalicationRecord" style="width:100%">
+				<p:dataTable cellspacing="8" rows="10" style="width:100%"
+					id="vacationApplicationTable" rowIndexVar="row"
+					value="#{systemConfigController.records}" var="record"
+					rowKey="#{record.id}" selectionMode="single" emptyMessage="没有相应记录"
+					selection="#{systemConfigController.selectedRow}" paginator="true"
+					paginatorPosition="bottom" paginatorAlwaysVisible="false"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+					<p:ajax event="rowSelect"
+						listener="#{systemConfigController.selectRecord}"
+						update=":dataTableForm,:maintainForm" />
+					<p:ajax event="rowUnselect"
+						listener="#{systemConfigController.unSelectRecord}"
+						update=":dataTableForm,:maintainForm" />
+
+					<p:column headerText="参数名称">
+						<h:outputText value="#{record.configDescription}" />
+					</p:column>
+					<p:column headerText="类型">
+						<h:outputText value="消息发送至部门列表" rendered="#{record.type==1}" />
+						<h:outputText value="消息发送至员工列表" rendered="#{record.type==2}" />
+						<h:outputText value="特殊设置系统参数值" rendered="#{record.type==3}" />
+					</p:column>
+					<p:column headerText="参数值">
+						<h:outputText value="#{record.configValue}" />
+					</p:column>
+					<p:column headerText="系统码">
+						<h:outputText value="#{record.configName}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:form>
+		<h:form id="maintainForm">
+			<div align="center">
+				<p:commandButton styleClass="modifybtn" value=""
+					disabled="#{systemConfigController.disUpdateButton}"
+					action="#{systemConfigController.copyRecordUpdatedRow}"
+					oncomplete="updateRecordDialog.show()"
+					update=":updateForm,:messages" />
+			</div>
+		</h:form>
+		<p:dialog header="修改" widgetVar="updateRecordDialog" resizable="false"
+			appendTo="@(body)" position="center" modal="true">
+			<h:form id="updateForm">
+				<table class="hengbiaoge" width="100%" id="updateTable">
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="参数名称:"
+								for="descriptionText" /></td>
+						<td class="hengbiaogedata"><p:inputText id="descriptionText"
+								size="60" readonly="true"
+								value="#{systemConfigController.updatedRow.configDescription}" /></td>
+					</tr>
+
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="参数值:"
+								for="configValueText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText id="configValueText"
+								required="true"
+								rendered="#{systemConfigController.updatedRow.type==1}"
+								requiredMessage="请输入参数值" size="60"
+								value="#{systemConfigController.updatedRow.configValue}">
+								<p:ajax event="focus"
+									listener="#{systemConfigController.selectNames}"
+									oncomplete="deptDig.show();" update=":deptForm"></p:ajax>
+							</p:inputText> <p:inputText id="configValueText2" required="true"
+								rendered="#{systemConfigController.updatedRow.type==2}"
+								requiredMessage="请输入参数值" size="60"
+								value="#{systemConfigController.updatedRow.configValue}">
+								<p:ajax event="focus"
+									listener="#{systemConfigController.selectNames}"
+									oncomplete="empDig.show();" update=":empForm"></p:ajax>
+							</p:inputText> <p:inputText id="configValueText3" required="true"
+								rendered="#{systemConfigController.updatedRow.type==3}"
+								requiredMessage="请输入参数值" size="60"
+								value="#{systemConfigController.updatedRow.configValue}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><h:outputLabel value="参数名:"
+								for="configNameText" styleClass="redfont" /></td>
+						<td class="hengbiaogedata"><p:inputText id="configNameText"
+								size="60" readonly="true"
+								value="#{systemConfigController.updatedRow.configName}" /></td>
+					</tr>
+				</table>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="submitbtn" value=""
+						action="#{systemConfigController.updateSystemConfigRecord}"
+						oncomplete="handleUpdateComplete(xhr, status, args)"
+						update=":updateForm,:dataTableForm,:messages,:maintainForm" />
+					<p:commandButton type="reset" styleClass="cancelbtn" value=""
+						onclick="updateRecordDialog.hide()">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="deptDig" appendTo="@(body)" resizable="true"
+			closable="true" header="部门配置" modal="true">
+			<h:form id="deptForm">
+				<p:dataTable id="olderElectricitys"
+					value="#{systemConfigController.depts}" var="record"
+					emptyMessage="没有记录" rows="10" paginatorAlwaysVisible="true"
+					selection="#{systemConfigController.dept}" rowKey="#{record.id}"
+					paginatorPosition="bottom" selectionMode="single"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					paginator="true">
+					<p:column id="dept_id">
+						<f:facet name="header">
+							<h:outputText value="部门编号"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{record.id}">
+						</h:outputText>
+					</p:column>
+					<p:column id="dept_name">
+						<f:facet name="header">
+							<h:outputText value="部门名称"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{record.name}">
+						</h:outputText>
+					</p:column>
+				</p:dataTable>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="addbtn" process="@this" value=""
+						oncomplete="adddeptWidget.show();"></p:commandButton>
+					<p:commandButton styleClass="deletebtn" value=""
+						action="#{systemConfigController.deleteDeptValue}"
+						update=":updateForm,:deptForm,:messages">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<!-- 增加数据 -->
+		<p:dialog id="adddeptDig" widgetVar="adddeptWidget"
+			appendToBody="true" resizable="false" modal="true" closable="true"
+			header="添加部门">
+			<h:form id="adddeptDigForm">
+				<table class="hengbiaoge" width="100%" id="addDataGridId">
+					<tr>
+						<td class="hengbiaogeHeader1" align="center"><h:outputLabel
+								value="部门编号" /></td>
+						<td class="hengbiaogedata" align="left"><p:inputText
+								id="deptId" value="#{systemConfigController.dept.id}">
+							</p:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1" align="center"><h:outputLabel
+								value="部门名称" /></td>
+						<td class="hengbiaogedata" align="left"><p:inputText
+								id="deptName" value="#{systemConfigController.dept.name}">
+							</p:inputText> <his:IME for="adddeptDigForm:deptName" fitcol="name,inputCode"
+								resultcol="1" lock="true" rawSQL="true"
+								SQL="#{systemConfigController.deptSQL}"
+								SQLResult="部门编号:0,部门名称:1" multiresult="adddeptDigForm:deptId;0">
+							</his:IME></td>
+					</tr>
+					<tr>
+						<td align="center" colspan="2"><p:commandButton
+								styleClass="savebtn" id="addBtn"
+								action="#{systemConfigController.addDeptValue}"
+								update=":updateForm,:deptForm,:adddeptDigForm" value=""
+								oncomplete="adddeptWidget.hide();">
+							</p:commandButton> <p:commandButton styleClass="closebtn" type="button" value=""
+								onclick="adddeptWidget.hide();">
+							</p:commandButton></td>
+					</tr>
+				</table>
+			</h:form>
+		</p:dialog>
+		<p:dialog widgetVar="empDig" appendTo="@(body)" resizable="true"
+			closable="true" header="员工配置" modal="true">
+			<h:form id="empForm">
+				<p:dataTable id="olderElectricitys"
+					value="#{systemConfigController.emps}" var="record"
+					emptyMessage="没有记录" rows="10" paginatorAlwaysVisible="true"
+					selection="#{systemConfigController.emp}" rowKey="#{record.id}"
+					paginatorPosition="bottom" selectionMode="single"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					paginator="true">
+					<p:column id="dept_id">
+						<f:facet name="header">
+							<h:outputText value="员工编号"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{record.id}">
+						</h:outputText>
+					</p:column>
+					<p:column id="dept_name">
+						<f:facet name="header">
+							<h:outputText value="员工名称"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{record.name}">
+						</h:outputText>
+					</p:column>
+				</p:dataTable>
+				<div style="width: 100%; text-align: center;">
+					<p:commandButton styleClass="addbtn" process="@this" value=""
+						oncomplete="addempWidget.show();"></p:commandButton>
+					<p:commandButton styleClass="deletebtn" value=""
+						action="#{systemConfigController.deleteEmptValue}"
+						update=":updateForm,:empForm,:messages">
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<!-- 增加数据 -->
+		<p:dialog id="addempDig" widgetVar="addempWidget" appendToBody="true"
+			resizable="false" modal="true" closable="true" header="添加员工">
+			<h:form id="addempDigForm">
+				<table class="hengbiaoge" width="100%" id="addDataGridId">
+					<tr>
+						<td class="hengbiaogeHeader1" align="center"><h:outputLabel
+								value="员工编号：" /></td>
+						<td class="hengbiaogedata" align="left"><h:inputText
+								id="empId" value="#{systemConfigController.emp.id}">
+							</h:inputText></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1" align="center"><h:outputLabel
+								value="员工姓名：" /></td>
+						<td class="hengbiaogedata" align="left"><h:inputText
+								id="empName" value="#{systemConfigController.emp.name}">
+							</h:inputText> <his:IME for="addempDigForm:empName" fitcol="name,inputCode"
+								resultcol="1" lock="true" rawSQL="true"
+								SQL="#{systemConfigController.empSQL}" SQLResult="员工编号:0,员工姓名:1"
+								multiresult="addempDigForm:empId;0">
+							</his:IME></td>
+					</tr>
+					<tr>
+						<td align="center" colspan="2"><p:commandButton
+								styleClass="savebtn" id="addBtn"
+								action="#{systemConfigController.addEmpValue}"
+								update=":updateForm,:empForm,:addempDigForm" value=""
+								oncomplete="addempWidget.hide();">
+							</p:commandButton> <p:commandButton styleClass="closebtn" type="button" value=""
+								onclick="addempWidget.hide();">
+							</p:commandButton></td>
+					</tr>
+				</table>
+			</h:form>
+		</p:dialog>
+		<script type="text/javascript">
+		//清空 selectForm
+		function clearSelectForm(){
+			document.getElementById("headForm:configNameText").value="";
+			
+			return true;
+		}
+		function handleUpdateComplete(xhr, status, args){
+			if(!args.validationFailed &amp;&amp; args.success) {
+				updateRecordDialog.hide();
+            }	
+		}
+		
+	</script>
+	</h:body>
+</f:view>
+</html>

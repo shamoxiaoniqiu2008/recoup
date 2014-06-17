@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-lazy-init ="true"  xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						   http://www.springframework.org/schema/context
+						   http://www.springframework.org/schema/context/spring-context-3.0.xsd
+						   http://www.springframework.org/schema/tx
+						   http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+						   http://www.springframework.org/schema/aop 
+						   http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+						   http://www.springframework.org/schema/jee 
+						   http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+	<!-- 注入Controller实例，同时注入Controller的依赖Service实例-->
+	<!-- author:wensy,老人申请录入 controller -->
+	<bean id="livingApplyController"  class="controller.receptionManage.LivingApplyController" scope="view">
+		<property name="livingApplyService"  ref="livingApplyService"></property>
+	</bean>
+	<!-- author:wensy,访客登记 controller -->
+	<bean id="visitorManageController"  class="controller.receptionManage.VisitorManageController"  scope="view">
+		<property name="visitorManageService"  ref="visitorManageService"></property>
+	</bean>
+	<!-- author:wensy,入住申请评估 controller -->
+	<bean id="livingEvaluateController"  class="controller.receptionManage.LivingEvaluateController"  scope="view">
+		<property name="livingEvaluateService"  ref="livingEvaluateService"></property>
+		<property name="livingApplyService"  ref="livingApplyService"></property>
+	</bean>
+	<!-- author:wensy,代办服务申请 controller -->
+	<bean id="agentApplyController"  class="controller.receptionManage.AgentApplyController"  scope="view">
+		<property name="agentApplyService"  ref="agentApplyService"></property>
+	</bean>
+	<!-- author:wensy,代办服务审核 controller -->
+	<bean id="agentEvaluateController"  class="controller.receptionManage.AgentEvaluateController"  scope="view">
+		<property name="agentApplyService"  ref="agentApplyService"></property>
+	</bean>
+	<!-- author:wensy,代办服务确认 controller -->
+	<bean id="agentConfirmController"  class="controller.receptionManage.AgentConfirmController"  scope="view">
+		<property name="agentConfirmService"  ref="agentConfirmService"></property>
+	</bean>
+</beans>
+

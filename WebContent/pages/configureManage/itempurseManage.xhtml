@@ -1,0 +1,277 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+
+<f:view contentType="text/html">
+	<style>
+.ui-panel .ui-panel-content {
+	padding: 0em !important;
+}
+</style>
+	<h:head>
+		<title>#{pageConfig.itempurseManage}</title>
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+	<h:body>
+
+
+		<p:growl id="message" widgetVar="message"></p:growl>
+
+		<table width="100%">
+			<tr>
+				<td valign="top"><h:form id="itempurseListForm">
+
+						<p:dataTable cellspacing="8" style="width:100%"
+							id="itempurseTable" paginatorAlwaysVisible="false"
+							selection="#{itempurseManageController.pensionItempurse}"
+							value="#{itempurseManageController.pensionItempurseList}"
+							rows="13" paginatorPosition="bottom" paginator="true"
+							var="itempurse" rowKey="#{itempurse.id}" selectionMode="single"
+							emptyMessage="没有相应记录">
+							<p:column headerText="编号" style="width:60px">
+								<h:outputText value="#{itempurse.id}" />
+							</p:column>
+							<p:column headerText="名称" style="width:160px">
+								<h:outputText value="#{itempurse.itemname}" />
+							</p:column>
+							<p:column headerText="类别">
+								<h:outputText value="#{itempurse.itemtype eq 1?'日常项目':'临时收费'}" />
+							</p:column>
+
+							<p:column headerText="价格">
+								<h:outputText value="#{itempurse.purse}" />
+							</p:column>
+							<p:column headerText="单位">
+								<h:outputText value="#{itempurse.unit}" />
+							</p:column>
+							<p:column headerText="启用标识">
+								<h:outputText value="#{itempurse.identity eq 1?'启用':'停用'}" />
+							</p:column>
+							<p:column headerText="操作者">
+								<h:outputText value="#{itempurse.recorderrname}" />
+							</p:column>
+							<p:column headerText="添加时间" style="width:160px">
+								<h:outputText value="#{itempurse.recordtime}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:MM:ss"></f:convertDateTime>
+								</h:outputText>
+							</p:column>
+
+							<p:column headerText="说明" style="width:160px">
+								<h:outputText title="#{itempurse.notes}"
+									value="#{fn:substring(itempurse.notes,0,10)}#{fn:length(itempurse.notes) gt 10?'..':''}" />
+							</p:column>
+						</p:dataTable>
+
+						<div align="center">
+							<p:commandButton oncomplete="itempurseDialog.show()"
+								id="addButton"
+								actionListener="#{itempurseManageController.showAddForm}"
+								update=":itempurseForm" styleClass="addbtn" value=""></p:commandButton>
+
+							<p:commandButton oncomplete="editConfirm(xhr,status,args);"
+								id="editButton"
+								actionListener="#{itempurseManageController.showSelectOneForm}"
+								update=":message,:itempurseForm,:itempurseListForm"
+								styleClass="modifybtn" value=""></p:commandButton>
+							<p:commandButton id="delButton"
+								oncomplete="delConfirm(xhr,status,args)" update=":message"
+								actionListener="#{itempurseManageController.showSelectOneForm}"
+								styleClass="deletebtn" value="">
+							</p:commandButton>
+						</div>
+
+
+					</h:form></td>
+			</tr>
+		</table>
+
+
+
+
+		<!-- 项目信息 -->
+		<p:dialog header="项目信息" widgetVar="itempurseDialog" resizable="false"
+			appendTo="@(body)" modal="true">
+			<h:form id="itempurseForm">
+
+				<table class="hengbiaoge" width="500px" align="center">
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="itempurseName">名称:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="itempurseName"
+								onkeypress="autoBlur(this,evt)"
+								value="#{itempurseManageController.pensionItempurseNow.itemname}">
+
+								<p:ajax event="blur"
+									onstart="return  checkIsNotNull('itempurseForm:itempurseName');"
+									process="@this"
+									listener="#{itempurseManageController.readPinYin}"
+									oncomplete="jumpTo('itempurseForm:itemtype')"
+									update=":message,:itempurseForm:inputCode">
+								</p:ajax>
+							</p:inputText></td>
+
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="inputCode">输入码:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="inputCode"
+								value="#{itempurseManageController.pensionItempurseNow.inputcode}">
+							</p:inputText></td>
+					</tr>
+
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="itemtype">类别:</label></td>
+						<td class="hengbiaogedata" style="width: 190px;"><p:panel
+								id="itemPursePanel"
+								style="border: 0px;height: 29px;width:  185px;padding: 0px 0px 0px 0px">
+								<h:selectOneMenu
+									value="#{itempurseManageController.pensionItempurseNow.itemtype}"
+									id="itemtype" style="width:70px"
+									class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+									<f:selectItem itemValue="1" itemLabel="日常" />
+									<f:selectItem itemValue="2" itemLabel="临时" />
+									<p:ajax event="valueChange"
+										process="@this,itempurseForm:itemtype"
+										listener="#{itempurseManageController.onItemTypeChange}"
+										update="itempurseForm:itemPursePanel"></p:ajax>
+								</h:selectOneMenu>
+								<h:inputHidden
+									value="#{itempurseManageController.pensionItempurseNow.pricetypeId}"
+									id="pricetypeId" />
+								<p:inputText style="width:  70px;"
+									value="#{itempurseManageController.pensionItempurseNow.pricetypeName}"
+									id="pricetypeName"
+									rendered="#{itempurseManageController.itemPurseTypeFlag}">
+								</p:inputText>
+								<his:IME for="itempurseForm:pricetypeName"
+									fitcol="id,input_code" resultcol="1" lock="true" rawSQL="true"
+									SQL="#{itempurseManageController.itemPurseTypeSql}"
+									SQLResult="编号:0,价表类型:1,输入码:2"
+									multiresult="itempurseForm:pricetypeId;0,itempurseForm:pricetypeName;1" />
+							</p:panel></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="purse">价格:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="purse"
+								onkeyup="value=value.replace(/[^\d.]/g,'')"
+								value="#{itempurseManageController.pensionItempurseNow.purse}">
+							</p:inputText></td>
+					</tr>
+
+					<tr>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="unit">单位:</label></td>
+						<td class="hengbiaogedata"><p:inputText id="unit"
+								value="#{itempurseManageController.pensionItempurseNow.unit}">
+							</p:inputText></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="identity">启用标记:</label></td>
+						<td class="hengbiaogedata"><h:selectOneMenu
+								value="#{itempurseManageController.pensionItempurseNow.identity}"
+								id="identity" style="width:145px"
+								class="ui-inputfield ui-widget ui-state-default ui-corner-all hasDatepicker ui-state-hover">
+								<f:selectItem itemValue="1" itemLabel="启用" />
+								<f:selectItem itemValue="2" itemLabel="停用" />
+							</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td class="hengbiaogeHeader1"><label for="notes">备注:</label></td>
+						<td class="hengbiaogedata" colspan="3"><p:inputTextarea
+								id="notes" style="width:100%"
+								value="#{itempurseManageController.pensionItempurseNow.notes}">
+							</p:inputTextarea></td>
+					</tr>
+				</table>
+
+				<h:panelGrid id="buttonGrid" columns="3" style="margin:0px auto">
+					<p:commandButton
+						action="#{itempurseManageController.saveItempurse}"
+						oncomplete="saveConfirm(xhr,status,args);" styleClass="submitbtn"
+						value=""
+						onstart="return checkNulls('itempurseForm','redfont',true);"
+						update=":message,:itempurseForm,:itempurseListForm">
+					</p:commandButton>
+					<p:commandButton onclick="itempurseDialog.hide()"
+						styleClass="cancelbtn" value="" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- 删除记录的dialog -->
+		<p:dialog appendTo="@(body)" modal="true" header="确认删除"
+			widgetVar="confirmDelDialog" width="220">
+			<h:form id="confirmDelForm">
+				<h:panelGrid>
+					<f:facet name="header">
+						<h:outputText value="您确定要删除该项目吗？" style="font-weight:bold;" />
+					</f:facet>
+					<f:facet name="footer">
+						<p:commandButton styleClass="submitbtn" value=""
+							action="#{itempurseManageController.delItempurse}"
+							update=":itempurseListForm" oncomplete="confirmDelDialog.hide()"></p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="" type="button"
+							onclick="confirmDelDialog.hide();"></p:commandButton>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<script>
+			function autoBlur(obj, evt) {
+				var isie = (document.all) ? true : false;
+				var key;
+				if (isie) // IE下
+				{
+					key = event.keyCode;
+				} else {
+					key = evt.which;
+				}
+				if (key == 13)
+					obj.blur();
+			}
+
+			function editConfirm(xhr, status, args) {
+				if (args.selected) {
+					itempurseDialog.show();
+				}
+			}
+
+			function delConfirm(xhr, status, args) {
+				if (args.selected) {
+					confirmDelDialog.show();
+				}
+			}
+
+			function saveConfirm(xhr, status, args) {
+				if (args.close) {
+					itempurseDialog.hide();
+				}
+			}
+		</script>
+	</h:body>
+</f:view>
+</html>
