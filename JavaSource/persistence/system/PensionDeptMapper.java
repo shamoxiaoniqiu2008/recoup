@@ -5,7 +5,7 @@ import domain.system.PensionDeptExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
-import service.configureManage.PensionDeptDoman;
+import service.system.PensionDeptDoman;
 
 public interface PensionDeptMapper {
 

@@ -33,9 +33,7 @@
 	<bean id="roleManageController" class="controller.system.RoleManageController"  scope="view">
 		<property name="roleManageService" ref="roleManageService"></property>
 	</bean>
-	<bean id="timerController" class="controller.system.TimerController"  scope="view">
-		<property name="timerService" ref="timerService"></property>
-	</bean>
+
 	<bean id="commonDictMaintainController" class="controller.system.CommonDictMaintainController"  scope="view">
 		<property name="commonDictMaintainService" ref="commonDictMaintainService"></property>
 	</bean>
@@ -44,11 +42,14 @@
 		<property name="deptManageService" ref="deptManageService"></property>
 		<property name="employeeManageService" ref="employeeManageService"></property>
 	</bean>
-	<bean id="ringManageController" class="controller.system.RingManageController"  scope="view">
-		<property name="ringManageService" ref="ringManageService"></property>
-	</bean>
+	
 	<bean id="messageController" class="controller.system.MessageController"  scope="view">
 		<property name="messageMessage" ref="messageMessage"></property>
+	</bean>
+	<!-- 部门管理 -->
+	<bean id="deptManageController"
+		class="controller.system.DeptManageController"  scope="view">
+		<property name="deptManageService" ref="deptManageService"></property>
 	</bean>
 </beans>
 

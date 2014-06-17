@@ -8,11 +8,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import persistence.configureManage.PensionBuildingMapper;
 import persistence.dictionary.PensionDicMessageMapper;
-import persistence.olderManage.PensionLivingrecordMapper;
-import persistence.olderManage.PensionOlderMapper;
 import persistence.system.PensionMessagedelrecordMapper;
 import persistence.system.PensionMessagesMapper;
 import util.PmsException;
@@ -20,7 +16,6 @@ import util.PmsException;
 import com.centling.his.util.logger.HisLogger;
 
 import domain.dictionary.PensionDicMessage;
-import domain.reportManage.OlderLiquidityReport;
 import domain.system.PensionMessagedelrecord;
 import domain.system.PensionMessages;
 import domain.system.PensionMessagesExample;
@@ -31,24 +26,10 @@ public class MessageMessage implements Serializable {
 
 	@Autowired
 	PensionMessagesMapper pensionMessagesMapper;
-
 	@Autowired
 	PensionDicMessageMapper pensionDicMessageMapper;
-
 	@Autowired
 	PensionMessagedelrecordMapper pensionMessagedelrecordMapper;
-	
-	@Autowired
-	PensionLivingrecordMapper pensionLivingrecordMapper;
-	
-	@Autowired
-	PensionOlderMapper pensionOlderMapper;
-	
-	@Autowired
-	PensionBuildingMapper pensionBuildingMapper;
-	
-	private final static Integer NEW_IN=2;
-	private final static Integer NEW_OUT=3;
 
 	private static HisLogger<?> logger = HisLogger
 			.getLogger(MessageMessage.class);
@@ -307,67 +288,5 @@ public class MessageMessage implements Serializable {
 			
 		}
 		return demans;
-	}
-
-	/**
-	 * 根据用户编号查询其护理的老人列表
-	 * @param userId
-	 * @return
-	 */
-	public List<NurseEchartsDeman> selectNurseList(Long userId) {
-		return pensionLivingrecordMapper.selectNurseList(userId);
-	}
-
-	/**
-	 * 根据老人编号查询其费用明细
-	 * @param olderId
-	 * @return
-	 */
-	public List<FeeEchartsDeman> selectOlderTotalFee(Long olderId) {
-		return pensionOlderMapper.selectOlderTotalFee(olderId);
-	}
-
-	/**
-	 * 计算最近一月的老人流动情况
-	 * @return
-	 */
-	public List<Integer> selectOlderFlowList() {
-		List<Integer> olderNum = new ArrayList<Integer>();
-		Calendar calendar=Calendar.getInstance();
-		Date endDate=new Date();
-		calendar.setTime(endDate);
-		calendar.set(Calendar.HOUR_OF_DAY, 23);
-		calendar.set(Calendar.MINUTE, 59);
-		calendar.set(Calendar.SECOND, 59);
-		endDate=calendar.getTime();
-		calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH)-1);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		Date startDate=calendar.getTime();
-		Integer startOlderNum=pensionBuildingMapper.selectOlderLiquidityByDateInTotal(startDate);
-		//结束时间点的在院老人总数
-		Integer endOlderNum=pensionBuildingMapper.selectOlderLiquidityByDateInTotal(endDate);
-		List<OlderLiquidityReport> olderLiquidityReports = new ArrayList<OlderLiquidityReport>();
-		olderLiquidityReports.addAll(pensionLivingrecordMapper.selectOlderLiquidityReports(NEW_IN,startDate,endDate));
-		olderLiquidityReports.addAll(pensionLivingrecordMapper.selectOlderLiquidityReports(NEW_OUT,startDate,endDate));
-		Integer newIn=this.calCount(olderLiquidityReports,NEW_IN);
-		Integer newOut=this.calCount(olderLiquidityReports,NEW_OUT);
-		olderNum.add(startOlderNum);
-		olderNum.add(newIn);
-		olderNum.add(newOut);
-		olderNum.add(endOlderNum);
-		return olderNum;
-	}
-	
-	private Integer calCount(List<OlderLiquidityReport> olderLiquidityReports,
-			Integer flag) {
-		Integer total=new Integer(0);
-		for(OlderLiquidityReport olderLiquidityReport: olderLiquidityReports){
-			if(flag == olderLiquidityReport.getFlag()){
-				total++;
-			}
-		}
-		return total;
 	}
 }

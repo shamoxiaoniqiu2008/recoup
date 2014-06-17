@@ -13,8 +13,8 @@ import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.UnselectEvent;
 
-import service.configureManage.DeptManageService;
-import service.personnelManage.EmployeeManageService;
+import service.employeeManage.EmployeeManageService;
+import service.system.DeptManageService;
 import service.system.SystemConfigService;
 
 import domain.employeeManage.PensionEmployee;
