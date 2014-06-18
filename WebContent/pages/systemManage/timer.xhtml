@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+
+	<f:view contentType="text/html">
+		<h:head>
+			<title>#{pageConfig.timerTitle}</title>
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/default.css" />
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/skin.css" />
+			<link type="text/css" rel="stylesheet"
+				href="#{request.contextPath}/css/layout.css"></link>
+			<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+				type="text/css" />
+			<link rel="stylesheet" href="#{request.contextPath}/css/style.css" ></link>
+
+			<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+			
+		    <script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+			 <script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+			
+			<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript" src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+		</h:head>
+		<h:body>
+		<p:growl id="message" widgetVar="message" ></p:growl>
+		<h:form id="timeForm">
+			<p:dataTable cellspacing="8" style="width:100%" 
+				id="applicationTable" paginatorAlwaysVisible="false"
+				value="#{timerController.timerPropertiesList}"
+				rows="10" paginatorPosition="bottom" rowKey="#{timerProperty.showName}"
+				paginator="true" selectionMode="single"
+				var="timerProperty"  emptyMessage="没有相应记录">
+				<p:column headerText="定时名称" style="width:160px">
+					<h:outputText value="#{timerProperty.showName}" />
+				</p:column>
+				
+				<p:column headerText="状态" style="width:160px">
+					<h:outputText value="#{timerProperty.open eq 1?'已开启':'已关闭'}" />
+				</p:column>
+				
+				
+				<p:column headerText="操作">
+					<p:commandButton value="#{timerProperty.open eq 1?'关闭服务':'开启服务'}"
+						onstart="return confirm('是否进行操作')"
+						action="#{timerController.actionTimer}" 
+						update=":message,:timeForm">
+						<f:setPropertyActionListener value="#{timerProperty}"
+							target="#{timerController.oneTimerProperty}" />
+					</p:commandButton>
+				</p:column>	
+			</p:dataTable>
+		</h:form>
+
+	</h:body>
+	</f:view>
+</html>
