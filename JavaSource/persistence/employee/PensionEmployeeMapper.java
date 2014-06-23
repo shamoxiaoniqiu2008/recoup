@@ -1,4 +1,4 @@
-package persistence.employeeManage;
+package persistence.employee;
 
 import domain.employeeManage.PensionEmployee;
 import domain.employeeManage.PensionEmployeeExample;

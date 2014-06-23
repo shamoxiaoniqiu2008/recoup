@@ -12,7 +12,7 @@ import com.onlyfido.util.MD5Util;
 import com.onlyfido.util.logger.HisLogger;
 
 import persistence.UserInfoMapper;
-import persistence.employeeManage.PensionEmployeeMapper;
+import persistence.employee.PensionEmployeeMapper;
 import persistence.system.PensionSysUserMapper;
 
 import util.JavaConfig;

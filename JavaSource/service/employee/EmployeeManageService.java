@@ -1,4 +1,4 @@
-package service.employeeManage;
+package service.employee;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import persistence.employeeManage.PensionEmployeeMapper;
+import persistence.employee.PensionEmployeeMapper;
 import persistence.system.PensionDeptMapper;
 import persistence.system.PensionSysUserMapper;
 import domain.employeeManage.PensionEmployee;

@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import persistence.employeeManage.PensionEmployeeMapper;
+import persistence.employee.PensionEmployeeMapper;
 import persistence.system.PensionSysUserMapper;
 import util.PmsException;
 
