@@ -22,7 +22,7 @@ import javax.servlet.http.HttpSession;
 import org.primefaces.context.RequestContext;
 import org.primefaces.model.StreamedContent;
 
-import com.centling.his.util.SessionManager;
+import com.onlyfido.util.SessionManager;
 
 import domain.system.PensionSysUser;
 

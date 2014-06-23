@@ -19,7 +19,7 @@
         <property name="scopes">
             <map>
                 <entry key="view">
-                    <bean class="com.centling.his.util.ViewScope"/>
+                    <bean class="com.onlyfido.util.ViewScope"/>
                 </entry>
             </map>
         </property>

@@ -1,4 +1,4 @@
-package com.centling.his.util;
+package com.onlyfido.util;
 
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;

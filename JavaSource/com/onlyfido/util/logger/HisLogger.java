@@ -2,11 +2,11 @@
  * 本文件应该是我们所有的logger的入口，方便自定义内容加入。
  * Author：Kevin Li
  */
-package com.centling.his.util.logger;
+package com.onlyfido.util.logger;
 
 import org.apache.log4j.Logger;
 
-import com.centling.his.util.ExceptionUtil;
+import com.onlyfido.util.ExceptionUtil;
 
 public class HisLogger<T> {
 

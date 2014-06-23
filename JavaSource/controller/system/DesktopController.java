@@ -23,7 +23,7 @@ import javax.servlet.http.HttpSession;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.TabChangeEvent;
 
-import com.centling.his.util.SessionManager;
+import com.onlyfido.util.SessionManager;
 
 import domain.system.PensionMenu;
 import domain.system.PensionSysUser;

@@ -3,6 +3,7 @@ package service.system;
 import java.io.Serializable;
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +11,8 @@ import persistence.employeeManage.PensionEmployeeMapper;
 import persistence.system.PensionSysUserMapper;
 import util.PmsException;
 
-import com.centling.his.util.MD5Util;
-import com.centling.his.util.logger.HisLogger;
+import com.onlyfido.util.MD5Util;
+import com.onlyfido.util.logger.HisLogger;
 
 import domain.employeeManage.PensionEmployee;
 import domain.employeeManage.PensionEmployeeExample;

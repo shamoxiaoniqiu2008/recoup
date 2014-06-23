@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.centling.his.util;
+package com.onlyfido.util;
 
 import java.io.IOException;
 import java.io.PrintWriter;

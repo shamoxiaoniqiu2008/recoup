@@ -23,7 +23,7 @@ import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.UnselectEvent;
 
-import com.centling.his.util.SessionManager;
+import com.onlyfido.util.SessionManager;
 
 import domain.system.PensionRole;
 import domain.system.PensionSysUser;

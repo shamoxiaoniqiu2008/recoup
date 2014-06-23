@@ -1,4 +1,4 @@
-package com.centling.his.util;
+package com.onlyfido.util;
 
 import java.nio.charset.Charset;
 import java.security.MessageDigest;

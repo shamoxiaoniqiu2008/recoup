@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 
-import com.centling.his.util.MD5Util;
+import com.onlyfido.util.MD5Util;
 
 
 

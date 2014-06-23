@@ -16,7 +16,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
-import com.centling.his.util.SessionManager;
+import com.onlyfido.util.SessionManager;
 
 import domain.system.PensionSysUser;
 

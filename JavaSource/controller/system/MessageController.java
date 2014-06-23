@@ -17,7 +17,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ViewScoped;
 
-import com.centling.his.util.SessionManager;
+import com.onlyfido.util.SessionManager;
 
 import domain.employeeManage.PensionEmployee;
 

@@ -83,7 +83,7 @@
 	<filter>
 	
 		<filter-name>vehicleSessionFilter</filter-name>
-		<filter-class>com.centling.his.util.VehicleSessionFilter</filter-class>
+		<filter-class>com.onlyfido.util.VehicleSessionFilter</filter-class>
 	</filter>
 	
 	<filter-mapping>
@@ -100,7 +100,7 @@
 	<!-- servletContextListner的具体实现 -->
 	<listener>
 		<display-name>vehicleServletContextListener</display-name>
-		<listener-class>com.centling.his.util.VehicleServletContextListener</listener-class>
+		<listener-class>com.onlyfido.util.VehicleServletContextListener</listener-class>
 	</listener>
 	
 	

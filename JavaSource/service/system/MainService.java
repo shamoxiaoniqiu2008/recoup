@@ -3,6 +3,7 @@ package service.system;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +12,8 @@ import persistence.system.PensionMenuMapper;
 import service.LoginService;
 import service.system.PensionMenus;
 
-import com.centling.his.util.SessionManager;
-import com.centling.his.util.logger.HisLogger;
+import com.onlyfido.util.SessionManager;
+import com.onlyfido.util.logger.HisLogger;
 
 import domain.system.PensionMenu;
 import domain.system.PensionMenuExample;

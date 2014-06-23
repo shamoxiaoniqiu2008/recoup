@@ -1,4 +1,4 @@
-package com.centling.his.util;
+package com.onlyfido.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

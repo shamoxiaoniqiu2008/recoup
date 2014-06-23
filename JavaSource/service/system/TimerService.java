@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.centling.his.util.SessionManager;
+import com.onlyfido.util.SessionManager;
 
 import domain.system.PensionSysUser;
 

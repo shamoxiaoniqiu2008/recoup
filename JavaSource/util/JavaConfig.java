@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import com.centling.his.util.VehicleServletContextListener;
+import com.onlyfido.util.VehicleServletContextListener;
 
 public class JavaConfig {
 
