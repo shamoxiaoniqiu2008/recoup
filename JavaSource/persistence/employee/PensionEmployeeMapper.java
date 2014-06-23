@@ -1,7 +1,8 @@
 package persistence.employee;
 
-import domain.employeeManage.PensionEmployee;
-import domain.employeeManage.PensionEmployeeExample;
+import domain.employee.PensionEmployee;
+import domain.employee.PensionEmployeeExample;
+
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 

@@ -17,7 +17,7 @@ import persistence.system.PensionSysUserMapper;
 
 import util.JavaConfig;
 import util.Spell;
-import domain.employeeManage.PensionEmployee;
+import domain.employee.PensionEmployee;
 import domain.system.PensionSysUser;
 import domain.system.PensionSysUserExample;
 

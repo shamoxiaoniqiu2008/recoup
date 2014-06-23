@@ -3,7 +3,7 @@ package com.onlyfido.util;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
-import domain.employeeManage.PensionEmployee;
+import domain.employee.PensionEmployee;
 import domain.system.PensionSysUser;
 
 public class SessionManager {

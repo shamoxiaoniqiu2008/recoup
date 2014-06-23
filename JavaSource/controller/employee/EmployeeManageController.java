@@ -20,7 +20,7 @@ import util.Spell;
 
 import com.onlyfido.util.SessionManager;
 
-import domain.employeeManage.PensionEmployee;
+import domain.employee.PensionEmployee;
 
 /**
  * 员工管理 author:mary liu

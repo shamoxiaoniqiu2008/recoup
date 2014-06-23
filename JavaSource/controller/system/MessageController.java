@@ -19,7 +19,7 @@ import javax.faces.bean.ViewScoped;
 
 import com.onlyfido.util.SessionManager;
 
-import domain.employeeManage.PensionEmployee;
+import domain.employee.PensionEmployee;
 
 import service.system.MessageDoman;
 import service.system.MessageMessage;

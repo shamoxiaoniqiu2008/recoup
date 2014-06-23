@@ -34,7 +34,7 @@ import com.google.gson.Gson;
 import com.onlyfido.util.SessionManager;
 import com.onlyfido.util.logger.HisLogger;
 
-import domain.employeeManage.PensionEmployee;
+import domain.employee.PensionEmployee;
 import domain.system.PensionMessages;
 import domain.system.PensionSysUser;
 

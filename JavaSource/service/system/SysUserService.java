@@ -14,8 +14,8 @@ import util.PmsException;
 import com.onlyfido.util.MD5Util;
 import com.onlyfido.util.logger.HisLogger;
 
-import domain.employeeManage.PensionEmployee;
-import domain.employeeManage.PensionEmployeeExample;
+import domain.employee.PensionEmployee;
+import domain.employee.PensionEmployeeExample;
 import domain.system.PensionSysUser;
 import domain.system.PensionSysUserExample;
 

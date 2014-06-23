@@ -17,7 +17,7 @@ import service.employee.EmployeeManageService;
 import service.system.DeptManageService;
 import service.system.SystemConfigService;
 
-import domain.employeeManage.PensionEmployee;
+import domain.employee.PensionEmployee;
 import domain.system.PensionDept;
 import domain.system.PensionSystemConfig;
 
