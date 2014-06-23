@@ -14,5 +14,9 @@
 						   http://www.springframework.org/schema/jee 
 						   http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 	<!-- 注入Controller实例，同时注入Controller的依赖Service实例-->
+	
+	<bean id="employeeManageController" class="controller.employee.EmployeeManageController" scope="view">
+		<property name="employeeManageService" ref="employeeManageService"></property>
+	</bean>
 </beans>
 
