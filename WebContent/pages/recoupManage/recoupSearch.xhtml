@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:his="http://centling.his.net/histag"
+	xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html">
+
+	<style>
+.ui-panel .ui-panel-content {
+	padding: 0em !important;
+}
+</style>
+
+	<h:head>
+		<title>#{pageConfig.recoupSearch}</title>
+		
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/default.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/skin.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{request.contextPath}/css/layout.css"></link>
+		<link href="#{request.contextPath}/css/css.css" rel="stylesheet"
+			type="text/css" />
+		<link rel="stylesheet" href="#{request.contextPath}/css/style.css"></link>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/ime.js?ver=#{projectConfig.ver}" />
+		<h:outputScript library="javax.faces" name="jsf.js" target="head" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
+		<script type="text/javascript"
+			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
+	</h:head>
+
+
+	<h:body>
+		<p:growl id="messages"></p:growl>
+		<h:form id="searchForm" style="display: inline">
+			<h:panelGrid columns="9">
+				<h:outputText value="项目"></h:outputText>
+				<p:inputText></p:inputText>
+				<h:outputText value="状态"></h:outputText>
+				<h:selectOneMenu></h:selectOneMenu>
+				<h:outputText value="日期"></h:outputText>
+				<p:calendar></p:calendar>
+				<h:outputLabel>至</h:outputLabel>
+				<p:calendar></p:calendar>
+				<p:commandButton styleClass="searchbtn" value=""
+					>
+				</p:commandButton>
+			</h:panelGrid>
+		</h:form>
+		
+		<h:form id="searchListForm">
+			<p:dataTable id="recoupList"
+				var="employee"
+				 emptyMessage="当前无内容" selectionMode="single"
+				rows="10"
+				paginatorAlwaysVisible="fasle" paginatorPosition="bottom"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+				paginator="true">
+				<p:ajax event="rowSelect"
+					update=":messages" />
+				<p:ajax event="rowUnselect"
+					update=":messages" />
+				<p:column headerText="单据号" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="申请人" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="项目" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="报销日期" style="text-align:center">
+					<h:outputText value="">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="金额" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="状态" style="text-align:center">
+					<h:outputText value="">
+					</h:outputText>
+				</p:column>
+				<p:column headerText="支付状态" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="描述" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+			</p:dataTable>
+			<div align="center">
+				<p:commandButton value="编辑" styleClass="commonbtn" onclick="editDialog.show()">
+				</p:commandButton>
+				
+			</div>
+		</h:form>
+		
+		<p:dialog id="editDia" widgetVar="editDialog" appendToBody="@(body)" modal="true"
+		header="编辑信息">
+			<h:form>
+					<table>
+							<tr>
+								<td><h:outputLabel>单据号</h:outputLabel></td>
+								<td colspan="3"><h:inputText size="53"></h:inputText></td>
+							</tr>
+							<tr>
+								<td><h:outputLabel>申请人</h:outputLabel></td>
+								<td><h:inputText></h:inputText></td>
+								<td><h:outputLabel>项目</h:outputLabel></td>
+								<td><h:inputText></h:inputText></td>
+							</tr>
+							<tr>
+								<td><h:outputLabel>报销日期</h:outputLabel></td>
+								<td><h:inputText></h:inputText></td>
+								<td><h:outputLabel>金额</h:outputLabel></td>
+								<td><h:inputText></h:inputText></td>
+							</tr>
+							<tr>
+								<td><h:outputLabel>状态</h:outputLabel></td>
+								<td><h:selectOneMenu></h:selectOneMenu></td>
+								<td><h:outputLabel>支付状态</h:outputLabel></td>
+								<td><h:selectOneMenu></h:selectOneMenu></td>
+							</tr>
+							<tr>
+								<td><h:outputLabel>描述</h:outputLabel></td>
+								<td colspan="3"><h:inputText size="53"></h:inputText></td>
+							</tr>
+					</table>
+					<div align="center">
+				<p:commandButton value="保存" styleClass="commonbtn" >
+				</p:commandButton>
+				<p:commandButton value="提交" styleClass="commonbtn" >
+				</p:commandButton>
+				<p:commandButton value="关闭" styleClass="commonbtn" onclick="editDialog.hide()">
+				</p:commandButton>
+			</div>
+			</h:form>
+		</p:dialog>
+	</h:body>
+	<script type="text/javascript">
+		
+	</script>
+</f:view>
+
+</html>

@@ -64,7 +64,7 @@ public class DeptManageController implements Serializable{
 		PensionDept pensionDept = new PensionDept();
 
 		//DictSectionInfo sectionInfo = new DictSectionInfo();
-		pensionDept.setName("全院");
+		pensionDept.setName("全部");
 		pensionDept.setId(0L);
 		child = new DefaultTreeNode(pensionDept, root);
 		//设置一个默认的选中节点。
@@ -84,7 +84,7 @@ public class DeptManageController implements Serializable{
 		PensionDept pensionDept = new PensionDept();
 
 		//DictSectionInfo sectionInfo = new DictSectionInfo();
-		pensionDept.setName("全院");
+		pensionDept.setName("全部");
 		pensionDept.setId(0L);
 		child = new DefaultTreeNode(pensionDept, root);
 		//设置一个默认的选中节点。
