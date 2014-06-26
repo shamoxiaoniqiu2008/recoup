@@ -49,7 +49,7 @@ public class ReceiptNumGenerator {
 	 * @param expense 费用金额，保留两位小数格式
 	 * @return  转换后的费用金额
 	 */
-	public String getExpenseNum(String expense) {
+	private String getExpenseNum(String expense) {
 		String expenseNum = expense.replace(".","");
 		DecimalFormat df = new DecimalFormat("000000000"); 
 		expenseNum = df.format(Integer.parseInt(expenseNum));
