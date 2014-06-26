@@ -15,7 +15,7 @@
 
 	<h:head>
 		<title>#{pageConfig.recoupApply}</title>
-		
+
 		<link type="text/css" rel="stylesheet"
 			href="#{request.contextPath}/css/default.css" />
 		<link type="text/css" rel="stylesheet"
@@ -39,12 +39,155 @@
 
 
 	<h:body>
-		<p:growl id="messages"></p:growl>
+		<p:growl id="msg"></p:growl>
 		<h:form id="searchForm" style="display: inline">
-			
-		
+			<h:panelGrid columns="9">
+				<h:outputText value="项目"></h:outputText>
+				<p:inputText></p:inputText>
+				<h:outputText value="状态"></h:outputText>
+				<p:selectOneMenu></p:selectOneMenu>
+				<h:outputText value="日期"></h:outputText>
+				<p:calendar></p:calendar>
+				<h:outputLabel>至</h:outputLabel>
+				<p:calendar></p:calendar>
+				<p:commandButton styleClass="searchbtn" value="">
+				</p:commandButton>
+			</h:panelGrid>
 		</h:form>
-			
+
+
+		<h:form id="ListForm" style="display: inline">
+			<p:dataTable id="recoupList" var="recoups" emptyMessage="当前无内容"
+				selectionMode="single" rows="10" paginatorAlwaysVisible="fasle"
+				paginatorPosition="bottom"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+				paginator="true">
+				<p:ajax event="rowSelect" update=":msg" />
+				<p:ajax event="rowUnselect" update=":msg" />
+				<p:column headerText="单据号" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="申请人" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="项目" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="报销日期" style="text-align:center">
+					<h:outputText value="">
+						<f:convertDateTime pattern="yyyy-MM-dd" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="金额" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="状态" style="text-align:center">
+					<h:outputText value="">
+					</h:outputText>
+				</p:column>
+				<p:column headerText="支付状态" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+				<p:column headerText="描述" style="text-align:center">
+					<h:outputText value="" />
+				</p:column>
+			</p:dataTable>
+
+			<div align="center">
+				<p:commandButton styleClass="commonbtn" value="报销填单"
+					onclick="applyDialog.show()">
+				</p:commandButton>
+			</div>
+		</h:form>
+
+
+
+		<p:dialog id="applyDialog" widgetVar="applyDialog" header="申请信息"
+			modal="true" appendTo="@(body)" height="380px" width="700px"
+			resizable="false" position="center" appendToBody="true">
+			<h:form id="addRecoupForm">
+					<table>
+						<tr>
+							<td>单据号</td>
+							<td><p:inputText></p:inputText></td>
+							<td>项目名称</td>
+							<td><p:inputText></p:inputText></td>
+							<td>日期</td>
+							<td><p:inputText></p:inputText></td>
+						</tr>
+						<tr>
+							<td>费用类别</td>
+							<td><p:inputText></p:inputText></td>
+							<td>姓名</td>
+							<td><p:inputText></p:inputText></td>
+							<td>状态</td>
+							<td><p:inputText></p:inputText></td>
+						</tr>
+						<tr>
+							<td>金额</td>
+							<td><p:inputText></p:inputText></td>
+							<td>支付方式</td>
+							<td><p:inputText></p:inputText></td>
+							<td>支付状态</td>
+							<td><p:inputText></p:inputText></td>
+						</tr>
+						<tr>
+							<td>事由</td>
+							<td colspan="5"><p:inputText size="88"></p:inputText></td>
+						</tr>
+						<tr>
+							<td>其他说明</td>
+							<td colspan="5"><p:inputText size="88"></p:inputText></td>
+						</tr>
+					</table>
+					<p:commandButton styleClass="commonbtn" value="添加明细">
+						</p:commandButton>
+					<p:dataTable id="detailTable" emptyMessage="当前无内容" >
+							<p:column headerText="时间">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="名称(摘要)">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="单价">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="单位">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="数量">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="金额">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="经手人">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="调出项目部">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="调入项目部">
+								<h:outputText></h:outputText>
+							</p:column>
+							<p:column headerText="发票照片">
+								<h:outputText></h:outputText>
+							</p:column>
+					</p:dataTable>
+				<div id="commandDiv" align="center" style="margin-top:100px">
+					<h:form>
+						<p:commandButton styleClass="commonbtn" value="保存">
+						</p:commandButton>
+						<p:commandButton styleClass="submitbtn" value="">
+						</p:commandButton>
+						<p:commandButton styleClass="cancelbtn" value="">
+						</p:commandButton>
+					</h:form>
+				</div>
+			</h:form>
+		</p:dialog>
+
+
 	</h:body>
 	<script type="text/javascript">
 		
