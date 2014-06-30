@@ -143,8 +143,8 @@
 					<p:commandButton styleClass="commonbtn" value="添加明细" onclick="applyDetailDialog.show()">
 						</p:commandButton>
 					<p:dataTable id="detailTable" emptyMessage="当前无内容" 
-					value="#{recoupApplyController.detailListForAdd}" widgetVar="details"  var="details" paginator="true" paginatorPosition="center"
-					rows="5" > 
+					value="#{recoupApplyController.detailListForAdd}" widgetVar="details"  var="details" paginator="true" paginatorPosition="bottom"
+					rows="5"  > 
 							<p:column headerText="时间">
 								<h:outputText value="#{details.feeDatetime}"><f:convertDateTime pattern="yyyyMMdd" timeZone="GMT+8"></f:convertDateTime></h:outputText>
 							</p:column>
@@ -195,7 +195,7 @@
 
 		<p:dialog id="detailDialog" widgetVar="applyDetailDialog" header="申请明细"
 			modal="true" appendTo="@(body)" height="220px" width="520px"
-			resizable="false" position="center" appendToBody="true" >
+			resizable="false" position="center" appendToBody="true"  > 
 			<h:form id="addRecoupDetailForm">
 					<table>
 						<tr>
@@ -221,12 +221,13 @@
 							<td><p:inputText value="#{recoupApplyController.detailForAdd.processerName}"></p:inputText></td>
 							<td>调出项目部</td>
 							<td><p:inputText value="#{recoupApplyController.detailForAdd.outProjName}"></p:inputText></td>
+							
 						</tr>
 						<tr>
 							<td>调入项目部</td>
 							<td><p:inputText value="#{recoupApplyController.detailForAdd.inProjName}"></p:inputText></td>
 							<td>发票照片</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.imageUrl}"></p:inputText></td>
+							<td><p:graphicImage value="#{recoupApplyController.detailForAdd.imageUrl}" ></p:graphicImage></td>
 							<td><p:commandButton styleClass="commonbtn" value="上传"></p:commandButton></td>
 						</tr>
 					</table>
