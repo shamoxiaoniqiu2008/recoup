@@ -95,7 +95,7 @@
 
 			<div align="center">
 				<p:commandButton styleClass="commonbtn" value="报销填单"
-					onclick="applyDialog.show()">
+					onclick="applyDialog.show()" action="#{recoupApplyController.getRecordDefaultValue}" update=":addRecoupForm">
 				</p:commandButton>
 			</div>
 		</h:form>
@@ -103,41 +103,52 @@
 
 
 		<p:dialog id="applyDialog" widgetVar="applyDialog" header="申请信息"
-			modal="true" appendTo="@(body)" height="480px" width="700px"
+			modal="true" appendTo="@(body)" height="480px" width="800px"
 			resizable="false" position="center" appendToBody="true">
 			<h:form id="addRecoupForm">
 					<table>
 						<tr>
 							<td>单据号</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:inputText disabled="true"></p:inputText></td>
 							<td>项目名称</td>
-							<td><p:inputText value="#{recoupApplyController.recordForAdd.projCode}"></p:inputText></td>
+							<td><p:selectOneMenu value="#{recoupApplyController.recordForAdd.projId}" style="width:150px">
+									<f:selectItems value="#{recoupApplyController.projects}" var="projects" itemLabel="#{projects.projectName}" itemValue="#{projects.id}"></f:selectItems>
+								</p:selectOneMenu></td>
 							<td>日期</td>
-							<td><p:calendar value="#{recoupApplyController.recordForAdd.applyDate}"></p:calendar></td>
+							<td><p:calendar value="#{recoupApplyController.recordForAdd.applyDate}" pattern="yyyyMMdd"></p:calendar></td>
 						</tr>
 						<tr>
 							<td>费用类别</td>
-							<td><p:inputText value="#{recoupApplyController.recordForAdd.typeId1}"></p:inputText></td>
+							<td><h:panelGrid columns="2">
+							<p:selectOneMenu value="#{recoupApplyController.recordForAdd.typeId1}" style="width:150px">
+									<f:selectItems value="#{recoupApplyController.costclasses1}" var="costclasses1" itemLabel="#{costclasses1.class1Name}" itemValue="#{costclasses1.id}"></f:selectItems>
+								</p:selectOneMenu>
+							<p:selectOneMenu value="#{recoupApplyController.recordForAdd.typeId2}" style="width:150px">
+									<f:selectItems value="#{recoupApplyController.costclasses2}" var="costclasses2" itemLabel="#{costclasses2.class2Name}" itemValue="#{costclasses1.id}"></f:selectItems>
+								</p:selectOneMenu>
+							</h:panelGrid></td>
 							<td>姓名</td>
 							<td><p:inputText  value="#{recoupApplyController.recordForAdd.neme}"></p:inputText></td>
 							<td>状态</td>
-							<td><p:inputText value="#{recoupApplyController.recordForAdd.state}"></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.recordForAdd.state}" disabled="true"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>金额</td>
 							<td><p:inputText value="#{recoupApplyController.recordForAdd.money}"></p:inputText></td>
 							<td>支付方式</td>
-							<td><p:inputText value="#{recoupApplyController.recordForAdd.payType}"></p:inputText></td>
+							<td><p:selectOneMenu value="#{recoupApplyController.recordForAdd.payType}" style="width:150px">
+									<f:selectItems value="#{recoupApplyController.payclasses}" var="payclasses" itemLabel="#{payclasses.className}" itemValue="#{payclasses.id}"></f:selectItems>
+								</p:selectOneMenu></td>
 							<td>支付状态</td>
-							<td><p:inputText value="#{recoupApplyController.recordForAdd.payState}"></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.recordForAdd.payState}" disabled="true"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>事由</td>
-							<td colspan="5"><p:inputText size="88" value="#{recoupApplyController.recordForAdd.reason}"></p:inputText></td>
+							<td colspan="5"><p:inputText size="115" value="#{recoupApplyController.recordForAdd.reason}"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>其他说明</td>
-							<td colspan="5"><p:inputText size="88" value="#{recoupApplyController.recordForAdd.ohers}"></p:inputText></td>
+							<td colspan="5"><p:inputText size="115" value="#{recoupApplyController.recordForAdd.ohers}"></p:inputText></td>
 						</tr>
 					</table>
 					<p:commandButton styleClass="commonbtn" value="添加明细" onclick="applyDetailDialog.show()" action="#{recoupApplyController.getDetailDefaultValue}" update=":addRecoupDetailForm">
@@ -178,15 +189,15 @@
 					</p:dataTable>
 				<div id="commandDiv" align="center" style="margin-top:10px">
 					<h:form>
-						<p:commandButton styleClass="commonbtn" value="编辑">
+						<p:commandButton styleClass="commonbtn" value="编辑明细">
 						</p:commandButton>
-						<p:commandButton styleClass="commonbtn"  value="保存"  >
+						<p:commandButton styleClass="commonbtn" value="删除明细">
 						</p:commandButton>
-						<p:commandButton styleClass="commonbtn" value="提交">
+						<p:commandButton styleClass="commonbtn"  value="保存申请"  >
 						</p:commandButton>
-						<p:commandButton styleClass="commonbtn" value="删除">
+						<p:commandButton styleClass="commonbtn" value="提交申请">
 						</p:commandButton>
-						<p:commandButton styleClass="commonbtn" value="取消">
+						<p:commandButton styleClass="commonbtn" value="取消申请">
 						</p:commandButton>
 					</h:form>
 				</div>
@@ -220,16 +231,12 @@
 							<td>经手人</td>
 							<td><p:inputText value="#{recoupApplyController.detailForAdd.processerName}" required="true" requiredMessage="请选填写经手人！"></p:inputText></td>
 							<td>调出项目部</td>
-							<td><p:selectOneMenu value="details.outProjId" style="width:150px">
-									<f:selectItems value="#{recoupApplyController.projects}" var="projects" itemLabel="#{projects.projectName}" itemValue="#{projects.id}"></f:selectItems>
-								</p:selectOneMenu></td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.outProjName}" ></p:inputText></td>
 								
 						</tr>
 						<tr>
 							<td>调入项目部</td>
-							<td><p:selectOneMenu value="details.inProjId" style="width:150px">
-									<f:selectItems value="#{recoupApplyController.projects}" var="projects" itemLabel="#{projects.projectName}" itemValue="#{projects.id}"></f:selectItems>
-								</p:selectOneMenu></td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.inProjName}" ></p:inputText></td>
 							<td>发票照片</td>
 							<td><p:graphicImage id="recoupGraph" value="#{recoupApplyController.detailForAdd.imageUrl}" width="50" height="50"></p:graphicImage></td>
 						</tr>
