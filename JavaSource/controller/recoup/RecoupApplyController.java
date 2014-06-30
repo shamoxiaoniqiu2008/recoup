@@ -96,7 +96,7 @@ public class RecoupApplyController implements Serializable{
 				+ "images" + File.separator + "invoice" + File.separator
 				+ upFileName;
 
-		photoPath = File.separator + "images" + File.separator + "caterManage"
+		photoPath = File.separator + "images" + File.separator + "invoice"
 				+ File.separator + upFileName;
 		photoPath = photoPath.replace("\\", "/");
 		if (addFlag) {

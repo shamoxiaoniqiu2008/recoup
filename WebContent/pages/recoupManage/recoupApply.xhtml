@@ -200,25 +200,25 @@
 					<table>
 						<tr>
 							<td>时间</td>
-							<td><p:calendar value="#{recoupApplyController.detailForAdd.feeDatetime}" pattern="yyyyMMdd"></p:calendar></td>
+							<td><p:calendar value="#{recoupApplyController.detailForAdd.feeDatetime}" pattern="yyyyMMdd" required="true" requiredMessage="请选择时间！"></p:calendar></td>
 							<td>名称(摘要)</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.name}"></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.name}" required="true" requiredMessage="请选填写名称(摘要)！"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>单价</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.price}"></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.price}" required="true" requiredMessage="请选填写单价！"> </p:inputText></td>
 							<td>单位</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.unit}"></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.unit}" required="true" requiredMessage="请选填写单位！"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>数量</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.qty}"></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.qty}" required="true" requiredMessage="请选填写数量！"></p:inputText></td>
 							<td>金额</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.amount}"></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.amount}" required="true" requiredMessage="请选填写金额！"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>经手人</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.processerName}"></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.processerName}" required="true" requiredMessage="请选填写经手人！"></p:inputText></td>
 							<td>调出项目部</td>
 							<td><p:selectOneMenu value="details.outProjId" style="width:150px">
 									<f:selectItems value="#{recoupApplyController.projects}" var="projects" itemLabel="#{projects.projectName}" itemValue="#{projects.id}"></f:selectItems>
@@ -227,18 +227,18 @@
 						</tr>
 						<tr>
 							<td>调入项目部</td>
-							<td><p:selectOneMenu value="details.inProjId">
+							<td><p:selectOneMenu value="details.inProjId" style="width:150px">
 									<f:selectItems value="#{recoupApplyController.projects}" var="projects" itemLabel="#{projects.projectName}" itemValue="#{projects.id}"></f:selectItems>
 								</p:selectOneMenu></td>
 							<td>发票照片</td>
-							<td><h:graphicImage id="recoupGraph" value="#{recoupApplyController.detailForAdd.imageUrl}" ></h:graphicImage></td>
+							<td><p:graphicImage id="recoupGraph" value="#{recoupApplyController.detailForAdd.imageUrl}" width="50" height="50"></p:graphicImage></td>
 						</tr>
 					</table>
 					<p:fileUpload required="true" requiredMessage="请上传图片！"
 							fileUploadListener="#{recoupApplyController.handleFileUpload}"
 							value="#{recoupApplyController.uploadedFile}" mode="advanced"
 							dragDropSupport="false" multiple="true"
-							update=":msg,:addRecoupDetailForm" sizeLimit="1000000"
+							update=":msg,:addRecoupDetailForm:recoupGraph" sizeLimit="1000000"
 							fileLimit="100" allowTypes="/(\.|\/)(gif|jpe?g|png)$/"
 							uploadLabel="上传" cancelLabel="取消" label="浏览"
 							fileLimitMessage="最大上传文件数量为1个！"
