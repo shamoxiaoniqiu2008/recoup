@@ -103,7 +103,7 @@
 
 
 		<p:dialog id="applyDialog" widgetVar="applyDialog" header="申请信息"
-			modal="true" appendTo="@(body)" height="380px" width="700px"
+			modal="true" appendTo="@(body)" height="480px" width="700px"
 			resizable="false" position="center" appendToBody="true">
 			<h:form id="addRecoupForm">
 					<table>
@@ -111,82 +111,135 @@
 							<td>单据号</td>
 							<td><p:inputText></p:inputText></td>
 							<td>项目名称</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.recordForAdd.projCode}"></p:inputText></td>
 							<td>日期</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:calendar value="#{recoupApplyController.recordForAdd.applyDate}"></p:calendar></td>
 						</tr>
 						<tr>
 							<td>费用类别</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.recordForAdd.typeId1}"></p:inputText></td>
 							<td>姓名</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:inputText  value="#{recoupApplyController.recordForAdd.neme}"></p:inputText></td>
 							<td>状态</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.recordForAdd.state}"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>金额</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.recordForAdd.money}"></p:inputText></td>
 							<td>支付方式</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.recordForAdd.payType}"></p:inputText></td>
 							<td>支付状态</td>
-							<td><p:inputText></p:inputText></td>
+							<td><p:inputText value="#{recoupApplyController.recordForAdd.payState}"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>事由</td>
-							<td colspan="5"><p:inputText size="88"></p:inputText></td>
+							<td colspan="5"><p:inputText size="88" value="#{recoupApplyController.recordForAdd.reason}"></p:inputText></td>
 						</tr>
 						<tr>
 							<td>其他说明</td>
-							<td colspan="5"><p:inputText size="88"></p:inputText></td>
+							<td colspan="5"><p:inputText size="88" value="#{recoupApplyController.recordForAdd.ohers}"></p:inputText></td>
 						</tr>
 					</table>
-					<p:commandButton styleClass="commonbtn" value="添加明细">
+					<p:commandButton styleClass="commonbtn" value="添加明细" onclick="applyDetailDialog.show()">
 						</p:commandButton>
-					<p:dataTable id="detailTable" emptyMessage="当前无内容" >
+					<p:dataTable id="detailTable" emptyMessage="当前无内容" 
+					value="#{recoupApplyController.detailListForAdd}" widgetVar="details"  var="details" paginator="true" paginatorPosition="center"
+					rows="5" > 
 							<p:column headerText="时间">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.feeDatetime}"><f:convertDateTime pattern="yyyyMMdd" timeZone="GMT+8"></f:convertDateTime></h:outputText>
 							</p:column>
 							<p:column headerText="名称(摘要)">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.name}"></h:outputText>
 							</p:column>
 							<p:column headerText="单价">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.price}"></h:outputText>
 							</p:column>
 							<p:column headerText="单位">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.unit}"></h:outputText>
 							</p:column>
 							<p:column headerText="数量">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.qty}"></h:outputText>
 							</p:column>
 							<p:column headerText="金额">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.amount}"></h:outputText>
 							</p:column>
 							<p:column headerText="经手人">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.processerName}"></h:outputText>
 							</p:column>
 							<p:column headerText="调出项目部">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.outProjName}"></h:outputText>
 							</p:column>
 							<p:column headerText="调入项目部">
-								<h:outputText></h:outputText>
+								<h:outputText value="#{details.inProjName}"></h:outputText>
 							</p:column>
 							<p:column headerText="发票照片">
-								<h:outputText></h:outputText>
+								<h:outputText  ></h:outputText>
 							</p:column>
 					</p:dataTable>
-				<div id="commandDiv" align="center" style="margin-top:100px">
+				<div id="commandDiv" align="center" style="margin-top:10px">
 					<h:form>
-						<p:commandButton styleClass="commonbtn" value="保存">
+						<p:commandButton styleClass="commonbtn" value="编辑">
 						</p:commandButton>
-						<p:commandButton styleClass="submitbtn" value="">
+						<p:commandButton styleClass="commonbtn"  value="保存"  >
 						</p:commandButton>
-						<p:commandButton styleClass="cancelbtn" value="">
+						<p:commandButton styleClass="commonbtn" value="提交">
+						</p:commandButton>
+						<p:commandButton styleClass="commonbtn" value="删除">
+						</p:commandButton>
+						<p:commandButton styleClass="commonbtn" value="取消">
 						</p:commandButton>
 					</h:form>
 				</div>
 			</h:form>
 		</p:dialog>
 
+		<p:dialog id="detailDialog" widgetVar="applyDetailDialog" header="申请明细"
+			modal="true" appendTo="@(body)" height="220px" width="520px"
+			resizable="false" position="center" appendToBody="true" >
+			<h:form id="addRecoupDetailForm">
+					<table>
+						<tr>
+							<td>时间</td>
+							<td><p:calendar value="#{recoupApplyController.detailForAdd.feeDatetime}" pattern="yyyyMMdd"></p:calendar></td>
+							<td>名称(摘要)</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.name}"></p:inputText></td>
+						</tr>
+						<tr>
+							<td>单价</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.price}"></p:inputText></td>
+							<td>单位</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.unit}"></p:inputText></td>
+						</tr>
+						<tr>
+							<td>数量</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.qty}"></p:inputText></td>
+							<td>金额</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.amount}"></p:inputText></td>
+						</tr>
+						<tr>
+							<td>经手人</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.processerName}"></p:inputText></td>
+							<td>调出项目部</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.outProjName}"></p:inputText></td>
+						</tr>
+						<tr>
+							<td>调入项目部</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.inProjName}"></p:inputText></td>
+							<td>发票照片</td>
+							<td><p:inputText value="#{recoupApplyController.detailForAdd.imageUrl}"></p:inputText></td>
+							<td><p:commandButton styleClass="commonbtn" value="上传"></p:commandButton></td>
+						</tr>
+					</table>
+					<div id="commandDivDetail" align="center" style="margin-top:10px">
+					<h:form>
+						<p:commandButton styleClass="commonbtn" value="添加" action="#{recoupApplyController.addDetailList}" update=":msg,:addRecoupForm">
+						</p:commandButton>
+						<p:commandButton styleClass="commonbtn" value="取消" onclick="applyDetailDialog.hide()">
+						</p:commandButton>
+					</h:form>
+				</div>
+				</h:form>
+			</p:dialog>
 
 	</h:body>
 	<script type="text/javascript">
