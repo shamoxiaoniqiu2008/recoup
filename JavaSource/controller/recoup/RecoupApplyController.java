@@ -29,7 +29,7 @@ public class RecoupApplyController implements Serializable{
 		* @version V1.0
 		*/   
 	    
-	private static final long serialVersionUID = 100000000000000L;
+	private static final long serialVersionUID = 100000000000001L;
 	
 	private transient RecoupApplyService recoupApplyService;
 
@@ -42,13 +42,18 @@ public class RecoupApplyController implements Serializable{
 	
 	
 	public void addDetailList(){
-		RecoupApplyDetailExtend detail = new RecoupApplyDetailExtend();
-		detail = detailForAdd;
-		detailListForAdd.add(detail);
-		FacesContext.getCurrentInstance().addMessage(
-				null,
-				new FacesMessage(FacesMessage.SEVERITY_INFO,
-						"明细添加成功！" , "明细添加成功！"));
+		if(detailForAdd.equals(null) || detailForAdd.equals("")){
+			
+		}else{
+			RecoupApplyDetailExtend detail = new RecoupApplyDetailExtend();
+			detail = detailForAdd;
+			detailListForAdd.add(detail);
+			FacesContext.getCurrentInstance().addMessage(
+					null,
+					new FacesMessage(FacesMessage.SEVERITY_INFO,
+							"明细添加成功！" , "明细添加成功！"));
+		}
+		
 	}
 
 	  
