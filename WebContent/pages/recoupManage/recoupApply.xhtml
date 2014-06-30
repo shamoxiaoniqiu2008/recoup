@@ -50,7 +50,7 @@
 				<p:calendar></p:calendar>
 				<h:outputLabel>至</h:outputLabel>
 				<p:calendar></p:calendar>
-				<p:commandButton styleClass="searchbtn" value="">
+				<p:commandButton styleClass="commonbtn" value="查询">
 				</p:commandButton>
 			</h:panelGrid>
 		</h:form>
@@ -140,7 +140,7 @@
 							<td colspan="5"><p:inputText size="88" value="#{recoupApplyController.recordForAdd.ohers}"></p:inputText></td>
 						</tr>
 					</table>
-					<p:commandButton styleClass="commonbtn" value="添加明细" onclick="applyDetailDialog.show()">
+					<p:commandButton styleClass="commonbtn" value="添加明细" onclick="applyDetailDialog.show()" action="#{recoupApplyController.getDetailDefaultValue}" update=":addRecoupDetailForm">
 						</p:commandButton>
 					<p:dataTable id="detailTable" emptyMessage="当前无内容" 
 					value="#{recoupApplyController.detailListForAdd}" widgetVar="details"  var="details" paginator="true" paginatorPosition="bottom"
@@ -163,14 +163,14 @@
 							<p:column headerText="金额">
 								<h:outputText value="#{details.amount}"></h:outputText>
 							</p:column>
-							<p:column headerText="经手人">
-								<h:outputText value="#{details.processerName}"></h:outputText>
-							</p:column>
 							<p:column headerText="调出项目部">
 								<h:outputText value="#{details.outProjName}"></h:outputText>
 							</p:column>
 							<p:column headerText="调入项目部">
 								<h:outputText value="#{details.inProjName}"></h:outputText>
+							</p:column>
+							<p:column headerText="经手人">
+								<h:outputText value="#{details.processerName}"></h:outputText>
 							</p:column>
 							<p:column headerText="发票照片">
 								<h:outputText  ></h:outputText>
@@ -194,9 +194,9 @@
 		</p:dialog>
 
 		<p:dialog id="detailDialog" widgetVar="applyDetailDialog" header="申请明细"
-			modal="true" appendTo="@(body)" height="220px" width="520px"
+			modal="true" appendTo="@(body)" height="260px" width="520px"
 			resizable="false" position="center" appendToBody="true"  > 
-			<h:form id="addRecoupDetailForm">
+			<h:form id="addRecoupDetailForm" enctype="multipart/form-data">
 					<table>
 						<tr>
 							<td>时间</td>
@@ -220,24 +220,36 @@
 							<td>经手人</td>
 							<td><p:inputText value="#{recoupApplyController.detailForAdd.processerName}"></p:inputText></td>
 							<td>调出项目部</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.outProjName}"></p:inputText></td>
-							
+							<td><p:selectOneMenu value="details.outProjId" style="width:150px">
+									<f:selectItems value="#{recoupApplyController.projects}" var="projects" itemLabel="#{projects.projectName}" itemValue="#{projects.id}"></f:selectItems>
+								</p:selectOneMenu></td>
+								
 						</tr>
 						<tr>
 							<td>调入项目部</td>
-							<td><p:inputText value="#{recoupApplyController.detailForAdd.inProjName}"></p:inputText></td>
+							<td><p:selectOneMenu value="details.inProjId">
+									<f:selectItems value="#{recoupApplyController.projects}" var="projects" itemLabel="#{projects.projectName}" itemValue="#{projects.id}"></f:selectItems>
+								</p:selectOneMenu></td>
 							<td>发票照片</td>
-							<td><p:graphicImage value="#{recoupApplyController.detailForAdd.imageUrl}" ></p:graphicImage></td>
-							<td><p:commandButton styleClass="commonbtn" value="上传"></p:commandButton></td>
+							<td><h:graphicImage id="recoupGraph" value="#{recoupApplyController.detailForAdd.imageUrl}" ></h:graphicImage></td>
 						</tr>
 					</table>
+					<p:fileUpload required="true" requiredMessage="请上传图片！"
+							fileUploadListener="#{recoupApplyController.handleFileUpload}"
+							value="#{recoupApplyController.uploadedFile}" mode="advanced"
+							dragDropSupport="false" multiple="true"
+							update=":msg,:addRecoupDetailForm" sizeLimit="1000000"
+							fileLimit="100" allowTypes="/(\.|\/)(gif|jpe?g|png)$/"
+							uploadLabel="上传" cancelLabel="取消" label="浏览"
+							fileLimitMessage="最大上传文件数量为1个！"
+							invalidFileMessage="上传文件必须为gif,jpe,jpg,png格式的图片！"
+							invalidSizeMessage="图片大小最大为1M！">
+						</p:fileUpload>
 					<div id="commandDivDetail" align="center" style="margin-top:10px">
-					<h:form>
 						<p:commandButton styleClass="commonbtn" value="添加" action="#{recoupApplyController.addDetailList}" update=":msg,:addRecoupForm">
 						</p:commandButton>
 						<p:commandButton styleClass="commonbtn" value="取消" onclick="applyDetailDialog.hide()">
 						</p:commandButton>
-					</h:form>
 				</div>
 				</h:form>
 			</p:dialog>
