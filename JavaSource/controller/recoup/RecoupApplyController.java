@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -116,13 +117,26 @@ public class RecoupApplyController implements Serializable{
 		ServletContext servletContext = (ServletContext) FacesContext
 				.getCurrentInstance().getExternalContext().getContext();
 		String fileName = file.getFileName();
-		String upFileName = DateUtil.getFormatDateTime(new Date()) + ".jpg";
+		String uuid = UUID.randomUUID().toString(); 
+		uuid = uuid.replaceAll("-", "");
+		String upFileName = uuid+"-"+DateUtil.getFormatDateTime(new Date()) + fileName.substring(fileName.lastIndexOf("."));
 		String sourceFileName = servletContext.getRealPath("") + File.separator
 				+ "uploaded" + File.separator + fileName;
 		String targetFileName = servletContext.getRealPath("") + File.separator
 				+ "images" + File.separator + "invoice" + File.separator
 				+ upFileName;
-
+		//检查文件路径是否存在
+		String tempPath = servletContext.getRealPath("") + File.separator+ "uploaded";
+		File  tf = new File(tempPath);
+		if(!tf.exists()){
+			tf.mkdir();	
+		}
+		String realPath =servletContext.getRealPath("") + File.separator+ "images" + File.separator + "invoice" ;
+		File  rf = new File(realPath);
+		if(!rf.exists()){
+			rf.mkdirs();	
+		}
+		
 		photoPath = File.separator + "images" + File.separator + "invoice"
 				+ File.separator + upFileName;
 		photoPath = photoPath.replace("\\", "/");
