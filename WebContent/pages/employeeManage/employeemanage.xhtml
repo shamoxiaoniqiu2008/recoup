@@ -77,32 +77,30 @@
 				<p:column headerText="姓名" style="text-align:center">
 					<h:outputText value="#{employee.name}" />
 				</p:column>
+				<!--
 				<p:column headerText="年龄" style="text-align:center">
 					<h:outputText value="#{employee.age}" />
 				</p:column>
+				  -->
+				
 				<p:column headerText="性别" style="text-align:center">
 					<h:outputText value="男" rendered="#{employee.sex == 1}" />
 					<h:outputText value="女" rendered="#{employee.sex == 2}" />
-					<h:outputText value=" "
+					<h:outputText value="未知"
 						rendered="#{employee.sex != 1 and employee.sex != 2}" />
 				</p:column>
-				<p:column headerText="出生日期" style="text-align:center">
-					<h:outputText value="#{employee.birthday}">
-						<f:convertDateTime pattern="yyyy-MM-dd" />
-					</h:outputText>
+				<p:column headerText="部门" style="text-align:center">
+					<h:outputText value="#{employee.deptId}" />
 				</p:column>
-				<p:column headerText="职务" style="text-align:center">
-					<h:outputText value="#{employee.job}" />
+				<p:column headerText="开户行" style="text-align:center">
+					<h:outputText value="#{employee.bankName}" />
 				</p:column>
-				<p:column headerText="员工卡号" style="text-align:center">
-					<h:outputText value="#{employee.idcard}">
+				<p:column headerText="银行卡号" style="text-align:center">
+					<h:outputText value="#{employee.bankCard}">
 					</h:outputText>
 				</p:column>
 				<p:column headerText="联系电话" style="text-align:center">
 					<h:outputText value="#{employee.phone}" />
-				</p:column>
-				<p:column headerText="家庭住址" style="text-align:center">
-					<h:outputText value="#{employee.address}" />
 				</p:column>
 			</p:dataTable>
 			<div align="center">
@@ -140,7 +138,7 @@
 					onclick="deleteConfirm.hide()" type="button" />
 			</h:form>
 		</p:confirmDialog>
-		<p:dialog widgetVar="modifyDig" width="930px" height="250px"
+		<p:dialog widgetVar="modifyDig" width="720px" height="250px"
 			appendTo="@(body)" resizable="true" header="员工记录" modal="true">
 			<h:form id="modifyForm">
 				<table>
@@ -166,27 +164,16 @@
 								<f:selectItem itemValue="2" itemLabel="女" />
 							</h:selectOneMenu></td>
 						<td class="hengbiaogeHeader1"><label class="redfont"
-							for="birthday">出生日期</label></td>
-						<td class="hengbiaogedata"><p:calendar id="birthday"
-								pattern="yyyy-MM-dd" navigator="true"
-								value="#{employeeManageController.selectEmployee.birthday}"
-								disabled="#{employeeManageController.viewFlag}" required="true"
-								requiredMessage="请选择出生日期！" /></td>
-						<td class="hengbiaogeHeader1"><label class="redfont"
 							for="accessdate">入职时间</label></td>
 						<td class="hengbiaogedata"><p:calendar id="accessdate"
 								pattern="yyyy-MM-dd" navigator="true"
 								value="#{employeeManageController.selectEmployee.accessdate}"
 								disabled="#{employeeManageController.viewFlag}" required="true"
 								requiredMessage="请选择入职时间！" /></td>
+						
 					</tr>
 					<tr>
-						<td class="hengbiaogeHeader1"><label class="redfont"
-							for="job">职务</label></td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.job}" id="job"
-								maxlength="10" readonly="#{employeeManageController.viewFlag}"
-								required="true" requiredMessage="请填写职务！"></p:inputText></td>
+						
 						<td class="hengbiaogeHeader1"><label class="redfont"
 							for="deptName">部门</label></td>
 						<td class="hengbiaogedata"><h:inputHidden
@@ -200,12 +187,11 @@
 								SQLResult="编号:0:hide,姓名:1,输入码:2:hide"
 								multiresult="modifyForm:deptId;0,modifyForm:deptName;1" /></td>
 						<td class="hengbiaogeHeader1"><label class="redfont"
-							for="idcard">员工卡号</label></td>
+							for="job">职务</label></td>
 						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.idcard}"
-								id="idcard" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20" required="true" requiredMessage="请填写员工卡号！">
-							</p:inputText></td>
+								value="#{employeeManageController.selectEmployee.job}" id="job"
+								maxlength="10" readonly="#{employeeManageController.viewFlag}"
+								required="true" requiredMessage="请填写职务！"></p:inputText></td>
 						<td class="hengbiaogeHeader1"><label class="redfont"
 							for="phone">联系电话</label></td>
 						<td class="hengbiaogedata"><p:inputText
@@ -215,82 +201,25 @@
 						</td>
 					</tr>
 					<tr>
-						<td class="hengbiaogeHeader1"><label for="health">健康状况</label></td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="bankCard">开户银行</label></td>
 						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.health}"
-								id="health" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20" /></td>
-						<td class="hengbiaogeHeader1"><label for="married">婚姻状况</label>
-						</td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.married}"
-								id="married" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20" /></td>
-						<td class="hengbiaogeHeader1"><label for="knowledge">学历</label></td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.knowledge}"
-								id="knowledge" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20" /></td>
-						<td class="hengbiaogeHeader1"><label for="school">毕业院校</label>
-						</td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.school}"
-								id="school" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20" /></td>
-					</tr>
-					<tr>
-						<td class="hengbiaogeHeader1"><label for="speciality">特殊技能</label></td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.speciality}"
-								id="speciality" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20">
+								value="#{employeeManageController.selectEmployee.bankName}"
+								id="bankName" readonly="#{employeeManageController.viewFlag}"
+								maxlength="20" required="true" requiredMessage="请填写开户银行！">
 							</p:inputText></td>
-						<td class="hengbiaogeHeader1"><label for="technology">技能</label>
-						</td>
+						<td class="hengbiaogeHeader1"><label class="redfont"
+							for="bankCard">银行卡号</label></td>
 						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.technology}"
-								id="technology" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20"></p:inputText></td>
-						<td class="hengbiaogeHeader1"><label for="language">语言</label></td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.language}"
-								id="language" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20" /></td>
-						<td class="hengbiaogeHeader1"><label for="computer">电脑技能</label>
-						</td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.computer}"
-								id="computer" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20" /></td>
-					</tr>
-					<tr>
-						<td class="hengbiaogeHeader1"><label for="certname">证书</label></td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.certname}"
-								id="certname" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20">
+								value="#{employeeManageController.selectEmployee.bankCard}"
+								id="bankCard" readonly="#{employeeManageController.viewFlag}"
+								maxlength="20" required="true" requiredMessage="请填写银行卡号！">
 							</p:inputText></td>
-
-						<td class="hengbiaogeHeader1"><label for="nativeplace">本地住址</label></td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.nativeplace}"
-								id="nativeplace" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20">
-							</p:inputText></td>
-						<td class="hengbiaogeHeader1"><label for="address">家庭住址</label>
-						</td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.address}"
-								id="address" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20"></p:inputText></td>
-						<td class="hengbiaogeHeader1"><label for="notes">备注</label></td>
-						<td class="hengbiaogedata"><p:inputText
-								value="#{employeeManageController.selectEmployee.notes}"
-								id="notes" readonly="#{employeeManageController.viewFlag}"
-								maxlength="20"></p:inputText></td>
+						<td  > </td>
+						<td  ></td>
 					</tr>
 				</table>
-				<div align="center">
+				<div align="center" >
 					<p:commandButton value="保存" styleClass="commonbtn"
 						rendered="#{!employeeManageController.viewFlag}"
 						actionListener="#{employeeManageController.checkInfo}"
@@ -320,11 +249,7 @@
 							<h:outputText value="女"
 								rendered="#{employeeManageController.selectEmployee.sex==2}"></h:outputText>
 						</td>
-						<td class="hengbiaogeHeader1"><label>出生日期</label></td>
-						<td class="hengbiaogedata" style="width: 80px;"><h:outputText
-								value="#{employeeManageController.selectEmployee.birthday}">
-								<f:convertDateTime pattern="yyyy-MM-dd"></f:convertDateTime>
-							</h:outputText></td>
+						 
 						<td class="hengbiaogeHeader1" style="width: 80px;"><label>入职时间</label></td>
 						<td class="hengbiaogedata"><h:outputText
 								value="#{employeeManageController.selectEmployee.accessdate}">
@@ -332,79 +257,29 @@
 							</h:outputText></td>
 					</tr>
 					<tr>
+						<td class="hengbiaogeHeader1"><label>部门</label></td>
+						<td class="hengbiaogedata"><h:outputText
+								value="#{employeeManageController.deptName}"></h:outputText></td>
 						<td class="hengbiaogeHeader1"><label>职务</label></td>
 						<td class="hengbiaogedata"><h:outputText
 								value="#{employeeManageController.selectEmployee.job}"></h:outputText>
 						</td>
-						<td class="hengbiaogeHeader1"><label>部门</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.deptName}"></h:outputText></td>
-						<td class="hengbiaogeHeader1"><label>员工卡号</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.idcard}"></h:outputText>
-						</td>
+						
 						<td class="hengbiaogeHeader1"><label>联系电话</label></td>
 						<td class="hengbiaogedata"><h:outputText
 								value="#{employeeManageController.selectEmployee.phone}"></h:outputText>
 						</td>
 					</tr>
 					<tr>
-						<td class="hengbiaogeHeader1"><label>健康状况</label></td>
+					<td class="hengbiaogeHeader1"><label>银行卡号</label></td>
 						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.health}"></h:outputText>
-
+								value="#{employeeManageController.selectEmployee.bankName}"></h:outputText>
 						</td>
-						<td class="hengbiaogeHeader1"><label>婚姻状况</label></td>
+						<td class="hengbiaogeHeader1"><label>银行卡号</label></td>
 						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.married}"></h:outputText>
+								value="#{employeeManageController.selectEmployee.bankCard}"></h:outputText>
 						</td>
-						<td class="hengbiaogeHeader1"><label>学历</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.knowledge}"></h:outputText>
-						</td>
-						<td class="hengbiaogeHeader1"><label>毕业院校</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.school}"></h:outputText>
-						</td>
-					</tr>
-					<tr>
-						<td class="hengbiaogeHeader1"><label>特殊技能</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.speciality}"></h:outputText>
-						</td>
-
-						<td class="hengbiaogeHeader1"><label>技能</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.technology}"></h:outputText>
-						</td>
-
-						<td class="hengbiaogeHeader1"><label>语言</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.language}"></h:outputText>
-						</td>
-
-						<td class="hengbiaogeHeader1"><label>电脑技能</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.computer}"></h:outputText>
-						</td>
-					</tr>
-					<tr>
-						<td class="hengbiaogeHeader1"><label>证书</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.certname}"></h:outputText>
-						</td>
-						<td class="hengbiaogeHeader1"><label>本地住址</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.nativeplace}"></h:outputText>
-						</td>
-						<td class="hengbiaogeHeader1"><label>家庭住址</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.address}"></h:outputText>
-						</td>
-						<td class="hengbiaogeHeader1"><label>备注</label></td>
-						<td class="hengbiaogedata"><h:outputText
-								value="#{employeeManageController.selectEmployee.notes}"></h:outputText>
-						</td>
+						<td></td><td></td>
 					</tr>
 				</table>
 				<div align="center">
