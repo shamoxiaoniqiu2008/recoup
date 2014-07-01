@@ -13,3 +13,4 @@ alter table `recoup`.`pension_employee`
    change `computer` `computer` varchar(20) character set utf8 collate utf8_general_ci NULL  comment '电脑技能', 
    change `certName` `certName` varchar(50) character set utf8 collate utf8_general_ci NULL  comment '证书', 
    change `notes` `notes` varchar(100) NULL 
+   
