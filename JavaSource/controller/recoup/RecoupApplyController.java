@@ -18,6 +18,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
@@ -35,46 +36,48 @@ import domain.recoup.RecoupDicProject;
 
 /**
  * @author justin
- *
+ * 
  */
 
-public class RecoupApplyController implements Serializable{
-	
-	
-	  
-		/** 
-		* @Fields serialVersionUID : TODO
-		* @version V1.0
-		*/   
-	    
+public class RecoupApplyController implements Serializable {
+
+	/**
+	 * @Fields serialVersionUID : TODO
+	 * @version V1.0
+	 */
+
 	private static final long serialVersionUID = 100000000000001L;
-	
+
 	private transient RecoupApplyService recoupApplyService;
-	
+
 	private List<RecoupApplyRecordExtend> recordList = new ArrayList<RecoupApplyRecordExtend>();
 
 	private RecoupApplyRecordExtend recordForAdd = new RecoupApplyRecordExtend();
 
 	private List<RecoupApplyDetailExtend> detailListForAdd = new ArrayList<RecoupApplyDetailExtend>();
-	
+
 	private RecoupApplyDetailExtend detailForAdd = new RecoupApplyDetailExtend();
-	
+
 	private RecoupApplyDetailExtend selectedDetail = new RecoupApplyDetailExtend();
-	
+
 	private List<RecoupDicProject> projects = new ArrayList<RecoupDicProject>();
-	
+
 	private List<RecoupDicPayclass> payclasses = new ArrayList<RecoupDicPayclass>();
-	
+
 	private List<RecoupDicCostclass1> costclasses1 = new ArrayList<RecoupDicCostclass1>();
-	
+
 	private List<RecoupDicCostclass2> costclasses2 = new ArrayList<RecoupDicCostclass2>();
-	
-	private String photoPath = null;
-	
-	private boolean addFlag = false;
+
+	/**
+	 * 说明：
+	 * 	Controller尽量不要在这层放业务逻辑操作。
+	 * 	将业务逻辑挪到Service层进行处理，对应的值域加载也别放在此处。
+	 * 将值域的获取尽量统一封装到一个方法里面，通过参数调用。另外就是能够合在一起最好
+	 * 目前优先实现功能，后面重构吧。
+	 */
 	
 	@PostConstruct
-	public void init(){
+	public void init() {
 		payclasses = new ArrayList<RecoupDicPayclass>();
 		projects = new ArrayList<RecoupDicProject>();
 		costclasses1 = new ArrayList<RecoupDicCostclass1>();
@@ -84,290 +87,225 @@ public class RecoupApplyController implements Serializable{
 		costclasses1 = recoupApplyService.selectAllCostclasses1();
 		costclasses2 = recoupApplyService.selectAllCostclasses2();
 	}
-	
-	public void getDetailDefaultValue(){
+
+	public void getDetailDefaultValue() {
 		detailForAdd = new RecoupApplyDetailExtend();
-		detailForAdd.setFeeDatetime(DateUtil.parseDate(DateUtil.getDate(new Date()), "yyyy-MM-dd"));
+		detailForAdd.setFeeDatetime(DateUtil.parseDate(
+				DateUtil.getDate(new Date()), "yyyy-MM-dd"));
 	}
-	
-	public void getRecordDefaultValue(){
+
+	public void getRecordDefaultValue() {
 		recordForAdd = new RecoupApplyRecordExtend();
 		recordForAdd.setNeme(SessionManager.getCurEmployee().getName());
-		recordForAdd.setApplyDate(DateUtil.parseDate(DateUtil.getDate(new Date()), "yyyy-MM-dd"));
+		recordForAdd.setApplyDate(DateUtil.parseDate(
+				DateUtil.getDate(new Date()), "yyyy-MM-dd"));
 	}
-	
-	public void addDetailList(){
-		if(detailForAdd.equals(null) || detailForAdd.equals("")){
+
+	public void addDetailList() {
+		if (detailForAdd.equals(null) || detailForAdd.equals("")) {
 			return;
-		}else{
+		} else {
 			RecoupApplyDetailExtend detail = new RecoupApplyDetailExtend();
 			detail = detailForAdd;
 			detailListForAdd.add(detail);
 			FacesContext.getCurrentInstance().addMessage(
 					null,
-					new FacesMessage(FacesMessage.SEVERITY_INFO,
-							"明细添加成功！" , "明细添加成功！"));
-		}	
+					new FacesMessage(FacesMessage.SEVERITY_INFO, "明细添加成功！",
+							"明细添加成功！"));
+		}
+	}
+	/**
+	 * 保存报销申请
+	 */
+	public void saveRecoup(){
+		System.out.println("调用保存！");
+		RequestContext request = RequestContext.getCurrentInstance();
+		RecoupApplyService ras = new RecoupApplyService();
+		
+		
 	}
 	
+	
+	/**
+	 * 文件上传业务逻辑操作
+	 * @param event
+	 */
 	public void handleFileUpload(FileUploadEvent event) {
-		photoPath = null;
+		RecoupApplyService ras = new RecoupApplyService();
 		// 图片上传到Tomcat发布目录下的uploaded目录
 		UploadedFile file = event.getFile();
+
 		ServletContext servletContext = (ServletContext) FacesContext
 				.getCurrentInstance().getExternalContext().getContext();
-		String fileName = file.getFileName();
-		String uuid = UUID.randomUUID().toString(); 
-		uuid = uuid.replaceAll("-", "");
-		String upFileName = uuid+"-"+DateUtil.getFormatDateTime(new Date()) + fileName.substring(fileName.lastIndexOf("."));
-		String sourceFileName = servletContext.getRealPath("") + File.separator
-				+ "uploaded" + File.separator + fileName;
-		String targetFileName = servletContext.getRealPath("") + File.separator
-				+ "images" + File.separator + "invoice" + File.separator
-				+ upFileName;
-		//检查文件路径是否存在
-		String tempPath = servletContext.getRealPath("") + File.separator+ "uploaded";
-		File  tf = new File(tempPath);
-		if(!tf.exists()){
-			tf.mkdir();	
-		}
-		String realPath =servletContext.getRealPath("") + File.separator+ "images" + File.separator + "invoice" ;
-		File  rf = new File(realPath);
-		if(!rf.exists()){
-			rf.mkdirs();	
-		}
+		String currentPath = servletContext.getRealPath("");
 		
-		photoPath = File.separator + "images" + File.separator + "invoice"
-				+ File.separator + upFileName;
-		photoPath = photoPath.replace("\\", "/");
+		String photoPath = ras.fileUpload(currentPath,file);
+		//此flag的作用是啥？不是很清楚。
+		boolean addFlag = false;
 		if (addFlag) {
 			detailForAdd.setImageUrl(photoPath);
 		} else {
 			selectedDetail.setImageUrl(photoPath);
 		}
-		try {
-			FileOutputStream fos = new FileOutputStream(
-					new File(sourceFileName));
-			InputStream is = file.getInputstream();
-			int BUFFER_SIZE = 8192;
-			byte[] buffer = new byte[BUFFER_SIZE];
-			int a;
-			while (true) {
-				a = is.read(buffer);
-				if (a < 0)
-					break;
-				fos.write(buffer, 0, a);
-				fos.flush();
-			}
-			fos.close();
-			is.close();
-			FacesMessage msg = new FacesMessage("图片上传成功！", event.getFile()
-					.getFileName());
-			FacesContext.getCurrentInstance().addMessage(null, msg);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		// 图片拷贝到images目录对应的文件夹
-		File sourceFile = new File(sourceFileName);
-		File targetFile = new File(targetFileName);
-		try {
-			FileUtil.copyFile(sourceFile, targetFile);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		// 删除Tomcat发布目录下的uploaded目录下的文件
-		try {
-			FileUtil.deleteFile(sourceFileName);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
+	/**
+	 * @return the recordForAdd
+	 */
 
-	  
-		/**
-		 * @return the recordForAdd
-		 */  
-	    
 	public RecoupApplyRecordExtend getRecordForAdd() {
 		return recordForAdd;
 	}
 
+	/**
+	 * @param recordForAdd
+	 *            the recordForAdd to set
+	 */
 
-
-	  
-	    /**
-		 * @param recordForAdd the recordForAdd to set
-		 */  
-	    
 	public void setRecordForAdd(RecoupApplyRecordExtend recordForAdd) {
 		this.recordForAdd = recordForAdd;
 	}
 
+	/**
+	 * @return the detailListForAdd
+	 */
 
+	public List<RecoupApplyDetailExtend> getDetailListForAdd() {
+		return detailListForAdd;
+	}
 
+	/**
+	 * @param detailListForAdd
+	 *            the detailListForAdd to set
+	 */
 
-		  
-			/**
-			 * @return the detailListForAdd
-			 */  
-		    
-		public List<RecoupApplyDetailExtend> getDetailListForAdd() {
-			return detailListForAdd;
-		}
+	public void setDetailListForAdd(
+			List<RecoupApplyDetailExtend> detailListForAdd) {
+		this.detailListForAdd = detailListForAdd;
+	}
 
+	/**
+	 * @return the detailForAdd
+	 */
 
+	public RecoupApplyDetailExtend getDetailForAdd() {
+		return detailForAdd;
+	}
 
+	/**
+	 * @param detailForAdd
+	 *            the detailForAdd to set
+	 */
 
-		  
-		    /**
-			 * @param detailListForAdd the detailListForAdd to set
-			 */  
-		    
-		public void setDetailListForAdd(List<RecoupApplyDetailExtend> detailListForAdd) {
-			this.detailListForAdd = detailListForAdd;
-		}
+	public void setDetailForAdd(RecoupApplyDetailExtend detailForAdd) {
+		this.detailForAdd = detailForAdd;
+	}
 
+	/**
+	 * @return the recoupApplyService
+	 */
 
+	public RecoupApplyService getRecoupApplyService() {
+		return recoupApplyService;
+	}
 
+	/**
+	 * @param recoupApplyService
+	 *            the recoupApplyService to set
+	 */
 
-			  
-				/**
-				 * @return the detailForAdd
-				 */  
-			    
-			public RecoupApplyDetailExtend getDetailForAdd() {
-				return detailForAdd;
-			}
+	public void setRecoupApplyService(RecoupApplyService recoupApplyService) {
+		this.recoupApplyService = recoupApplyService;
+	}
 
+	/**
+	 * @return the projects
+	 */
+	public List<RecoupDicProject> getProjects() {
+		return projects;
+	}
 
+	/**
+	 * @param projects
+	 *            the projects to set
+	 */
+	public void setProjects(List<RecoupDicProject> projects) {
+		this.projects = projects;
+	}
 
+	/**
+	 * @return the selectedDetail
+	 */
+	public RecoupApplyDetailExtend getSelectedDetail() {
+		return selectedDetail;
+	}
 
-			  
-			    /**
-				 * @param detailForAdd the detailForAdd to set
-				 */  
-			    
-			public void setDetailForAdd(RecoupApplyDetailExtend detailForAdd) {
-				this.detailForAdd = detailForAdd;
-			}
+	/**
+	 * @param selectedDetail
+	 *            the selectedDetail to set
+	 */
+	public void setSelectedDetail(RecoupApplyDetailExtend selectedDetail) {
+		this.selectedDetail = selectedDetail;
+	}
 
+	/**
+	 * @return the recordList
+	 */
+	public List<RecoupApplyRecordExtend> getRecordList() {
+		return recordList;
+	}
 
-				  
-					/**
-					 * @return the recoupApplyService
-					 */  
-				    
-				public RecoupApplyService getRecoupApplyService() {
-					return recoupApplyService;
-				}
+	/**
+	 * @param recordList
+	 *            the recordList to set
+	 */
+	public void setRecordList(List<RecoupApplyRecordExtend> recordList) {
+		this.recordList = recordList;
+	}
 
+	/**
+	 * @return the payclasses
+	 */
+	public List<RecoupDicPayclass> getPayclasses() {
+		return payclasses;
+	}
 
-				  
-				    /**
-					 * @param recoupApplyService the recoupApplyService to set
-					 */  
-				    
-				public void setRecoupApplyService(RecoupApplyService recoupApplyService) {
-					this.recoupApplyService = recoupApplyService;
-				}
+	/**
+	 * @param payclasses
+	 *            the payclasses to set
+	 */
+	public void setPayclasses(List<RecoupDicPayclass> payclasses) {
+		this.payclasses = payclasses;
+	}
 
-					/**
-					 * @return the projects
-					 */
-					public List<RecoupDicProject> getProjects() {
-						return projects;
-					}
+	/**
+	 * @return the costclasses1
+	 */
+	public List<RecoupDicCostclass1> getCostclasses1() {
+		return costclasses1;
+	}
 
-					/**
-					 * @param projects the projects to set
-					 */
-					public void setProjects(List<RecoupDicProject> projects) {
-						this.projects = projects;
-					}
+	/**
+	 * @param costclasses1
+	 *            the costclasses1 to set
+	 */
+	public void setCostclasses1(List<RecoupDicCostclass1> costclasses1) {
+		this.costclasses1 = costclasses1;
+	}
 
-					public String getPhotoPath() {
-						return photoPath;
-					}
+	/**
+	 * @return the costclasses2
+	 */
+	public List<RecoupDicCostclass2> getCostclasses2() {
+		return costclasses2;
+	}
 
-					public void setPhotoPath(String photoPath) {
-						this.photoPath = photoPath;
-					}
-
-					/**
-					 * @return the selectedDetail
-					 */
-					public RecoupApplyDetailExtend getSelectedDetail() {
-						return selectedDetail;
-					}
-
-					/**
-					 * @param selectedDetail the selectedDetail to set
-					 */
-					public void setSelectedDetail(RecoupApplyDetailExtend selectedDetail) {
-						this.selectedDetail = selectedDetail;
-					}
-
-					/**
-					 * @return the recordList
-					 */
-					public List<RecoupApplyRecordExtend> getRecordList() {
-						return recordList;
-					}
-
-					/**
-					 * @param recordList the recordList to set
-					 */
-					public void setRecordList(List<RecoupApplyRecordExtend> recordList) {
-						this.recordList = recordList;
-					}
-
-					/**
-					 * @return the payclasses
-					 */
-					public List<RecoupDicPayclass> getPayclasses() {
-						return payclasses;
-					}
-
-					/**
-					 * @param payclasses the payclasses to set
-					 */
-					public void setPayclasses(List<RecoupDicPayclass> payclasses) {
-						this.payclasses = payclasses;
-					}
-
-					/**
-					 * @return the costclasses1
-					 */
-					public List<RecoupDicCostclass1> getCostclasses1() {
-						return costclasses1;
-					}
-
-					/**
-					 * @param costclasses1 the costclasses1 to set
-					 */
-					public void setCostclasses1(List<RecoupDicCostclass1> costclasses1) {
-						this.costclasses1 = costclasses1;
-					}
-
-					/**
-					 * @return the costclasses2
-					 */
-					public List<RecoupDicCostclass2> getCostclasses2() {
-						return costclasses2;
-					}
-
-					/**
-					 * @param costclasses2 the costclasses2 to set
-					 */
-					public void setCostclasses2(List<RecoupDicCostclass2> costclasses2) {
-						this.costclasses2 = costclasses2;
-					}
-
-
-
+	/**
+	 * @param costclasses2
+	 *            the costclasses2 to set
+	 */
+	public void setCostclasses2(List<RecoupDicCostclass2> costclasses2) {
+		this.costclasses2 = costclasses2;
+	}
 
 }

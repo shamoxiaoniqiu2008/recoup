@@ -3,8 +3,18 @@
  */
 package service.recoup;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+
+import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +30,8 @@ import persistence.recoup.RecoupDicCostclass1Mapper;
 import persistence.recoup.RecoupDicCostclass2Mapper;
 import persistence.recoup.RecoupDicPayclassMapper;
 import persistence.recoup.RecoupDicProjectMapper;
+import util.DateUtil;
+import util.FileUtil;
 
 /**
  * @author justin
@@ -68,5 +80,76 @@ public class RecoupApplyService {
 		RecoupDicCostclass2Example example = new RecoupDicCostclass2Example();
 		example.or().andClearedEqualTo(2);
 		return recoupDicCostclass2Mapper.selectByExample(example);
+	}
+
+
+	public String  fileUpload(String currentPath, UploadedFile file) {
+		String photoPath = null;
+		String fileName = file.getFileName();
+		String uuid = UUID.randomUUID().toString();
+		uuid = uuid.replaceAll("-", "");
+		String upFileName = uuid + "-" + DateUtil.getFormatDateTime(new Date())
+				+ fileName.substring(fileName.lastIndexOf("."));
+		String sourceFileName = currentPath + File.separator
+				+ "uploaded" + File.separator + fileName;
+		String targetFileName = currentPath + File.separator
+				+ "images" + File.separator + "invoice" + File.separator
+				+ upFileName;
+		// 检查文件路径是否存在
+		String tempPath = currentPath + File.separator
+				+ "uploaded";
+		File tf = new File(tempPath);
+		if (!tf.exists()) {
+			tf.mkdir();
+		}
+		String realPath = currentPath + File.separator
+				+ "images" + File.separator + "invoice";
+		File rf = new File(realPath);
+		if (!rf.exists()) {
+			rf.mkdirs();
+		}
+
+		photoPath = File.separator + "images" + File.separator + "invoice"
+				+ File.separator + upFileName;
+		photoPath = photoPath.replace("\\", "/");
+		
+		try {
+			FileOutputStream fos = new FileOutputStream(
+					new File(sourceFileName));
+			InputStream is = file.getInputstream();
+			int BUFFER_SIZE = 8192;
+			byte[] buffer = new byte[BUFFER_SIZE];
+			int a;
+			while (true) {
+				a = is.read(buffer);
+				if (a < 0)
+					break;
+				fos.write(buffer, 0, a);
+				fos.flush();
+			}
+			fos.close();
+			is.close();
+			FacesMessage msg = new FacesMessage("图片上传成功！", file.getFileName());
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// 图片拷贝到images目录对应的文件夹
+		File sourceFile = new File(sourceFileName);
+		File targetFile = new File(targetFileName);
+		try {
+			FileUtil.copyFile(sourceFile, targetFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// 删除Tomcat发布目录下的uploaded目录下的文件
+		try {
+			FileUtil.deleteFile(sourceFileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return photoPath;
+		
 	}
 }
