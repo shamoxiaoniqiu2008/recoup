@@ -1,0 +1,15 @@
+--add by qiufj 修改员工表字段长度，增加银行卡和开户行字段内容。
+alter table `recoup`.`pension_employee` 
+   add column `bankName` varchar(100) NULL COMMENT '开户银行' after `cleared`, 
+   add column `bankCard` varchar(20) NULL COMMENT '银行卡号' after `bankName`,
+   change `name` `name` varchar(50) character set utf8 collate utf8_general_ci NULL  comment '员工名称', 
+   change `age` `age` int(3) NULL  comment '年龄', 
+   change `sex` `sex` varchar(1) character set utf8 collate utf8_general_ci NULL  comment '性别', 
+   change `health` `health` varchar(10) character set utf8 collate utf8_general_ci NULL  comment '健康状况', 
+   change `married` `married` varchar(1) character set utf8 collate utf8_general_ci NULL  comment '婚姻状况', 
+   change `IDcard` `IDcard` varchar(32) character set utf8 collate utf8_general_ci NULL  comment '员工卡号', 
+   change `phone` `phone` varchar(20) character set utf8 collate utf8_general_ci NULL  comment '联系电话', 
+   change `language` `language` varchar(20) character set utf8 collate utf8_general_ci NULL  comment '语言', 
+   change `computer` `computer` varchar(20) character set utf8 collate utf8_general_ci NULL  comment '电脑技能', 
+   change `certName` `certName` varchar(50) character set utf8 collate utf8_general_ci NULL  comment '证书', 
+   change `notes` `notes` varchar(100) NULL 
