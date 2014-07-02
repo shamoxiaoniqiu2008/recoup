@@ -155,8 +155,8 @@ public class EmployeeManageController implements Serializable {
 		RequestContext request = RequestContext.getCurrentInstance();
 		try {
 			selectEmployee.setInputcode(inputCode);
-			selectEmployee.setAge(DateUtil.selectAge(selectEmployee
-					.getBirthday()));
+//			selectEmployee.setAge(DateUtil.selectAge(selectEmployee
+//					.getBirthday()));
 			if (addFlag) {// 新增-保存
 				Long id = employeeManageService.saveEmployee(selectEmployee);
 				selectEmployee.setId(id);
