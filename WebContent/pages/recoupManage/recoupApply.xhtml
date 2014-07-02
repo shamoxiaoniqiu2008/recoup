@@ -200,6 +200,11 @@
 					action="#{recoupApplyController.getDetailDefaultValue}"
 					update=":addRecoupDetailForm">
 				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="修改明细">
+				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="删除明细">
+				</p:commandButton>
+						
 				<p:dataTable id="detailTable" emptyMessage="当前无内容"
 					value="#{recoupApplyController.detailListForAdd}"
 					widgetVar="details" var="details" paginator="true"
@@ -239,17 +244,14 @@
 				</p:dataTable>
 				<div id="commandDiv" align="center" style="margin-top: 10px">
 					<h:form>
-						<p:commandButton styleClass="commonbtn" value="编辑明细">
-						</p:commandButton>
-						<p:commandButton styleClass="commonbtn" value="删除明细">
-						</p:commandButton>
-						<p:commandButton styleClass="commonbtn" value="保存申请"
+						
+						<p:commandButton styleClass="commonbtn" value="保存"
 							action="#{recoupApplyController.saveRecoup}"
 							>
 						</p:commandButton>
-						<p:commandButton styleClass="commonbtn" value="提交申请">
+						<p:commandButton styleClass="commonbtn" value="提交">
 						</p:commandButton>
-						<p:commandButton styleClass="commonbtn" value="取消申请">
+						<p:commandButton styleClass="commonbtn" value="取消">
 						</p:commandButton>
 					</h:form>
 				</div>
