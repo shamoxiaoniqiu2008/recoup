@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import domain.recoup.RecoupApplyDetailExtend;
 import domain.recoup.RecoupDicCostclass1;
 import domain.recoup.RecoupDicCostclass1Example;
 import domain.recoup.RecoupDicCostclass2;
@@ -52,7 +54,14 @@ public class RecoupApplyService {
 	
 	/**
 	 * 
-	 * @return
+		* @Title: selectAllProjects 
+		* @Description: TODO
+		* @param @return
+		* @return List<RecoupDicProject>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午2:13:31
+		* @version V1.0
 	 */
 	public List<RecoupDicProject> selectAllProjects(){
 		RecoupDicProjectExample example = new RecoupDicProjectExample();
@@ -60,7 +69,17 @@ public class RecoupApplyService {
 		return recoupDicProjectMapper.selectByExample(example);
 	}
 	
-	
+	/**
+	 * 
+		* @Title: selectAllPayclasses 
+		* @Description: TODO
+		* @param @return
+		* @return List<RecoupDicPayclass>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午2:13:34
+		* @version V1.0
+	 */
 	public List<RecoupDicPayclass> selectAllPayclasses(){
 		RecoupDicPayclassExample example = new RecoupDicPayclassExample();
 		example.or().andClearedEqualTo(2);
@@ -68,6 +87,17 @@ public class RecoupApplyService {
 		return recoupDicPayclassMapper.selectByExample(example);
 	}
 	
+	/**
+	 * 
+		* @Title: selectAllCostclasses1 
+		* @Description: TODO
+		* @param @return
+		* @return List<RecoupDicCostclass1>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午2:13:37
+		* @version V1.0
+	 */
 	public List<RecoupDicCostclass1> selectAllCostclasses1(){
 		RecoupDicCostclass1Example example = new RecoupDicCostclass1Example();
 		example.or().andClearedEqualTo(2);
@@ -75,7 +105,17 @@ public class RecoupApplyService {
 	}
 	
 	
-	
+	/**
+	 * 
+		* @Title: selectAllCostclasses2 
+		* @Description: TODO
+		* @param @return
+		* @return List<RecoupDicCostclass2>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午2:13:41
+		* @version V1.0
+	 */
 	public List<RecoupDicCostclass2> selectAllCostclasses2(){
 		RecoupDicCostclass2Example example = new RecoupDicCostclass2Example();
 		example.or().andClearedEqualTo(2);
@@ -83,6 +123,19 @@ public class RecoupApplyService {
 	}
 
 
+	/**
+	 * 
+		* @Title: fileUpload 
+		* @Description: TODO
+		* @param @param currentPath
+		* @param @param file
+		* @param @return
+		* @return String
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午2:13:45
+		* @version V1.0
+	 */
 	public String  fileUpload(String currentPath, UploadedFile file) {
 		String photoPath = null;
 		String fileName = file.getFileName();
@@ -151,5 +204,17 @@ public class RecoupApplyService {
 		}
 		return photoPath;
 		
+	}
+	
+	
+	public BigDecimal getAmount(RecoupApplyDetailExtend detailForAdd){
+		BigDecimal tempAmount = new BigDecimal(0);
+		if(detailForAdd.getPrice().compareTo(BigDecimal.ZERO)== 0 || null == detailForAdd.getQty() ){
+			tempAmount = BigDecimal.ZERO;
+		}
+		else{
+			tempAmount = detailForAdd.getPrice().multiply(new BigDecimal ( detailForAdd.getQty()));
+		}
+		return tempAmount;
 	}
 }

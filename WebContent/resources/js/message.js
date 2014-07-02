@@ -21,11 +21,13 @@
 			}
 		  },"json");
 	}
+
+/*
 	fetchMessageCount();
 	setInterval(function(){
 		fetchMessageCount();
 	},6000);
-	
+**/
 	
 	function fetchMessageCounts() {
 		var strUrl=window.location.href;

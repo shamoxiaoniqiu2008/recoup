@@ -35,25 +35,7 @@
 			src="#{request.contextPath}/resources/js/common.js?ver=#{projectConfig.ver}" />
 		<script type="text/javascript"
 			src="#{request.contextPath}/resources/js/calendar.js?ver=#{projectConfig.ver}" />
-		<script>
-			//计算申请明细费用总金额
-			function getAmount() {
-				var price = document.addRecoupDetailForm["addRecoupDetailForm:price"].value;
-				var qty = document.addRecoupDetailForm["addRecoupDetailForm:qty"].value;
-				var amt = document.addRecoupDetailForm["addRecoupDetailForm:amount"];
-				amt.value = price * qty;
-			}
-			//添加申请明细到申请列表中 
-			function resetDetailForm() {
-				addRecoupDetailForm.reset();
-				alert("添加成功！");
-			}
-		</script>
-
-
 	</h:head>
-
-
 	<h:body>
 		<p:growl id="msg"></p:growl>
 		<h:form id="searchForm" style="display: inline">
@@ -143,16 +125,14 @@
 						<td><h:panelGrid columns="2">
 								<p:selectOneMenu
 									value="#{recoupApplyController.recordForAdd.typeId1}">
-									<f:selectItems value="#{recoupApplyController.costclasses1}"
-										var="costclasses1" itemLabel="选择费用大类" itemValue=""></f:selectItems>
+									<f:selectItem itemLabel="请选择" itemValue="0"></f:selectItem>
 									<f:selectItems value="#{recoupApplyController.costclasses1}"
 										var="costclasses1" itemLabel="#{costclasses1.class1Name}"
 										itemValue="#{costclasses1.id}"></f:selectItems>
 								</p:selectOneMenu>
 								<p:selectOneMenu
 									value="#{recoupApplyController.recordForAdd.typeId2}">
-									<f:selectItems value="#{recoupApplyController.costclasses2}"
-										var="costclasses2" itemLabel="请选择" itemValue=""></f:selectItems>
+									<f:selectItem itemLabel="请选择" itemValue="0"></f:selectItem>
 									<f:selectItems value="#{recoupApplyController.costclasses2}"
 										var="costclasses2" itemLabel="#{costclasses2.class2Name}"
 										itemValue="#{costclasses1.id}"></f:selectItems>
@@ -239,15 +219,13 @@
 						<h:outputText value="#{details.processerName}"></h:outputText>
 					</p:column>
 					<p:column headerText="发票照片">
-						<h:outputText></h:outputText>
+						<p:graphicImage value="#{details.imageUrl}"></p:graphicImage>
 					</p:column>
 				</p:dataTable>
 				<div id="commandDiv" align="center" style="margin-top: 10px">
 					<h:form>
-						
 						<p:commandButton styleClass="commonbtn" value="保存"
-							action="#{recoupApplyController.saveRecoup}"
-							>
+							action="#{recoupApplyController.saveRecoup}">
 						</p:commandButton>
 						<p:commandButton styleClass="commonbtn" value="提交">
 						</p:commandButton>
@@ -259,7 +237,7 @@
 		</p:dialog>
 
 		<p:dialog id="detailDialog" widgetVar="applyDetailDialog"
-			header="申请明细" modal="true" appendTo="@(body)" height="260px"
+			header="申请明细" modal="true" appendTo="@(body)" height="280px"
 			width="520px" resizable="false" position="center" appendToBody="true">
 			<h:form id="addRecoupDetailForm" enctype="multipart/form-data">
 				<table>
@@ -276,8 +254,8 @@
 					<tr>
 						<td>单价</td>
 						<td><p:inputText id="price"
-								value="#{recoupApplyController.detailForAdd.price}"
-								required="true" requiredMessage="请选填写单价！">
+								value="#{recoupApplyController.detailForAdd.price}" >
+									<p:ajax event="blur"  process="@this"  listener="#{recoupApplyController.calcAmount}" update=":addRecoupDetailForm:amount"></p:ajax>
 							</p:inputText></td>
 						<td>单位</td>
 						<td><p:inputText
@@ -287,12 +265,12 @@
 					<tr>
 						<td>数量</td>
 						<td><p:inputText id="qty"
-								value="#{recoupApplyController.detailForAdd.qty}"
-								required="true" requiredMessage="请选填写数量！"></p:inputText></td>
+								value="#{recoupApplyController.detailForAdd.qty}" >
+									<p:ajax event="blur"  process="@this" listener="#{recoupApplyController.calcAmount}" update=":addRecoupDetailForm:amount"></p:ajax>
+								</p:inputText></td>
 						<td>金额</td>
 						<td><p:inputText id="amount" readonly="true"
-								value="#{recoupApplyController.detailForAdd.amount}"
-								onfocus="getAmount()" required="true" requiredMessage="请选填写金额！"></p:inputText></td>
+								value="#{recoupApplyController.detailForAdd.amount}"  ></p:inputText></td>
 					</tr>
 					<tr>
 						<td>经手人</td>

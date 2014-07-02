@@ -4,6 +4,7 @@
 package controller.recoup;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -82,13 +83,36 @@ public class RecoupApplyController implements Serializable {
 		costclasses2 = recoupApplyService.selectAllCostclasses2();
 	}
 
+	/**
+	 * 
+		* @Title: getDetailDefaultValue 
+		* @Description: TODO
+		* @param 
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午2:12:12
+		* @version V1.0
+	 */
 	public void getDetailDefaultValue() {
 		detailForAdd = new RecoupApplyDetailExtend();
 		detailForAdd.setFeeDatetime(DateUtil.parseDate(
 				DateUtil.getDate(new Date()), "yyyy-MM-dd"));
+		detailForAdd.setAmount(BigDecimal.ZERO);
 		addFlag = true;
 	}
 
+	/**
+	 * 
+		* @Title: getRecordDefaultValue 
+		* @Description: TODO
+		* @param 
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午2:12:15
+		* @version V1.0
+	 */
 	public void getRecordDefaultValue() {
 		recordForAdd = new RecoupApplyRecordExtend();
 		recordForAdd.setNeme(SessionManager.getCurEmployee().getName());
@@ -96,6 +120,17 @@ public class RecoupApplyController implements Serializable {
 				DateUtil.getDate(new Date()), "yyyy-MM-dd"));
 	}
 
+	/**
+	 * 
+		* @Title: addDetailList 
+		* @Description: TODO
+		* @param 
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午2:12:21
+		* @version V1.0
+	 */
 	public void addDetailList() {
 		if (detailForAdd.equals(null) || detailForAdd.equals("")) {
 			return;
@@ -108,7 +143,17 @@ public class RecoupApplyController implements Serializable {
 					new FacesMessage(FacesMessage.SEVERITY_INFO, "明细添加成功！",
 							"明细添加成功！"));
 		}
+		if(detailListForAdd.size() > 0){
+			for(RecoupApplyDetailExtend detail : detailListForAdd){
+				
+			}
+		}
 	}
+	
+	public void calcAmount(){
+		detailForAdd.setAmount(recoupApplyService.getAmount(detailForAdd));
+	}
+	
 	/**
 	 * 保存报销申请
 	 */
