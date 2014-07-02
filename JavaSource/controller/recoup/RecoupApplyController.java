@@ -3,22 +3,15 @@
  */
 package controller.recoup;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
-
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 
-import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
@@ -26,7 +19,6 @@ import com.onlyfido.util.SessionManager;
 
 import service.recoup.RecoupApplyService;
 import util.DateUtil;
-import util.FileUtil;
 import domain.recoup.RecoupApplyDetailExtend;
 import domain.recoup.RecoupApplyRecordExtend;
 import domain.recoup.RecoupDicCostclass1;
@@ -67,6 +59,8 @@ public class RecoupApplyController implements Serializable {
 	private List<RecoupDicCostclass1> costclasses1 = new ArrayList<RecoupDicCostclass1>();
 
 	private List<RecoupDicCostclass2> costclasses2 = new ArrayList<RecoupDicCostclass2>();
+	
+	private boolean addFlag = false;
 
 	/**
 	 * 说明：
@@ -92,6 +86,7 @@ public class RecoupApplyController implements Serializable {
 		detailForAdd = new RecoupApplyDetailExtend();
 		detailForAdd.setFeeDatetime(DateUtil.parseDate(
 				DateUtil.getDate(new Date()), "yyyy-MM-dd"));
+		addFlag = true;
 	}
 
 	public void getRecordDefaultValue() {
@@ -119,10 +114,6 @@ public class RecoupApplyController implements Serializable {
 	 */
 	public void saveRecoup(){
 		System.out.println("调用保存！");
-		RequestContext request = RequestContext.getCurrentInstance();
-		RecoupApplyService ras = new RecoupApplyService();
-		
-		
 	}
 	
 	
@@ -131,7 +122,6 @@ public class RecoupApplyController implements Serializable {
 	 * @param event
 	 */
 	public void handleFileUpload(FileUploadEvent event) {
-		RecoupApplyService ras = new RecoupApplyService();
 		// 图片上传到Tomcat发布目录下的uploaded目录
 		UploadedFile file = event.getFile();
 
@@ -139,9 +129,9 @@ public class RecoupApplyController implements Serializable {
 				.getCurrentInstance().getExternalContext().getContext();
 		String currentPath = servletContext.getRealPath("");
 		
-		String photoPath = ras.fileUpload(currentPath,file);
+		String photoPath = recoupApplyService.fileUpload(currentPath,file);
 		//此flag的作用是啥？不是很清楚。
-		boolean addFlag = false;
+		
 		if (addFlag) {
 			detailForAdd.setImageUrl(photoPath);
 		} else {
