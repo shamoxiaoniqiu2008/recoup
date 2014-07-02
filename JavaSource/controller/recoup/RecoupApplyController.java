@@ -13,7 +13,11 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 
+import org.primefaces.event.CellEditEvent;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.event.RowEditEvent;
+import org.primefaces.event.SelectEvent;
+import org.primefaces.event.UnselectEvent;
 import org.primefaces.model.UploadedFile;
 
 import com.onlyfido.util.SessionManager;
@@ -135,21 +139,34 @@ public class RecoupApplyController implements Serializable {
 		if (detailForAdd.equals(null) || detailForAdd.equals("")) {
 			return;
 		} else {
-			RecoupApplyDetailExtend detail = new RecoupApplyDetailExtend();
-			detail = detailForAdd;
-			detailListForAdd.add(detail);
+			detailListForAdd.add(detailForAdd);
 			FacesContext.getCurrentInstance().addMessage(
 					null,
 					new FacesMessage(FacesMessage.SEVERITY_INFO, "明细添加成功！",
 							"明细添加成功！"));
 		}
 		if(detailListForAdd.size() > 0){
+			BigDecimal tempAmount = BigDecimal.ZERO;
+			recordForAdd.setMoney(BigDecimal.ZERO);
 			for(RecoupApplyDetailExtend detail : detailListForAdd){
-				
+				tempAmount = tempAmount.add(detail.getAmount());
 			}
+			recordForAdd.setMoney(tempAmount);
 		}
+		detailForAdd = new RecoupApplyDetailExtend();
 	}
 	
+	/**
+	 * 
+		* @Title: calcAmount 
+		* @Description: TODO
+		* @param 
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午09:25:47
+		* @version V1.0
+	 */
 	public void calcAmount(){
 		detailForAdd.setAmount(recoupApplyService.getAmount(detailForAdd));
 	}
@@ -183,6 +200,52 @@ public class RecoupApplyController implements Serializable {
 			selectedDetail.setImageUrl(photoPath);
 		}
 	}
+	
+	
+	public void onDetailUnselect(UnselectEvent e) {
+
+	}
+
+	public void onDetailSelect(SelectEvent e) {
+
+	}
+	
+	
+	public void getType2List(){
+		if(recordForAdd.getTypeId1() != 0L){
+			costclasses2 = recoupApplyService.getCostclass2ByTypeId1(recordForAdd.getTypeId1());
+		}else{
+			costclasses2 = recoupApplyService.selectAllCostclasses2();
+		}
+	}
+	
+	
+	public void onRowEdit(RowEditEvent event) {
+        FacesMessage msg = new FacesMessage("Edited", null);
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+     
+    public void onRowCancel(RowEditEvent event) {
+        FacesMessage msg = new FacesMessage("Edit Cancelled", null);
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+     
+    public void onCellEdit(CellEditEvent event) {
+        Object oldValue = event.getOldValue();
+        Object newValue = event.getNewValue();
+        if(newValue != null && !newValue.equals(oldValue)) {
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "编辑完成", "编辑完成");
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+        }
+        if(detailListForAdd.size() > 0){
+			BigDecimal tempAmount = BigDecimal.ZERO;
+			recordForAdd.setMoney(BigDecimal.ZERO);
+			for(RecoupApplyDetailExtend detail : detailListForAdd){
+				tempAmount = tempAmount.add(detail.getAmount());
+			}
+			recordForAdd.setMoney(tempAmount);
+		}
+    }
 
 	/**
 	 * @return the recordForAdd

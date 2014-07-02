@@ -206,7 +206,18 @@ public class RecoupApplyService {
 		
 	}
 	
-	
+	/**
+	 * 
+		* @Title: getAmount 
+		* @Description: TODO
+		* @param @param detailForAdd
+		* @param @return
+		* @return BigDecimal
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-2 下午09:18:49
+		* @version V1.0
+	 */
 	public BigDecimal getAmount(RecoupApplyDetailExtend detailForAdd){
 		BigDecimal tempAmount = new BigDecimal(0);
 		if(detailForAdd.getPrice().compareTo(BigDecimal.ZERO)== 0 || null == detailForAdd.getQty() ){
@@ -216,5 +227,23 @@ public class RecoupApplyService {
 			tempAmount = detailForAdd.getPrice().multiply(new BigDecimal ( detailForAdd.getQty()));
 		}
 		return tempAmount;
+	}
+	
+	/**
+	 * 
+		* @Title: getCostclass2ByTypeId1 
+		* @Description: TODO
+		* @param @param typeId1
+		* @param @return
+		* @return List<RecoupDicCostclass2>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-3 上午12:06:21
+		* @version V1.0
+	 */
+	public List<RecoupDicCostclass2> getCostclass2ByTypeId1(Long typeId1){
+		RecoupDicCostclass2Example example = new RecoupDicCostclass2Example();
+		example.or().andClass1IdEqualTo(typeId1);
+		return recoupDicCostclass2Mapper.selectByExample(example);
 	}
 }
