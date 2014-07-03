@@ -13,4 +13,49 @@ alter table `recoup`.`pension_employee`
    change `computer` `computer` varchar(20) character set utf8 collate utf8_general_ci NULL  comment '电脑技能', 
    change `certName` `certName` varchar(50) character set utf8 collate utf8_general_ci NULL  comment '证书', 
    change `notes` `notes` varchar(100) NULL 
+
+
+   --add by qiufj on 2014-7-3 15:55:29
+    --  创建值域表，对值域进行统一管理
+   CREATE TABLE `recoup_db`.`sys_de_datarange` (
+	   `ID` varchar(50) NOT NULL COMMENT '唯一标识',
+	   `RANGE_CODE` varchar(50) DEFAULT NULL COMMENT '值域类代码',
+	   `RANGE_NAME` varchar(100) DEFAULT NULL COMMENT '值域类名称',
+	   `AUDI_FLAG` varchar(2) DEFAULT NULL COMMENT '审核标记 0未审核，1通过，2不通过',
+	   `USE_FLAG` varchar(2) DEFAULT NULL COMMENT '使用标记0不可用，1可用',
+	   `CREAT_DATE` varchar(15) DEFAULT NULL COMMENT '创建日期',
+	   `CREATE_PERSON` varchar(50) DEFAULT NULL COMMENT '创建人',
+	   PRIMARY KEY (`ID`)
+	 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 ROW_FORMAT=DYNAMIC
+    
+    --值域明细表
+   create table `recoup_db`.`sys_de_datarangeitem`( 
+   `ID` varchar(50) NOT NULL COMMENT '唯一标识', 
+   `CODE` varchar(50) COMMENT '值域代码', 
+   `NAME` varchar(200) COMMENT '值域名称', 
+   `PARENT_ID` varchar(50) COMMENT '父节点ID', 
+   `RANGE_CODE` varchar(32) COMMENT '值域类别代码', 
+   `AUDI_FLAG` varchar(2) COMMENT '审批标记0不通过，1审批通过', 
+   `USE_FLAG` varchar(2) COMMENT '有效标记，0无效,1有效', 
+   `CREAT_DATE` varchar(15) COMMENT '创建时间17位字符', 
+   `CREATE_PERSON` varchar(50) COMMENT '创建人', 
+   PRIMARY KEY (`ID`)
+ )  Engine=InnoDB DEFAULT CHARSET=utf8 checksum=1 ROW_FORMAT=DYNAMIC
+ 
+	--修改费用报销主表，调整字段类型，名称。删除无用字段
+	alter table `recoup_db`.`recoup_apply_record` drop column `proj_id`,
+   change `receipt_no` `receipt_no` varchar(50) character set utf8 collate utf8_general_ci NOT NULL comment '单据号', 
+   change `proj_name` `proj_name` varchar(100) character set utf8 collate utf8_general_ci NOT NULL comment '项目名称', 
+   change `proj_code` `proj_code` varchar(50) NOT NULL comment '项目代码', 
+   change `apply_date` `apply_date` varchar(15) NOT NULL comment '申请日期', 
+   change `type_id1` `exp_type_code_p` varchar(50) NOT NULL comment '费用大类', 
+   change `type_id2` `exp_type_code` varchar(50) NOT NULL comment '费用小类', 
+   change `neme` `user_id` int(11) NOT NULL comment '员工标识', 
+   change `pay_type` `pay_type` varchar(50) NOT NULL comment '支付方式代码'
+   
+   --调整费用明细费用发生时间数据类型。
+   alter table `recoup_db`.`recoup_apply_detail` 
+   change `fee_datetime` `fee_datetime` varchar(15) NOT NULL comment '费用发生时间'
+   -- add by qiufj end on 2014-7-3 16:47:45
+   
    
