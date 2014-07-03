@@ -176,6 +176,10 @@ public class RecoupApplyController implements Serializable {
 	 */
 	public void saveRecoup(){
 		System.out.println("调用保存！");
+		long recordId = recoupApplyService.saveRecoupApplyRecord(recordForAdd);
+		recoupApplyService.saveRecoupApplyDetailExtend(recordId,detailListForAdd);
+		FacesContext.getCurrentInstance().addMessage(null,
+				new FacesMessage("保存报销记录成功", "保存报销记录成功！"));
 	}
 	
 	

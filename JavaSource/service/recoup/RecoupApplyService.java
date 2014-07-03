@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +20,11 @@ import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sun.faces.lifecycle.ApplyRequestValuesPhase;
+
 import domain.recoup.RecoupApplyDetailExtend;
+import domain.recoup.RecoupApplyRecord;
+import domain.recoup.RecoupApplyRecordExtend;
 import domain.recoup.RecoupDicCostclass1;
 import domain.recoup.RecoupDicCostclass1Example;
 import domain.recoup.RecoupDicCostclass2;
@@ -28,12 +33,15 @@ import domain.recoup.RecoupDicPayclass;
 import domain.recoup.RecoupDicPayclassExample;
 import domain.recoup.RecoupDicProject;
 import domain.recoup.RecoupDicProjectExample;
+import persistence.recoup.RecoupApplyDetailMapper;
+import persistence.recoup.RecoupApplyRecordMapper;
 import persistence.recoup.RecoupDicCostclass1Mapper;
 import persistence.recoup.RecoupDicCostclass2Mapper;
 import persistence.recoup.RecoupDicPayclassMapper;
 import persistence.recoup.RecoupDicProjectMapper;
 import util.DateUtil;
 import util.FileUtil;
+import util.ReceiptNumGenerator;
 
 /**
  * @author justin
@@ -51,7 +59,10 @@ public class RecoupApplyService {
 	private RecoupDicCostclass1Mapper recoupDicCostclass1Mapper;
 	@Autowired
 	private RecoupDicCostclass2Mapper recoupDicCostclass2Mapper;
-	
+	@Autowired
+	private RecoupApplyRecordMapper recoupApplyRecordMapper;
+	@Autowired
+	private RecoupApplyDetailMapper recoupApplyDetailMapper;
 	/**
 	 * 
 		* @Title: selectAllProjects 
@@ -245,5 +256,33 @@ public class RecoupApplyService {
 		RecoupDicCostclass2Example example = new RecoupDicCostclass2Example();
 		example.or().andClass1IdEqualTo(typeId1);
 		return recoupDicCostclass2Mapper.selectByExample(example);
+	}
+
+	/**
+	 * 保存报销记录
+	 * @param recordForAdd
+	 * @return
+	 */
+	public long saveRecoupApplyRecord(RecoupApplyRecordExtend recordForAdd) {
+		RecoupApplyRecord applyRecord = (RecoupApplyRecord) recordForAdd;
+		applyRecord.setPayState(1); //支付状态，1未支付
+//		applyRecord.getApplyDate().toString();
+//		SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
+//		String applyDate = sf.format(applyRecord.getApplyDate()); 
+		
+		String receiptNum = ReceiptNumGenerator.getInstance().getReceiptNum(applyRecord.getProjCode(),"01","Y01","userid","C",applyRecord.getMoney());
+		applyRecord.setReceiptNo(receiptNum);
+		recoupApplyRecordMapper.insertSelective(applyRecord);
+		return recordForAdd.getId();
+	}
+	/**
+	 * 保存报销明细
+	 * @param recordId 父记录ID
+	 * @param detailListForAdd 费用明细
+	 */
+	public void saveRecoupApplyDetailExtend(
+			long recordId, List<RecoupApplyDetailExtend> detailListForAdd) {
+		// TODO Auto-generated method stub
+		
 	}
 }
