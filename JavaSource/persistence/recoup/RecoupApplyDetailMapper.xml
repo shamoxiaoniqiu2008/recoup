@@ -9,7 +9,7 @@
     -->
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="record_id" property="recordId" jdbcType="INTEGER" />
-    <result column="fee_datetime" property="feeDatetime" jdbcType="TIMESTAMP" />
+    <result column="fee_datetime" property="feeDatetime" jdbcType="VARCHAR" />
     <result column="name" property="name" jdbcType="VARCHAR" />
     <result column="price" property="price" jdbcType="DECIMAL" />
     <result column="qty" property="qty" jdbcType="INTEGER" />
@@ -201,7 +201,7 @@
       out_proj_id, out_proj_name, in_proj_id, 
       in_proj_name, image_url, image_data
       )
-    values (#{id,jdbcType=INTEGER}, #{recordId,jdbcType=INTEGER}, #{feeDatetime,jdbcType=TIMESTAMP}, 
+    values (#{id,jdbcType=INTEGER}, #{recordId,jdbcType=INTEGER}, #{feeDatetime,jdbcType=VARCHAR}, 
       #{name,jdbcType=VARCHAR}, #{price,jdbcType=DECIMAL}, #{qty,jdbcType=INTEGER}, #{unit,jdbcType=VARCHAR}, 
       #{amount,jdbcType=DECIMAL}, #{processerId,jdbcType=INTEGER}, #{processerName,jdbcType=VARCHAR}, 
       #{outProjId,jdbcType=INTEGER}, #{outProjName,jdbcType=VARCHAR}, #{inProjId,jdbcType=INTEGER}, 
@@ -273,7 +273,7 @@
         #{recordId,jdbcType=INTEGER},
       </if>
       <if test="feeDatetime != null" >
-        #{feeDatetime,jdbcType=TIMESTAMP},
+        #{feeDatetime,jdbcType=VARCHAR},
       </if>
       <if test="name != null" >
         #{name,jdbcType=VARCHAR},
@@ -342,7 +342,7 @@
         record_id = #{record.recordId,jdbcType=INTEGER},
       </if>
       <if test="record.feeDatetime != null" >
-        fee_datetime = #{record.feeDatetime,jdbcType=TIMESTAMP},
+        fee_datetime = #{record.feeDatetime,jdbcType=VARCHAR},
       </if>
       <if test="record.name != null" >
         name = #{record.name,jdbcType=VARCHAR},
@@ -397,7 +397,7 @@
     update recoup_apply_detail
     set id = #{record.id,jdbcType=INTEGER},
       record_id = #{record.recordId,jdbcType=INTEGER},
-      fee_datetime = #{record.feeDatetime,jdbcType=TIMESTAMP},
+      fee_datetime = #{record.feeDatetime,jdbcType=VARCHAR},
       name = #{record.name,jdbcType=VARCHAR},
       price = #{record.price,jdbcType=DECIMAL},
       qty = #{record.qty,jdbcType=INTEGER},
@@ -424,7 +424,7 @@
     update recoup_apply_detail
     set id = #{record.id,jdbcType=INTEGER},
       record_id = #{record.recordId,jdbcType=INTEGER},
-      fee_datetime = #{record.feeDatetime,jdbcType=TIMESTAMP},
+      fee_datetime = #{record.feeDatetime,jdbcType=VARCHAR},
       name = #{record.name,jdbcType=VARCHAR},
       price = #{record.price,jdbcType=DECIMAL},
       qty = #{record.qty,jdbcType=INTEGER},
@@ -453,7 +453,7 @@
         record_id = #{recordId,jdbcType=INTEGER},
       </if>
       <if test="feeDatetime != null" >
-        fee_datetime = #{feeDatetime,jdbcType=TIMESTAMP},
+        fee_datetime = #{feeDatetime,jdbcType=VARCHAR},
       </if>
       <if test="name != null" >
         name = #{name,jdbcType=VARCHAR},
@@ -505,7 +505,7 @@
     -->
     update recoup_apply_detail
     set record_id = #{recordId,jdbcType=INTEGER},
-      fee_datetime = #{feeDatetime,jdbcType=TIMESTAMP},
+      fee_datetime = #{feeDatetime,jdbcType=VARCHAR},
       name = #{name,jdbcType=VARCHAR},
       price = #{price,jdbcType=DECIMAL},
       qty = #{qty,jdbcType=INTEGER},
@@ -529,7 +529,7 @@
     -->
     update recoup_apply_detail
     set record_id = #{recordId,jdbcType=INTEGER},
-      fee_datetime = #{feeDatetime,jdbcType=TIMESTAMP},
+      fee_datetime = #{feeDatetime,jdbcType=VARCHAR},
       name = #{name,jdbcType=VARCHAR},
       price = #{price,jdbcType=DECIMAL},
       qty = #{qty,jdbcType=INTEGER},
