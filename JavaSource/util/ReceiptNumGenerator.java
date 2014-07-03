@@ -1,5 +1,6 @@
 package util;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 /**
  * 根据传入数据，生成系统报销单据号码
@@ -14,8 +15,8 @@ public class ReceiptNumGenerator {
 		// TODO Auto-generated method stub
 		//System.out.println(ReceiptNumGenerator.getInstance().getBankCardNum("1"));
 		//System.out.println(ReceiptNumGenerator.getInstance().getExpenseNum("13214.98"));
-		System.out.println(ReceiptNumGenerator.getInstance().getReceiptNum("XYH","01","Y10","userid","C","13214.98"));
-		
+		System.out.println(ReceiptNumGenerator.getInstance().getReceiptNum("XYH","01","Y10","userid","C",new BigDecimal(1212.897)));
+		System.out.println("20130923".substring(6));
 	}
 	private static class ReceiptNumGeneratorHolder  {
 		public final static ReceiptNumGenerator receiptNumGen = new ReceiptNumGenerator();
@@ -35,7 +36,7 @@ public class ReceiptNumGenerator {
 	 * @param expense 费用金额，保留小数点后两位
 	 * @return  ReceiptNum 单据号
 	 */
-	public String getReceiptNum (String projCode,String happenDay,String expenseType, String userId,String payType,String expense ){
+	public String getReceiptNum (String projCode,String happenDay,String expenseType, String userId,String payType,BigDecimal expense ){
 		StringBuffer receiptBuffer = new StringBuffer();
 		//根据userid获取银行卡号。获取方式暂未实现
 		String cardNum = this.getBankCardNum(userId);
@@ -49,10 +50,11 @@ public class ReceiptNumGenerator {
 	 * @param expense 费用金额，保留两位小数格式
 	 * @return  转换后的费用金额
 	 */
-	private String getExpenseNum(String expense) {
-		String expenseNum = expense.replace(".","");
+	private String getExpenseNum(BigDecimal expense) {
+		expense = expense.multiply(new BigDecimal(100));
+		expense.setScale(0, BigDecimal.ROUND_HALF_EVEN);
 		DecimalFormat df = new DecimalFormat("000000000"); 
-		expenseNum = df.format(Integer.parseInt(expenseNum));
+		String expenseNum = df.format(expense);
 		return expenseNum;
 	}
 
