@@ -56,10 +56,9 @@ public class DataRangeMangerController {
 	/**
 	 * @return the expTypeCode
 	 */
-	public List<SysDeDatarangeitem> getExpTypeCode() {
+	public List<SysDeDatarangeitem> getExpTypeCode(String parentCode) {
 		if(expTypeCode.isEmpty()){
 			String type = "RC001";
-			String parentCode = "";
 			expTypeCode = DataRangeService.getDataRangeItem(type,parentCode);
 		}
 		return expTypeCode;
