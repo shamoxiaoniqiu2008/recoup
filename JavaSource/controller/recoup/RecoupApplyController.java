@@ -57,14 +57,7 @@ public class RecoupApplyController implements Serializable {
 
 	private RecoupApplyDetailExtend selectedDetail = new RecoupApplyDetailExtend();
 
-	private List<RecoupDicProject> projects = new ArrayList<RecoupDicProject>();
 
-	private List<RecoupDicPayclass> payclasses = new ArrayList<RecoupDicPayclass>();
-
-	private List<RecoupDicCostclass1> costclasses1 = new ArrayList<RecoupDicCostclass1>();
-
-	private List<RecoupDicCostclass2> costclasses2 = new ArrayList<RecoupDicCostclass2>();
-	
 	private boolean addFlag = false;
 
 	/**
@@ -77,14 +70,14 @@ public class RecoupApplyController implements Serializable {
 	
 	@PostConstruct
 	public void init() {
-		payclasses = new ArrayList<RecoupDicPayclass>();
-		projects = new ArrayList<RecoupDicProject>();
-		costclasses1 = new ArrayList<RecoupDicCostclass1>();
-		costclasses2 = new ArrayList<RecoupDicCostclass2>();
-		projects = recoupApplyService.selectAllProjects();
-		payclasses = recoupApplyService.selectAllPayclasses();
-		costclasses1 = recoupApplyService.selectAllCostclasses1();
-		costclasses2 = recoupApplyService.selectAllCostclasses2();
+//		payclasses = new ArrayList<RecoupDicPayclass>();
+//		projects = new ArrayList<RecoupDicProject>();
+//		costclasses1 = new ArrayList<RecoupDicCostclass1>();
+//		costclasses2 = new ArrayList<RecoupDicCostclass2>();
+//		projects = recoupApplyService.selectAllProjects();
+//		payclasses = recoupApplyService.selectAllPayclasses();
+//		costclasses1 = recoupApplyService.selectAllCostclasses1();
+//		costclasses2 = recoupApplyService.selectAllCostclasses2();
 	}
 
 	/**
@@ -101,7 +94,7 @@ public class RecoupApplyController implements Serializable {
 	public void getDetailDefaultValue() {
 		detailForAdd = new RecoupApplyDetailExtend();
 		detailForAdd.setFeeDatetime(DateUtil.parseDate(
-				DateUtil.getDate(new Date()), "yyyy-MM-dd"));
+				DateUtil.getDate(new Date()), "yyyy-MM-dd").toString());
 		detailForAdd.setAmount(BigDecimal.ZERO);
 		addFlag = true;
 	}
@@ -119,9 +112,10 @@ public class RecoupApplyController implements Serializable {
 	 */
 	public void getRecordDefaultValue() {
 		recordForAdd = new RecoupApplyRecordExtend();
-		recordForAdd.setNeme(SessionManager.getCurEmployee().getName());
+		recordForAdd.setUserName(SessionManager.getCurUser().getUsername());//((int)SessionManager.getCurEmployee().getId());
+		recordForAdd.setUserId(Integer.getInteger(SessionManager.getCurUser().getId().toString()));
 		recordForAdd.setApplyDate(DateUtil.parseDate(
-				DateUtil.getDate(new Date()), "yyyy-MM-dd"));
+				DateUtil.getDate(new Date()), "yyyy-MM-dd").toString());
 	}
 
 	/**
@@ -216,11 +210,11 @@ public class RecoupApplyController implements Serializable {
 	
 	
 	public void getType2List(){
-		if(recordForAdd.getTypeId1() != 0L){
-			costclasses2 = recoupApplyService.getCostclass2ByTypeId1(recordForAdd.getTypeId1());
-		}else{
-			costclasses2 = recoupApplyService.selectAllCostclasses2();
-		}
+//		if(recordForAdd.getTypeId1() != 0L){
+//			costclasses2 = recoupApplyService.getCostclass2ByTypeId1(recordForAdd.getTypeId1());
+//		}else{
+//			costclasses2 = recoupApplyService.selectAllCostclasses2();
+//		}
 	}
 	
 	
@@ -320,20 +314,6 @@ public class RecoupApplyController implements Serializable {
 		this.recoupApplyService = recoupApplyService;
 	}
 
-	/**
-	 * @return the projects
-	 */
-	public List<RecoupDicProject> getProjects() {
-		return projects;
-	}
-
-	/**
-	 * @param projects
-	 *            the projects to set
-	 */
-	public void setProjects(List<RecoupDicProject> projects) {
-		this.projects = projects;
-	}
 
 	/**
 	 * @return the selectedDetail
@@ -365,49 +345,6 @@ public class RecoupApplyController implements Serializable {
 		this.recordList = recordList;
 	}
 
-	/**
-	 * @return the payclasses
-	 */
-	public List<RecoupDicPayclass> getPayclasses() {
-		return payclasses;
-	}
 
-	/**
-	 * @param payclasses
-	 *            the payclasses to set
-	 */
-	public void setPayclasses(List<RecoupDicPayclass> payclasses) {
-		this.payclasses = payclasses;
-	}
-
-	/**
-	 * @return the costclasses1
-	 */
-	public List<RecoupDicCostclass1> getCostclasses1() {
-		return costclasses1;
-	}
-
-	/**
-	 * @param costclasses1
-	 *            the costclasses1 to set
-	 */
-	public void setCostclasses1(List<RecoupDicCostclass1> costclasses1) {
-		this.costclasses1 = costclasses1;
-	}
-
-	/**
-	 * @return the costclasses2
-	 */
-	public List<RecoupDicCostclass2> getCostclasses2() {
-		return costclasses2;
-	}
-
-	/**
-	 * @param costclasses2
-	 *            the costclasses2 to set
-	 */
-	public void setCostclasses2(List<RecoupDicCostclass2> costclasses2) {
-		this.costclasses2 = costclasses2;
-	}
-
+	
 }
