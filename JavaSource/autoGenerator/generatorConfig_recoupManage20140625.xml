@@ -2,10 +2,11 @@
 <!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
 <generatorConfiguration >
 
-	<!-- 驱动类 -->
-   <classPathEntry location="/Users/justin/Documents/workspace/recoup/WebContent/WEB-INF/lib/mysql-connector-java-5.1.7-bin.jar"/>
-
-  <context id="context1" >
+	<!-- 驱动类 --> 
+   <classPathEntry location="Z:/GitHub/recoup/recoup/WebContent/WEB-INF/lib/mysql-connector-java-5.1.7-bin.jar"/>
+    
+ 	
+ 	<context id="context1" >
   	
   	 <!-- 生成equals和hashcode的插件 -->
 	  <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />
@@ -13,6 +14,7 @@
    
   	<!-- 数据库连接的配置 -->
     <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://127.0.0.1:3306/recoup_db" userId="root" password="root" />
+
    
    <!-- domain 和example 的配置 -->
    <!-- targetProject指定生成在哪个工程下，在eclipse中必须指定 -->
@@ -37,8 +39,6 @@
     <!-- table的配置 -->
 	<table tableName="recoup_apply_record" >
 				<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
-				<columnOverride column="type_id1" property="typeId1" javaType = "java.lang.Long"></columnOverride>
-				<columnOverride column="type_id2" property="typeId2" javaType = "java.lang.Long"></columnOverride>
 	</table> 
 	<table tableName="recoup_apply_detail" >
 				<columnOverride column="id" property="id" javaType = "java.lang.Long"></columnOverride>
