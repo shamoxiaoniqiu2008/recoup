@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -20,8 +19,16 @@ import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sun.faces.lifecycle.ApplyRequestValuesPhase;
-
+import persistence.recoup.RecoupApplyDetailMapper;
+import persistence.recoup.RecoupApplyRecordMapper;
+import persistence.recoup.RecoupDicCostclass1Mapper;
+import persistence.recoup.RecoupDicCostclass2Mapper;
+import persistence.recoup.RecoupDicPayclassMapper;
+import persistence.recoup.RecoupDicProjectMapper;
+import persistence.recoup.SysDeDatarangeitemMapper;
+import util.DateUtil;
+import util.FileUtil;
+import util.ReceiptNumGenerator;
 import domain.recoup.RecoupApplyDetailExtend;
 import domain.recoup.RecoupApplyRecord;
 import domain.recoup.RecoupApplyRecordExtend;
@@ -33,15 +40,8 @@ import domain.recoup.RecoupDicPayclass;
 import domain.recoup.RecoupDicPayclassExample;
 import domain.recoup.RecoupDicProject;
 import domain.recoup.RecoupDicProjectExample;
-import persistence.recoup.RecoupApplyDetailMapper;
-import persistence.recoup.RecoupApplyRecordMapper;
-import persistence.recoup.RecoupDicCostclass1Mapper;
-import persistence.recoup.RecoupDicCostclass2Mapper;
-import persistence.recoup.RecoupDicPayclassMapper;
-import persistence.recoup.RecoupDicProjectMapper;
-import util.DateUtil;
-import util.FileUtil;
-import util.ReceiptNumGenerator;
+import domain.recoup.SysDeDatarangeitem;
+import domain.recoup.SysDeDatarangeitemExample;
 
 /**
  * @author justin
@@ -63,6 +63,9 @@ public class RecoupApplyService {
 	private RecoupApplyRecordMapper recoupApplyRecordMapper;
 	@Autowired
 	private RecoupApplyDetailMapper recoupApplyDetailMapper;
+	@Autowired
+	private SysDeDatarangeitemMapper sysDeDatarangeitemMapper;
+	
 	/**
 	 * 
 		* @Title: selectAllProjects 
@@ -284,5 +287,23 @@ public class RecoupApplyService {
 			long recordId, List<RecoupApplyDetailExtend> detailListForAdd) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	/**
+	 * 
+		* @Title: selectAllItem 
+		* @Description: TODO
+		* @param @param rangeCode
+		* @param @return
+		* @return List<SysDeDatarangeitem>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-6 下午10:47:31
+		* @version V1.0
+	 */
+	public List<SysDeDatarangeitem> selectAllItem(String rangeCode){
+		SysDeDatarangeitemExample example = new SysDeDatarangeitemExample();
+		example.or().andRangeCodeLike(rangeCode);
+		return sysDeDatarangeitemMapper.selectByExample(example);
 	}
 }

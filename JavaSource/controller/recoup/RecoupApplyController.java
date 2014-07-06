@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -20,16 +21,14 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.event.UnselectEvent;
 import org.primefaces.model.UploadedFile;
 
-import com.onlyfido.util.SessionManager;
-
 import service.recoup.RecoupApplyService;
 import util.DateUtil;
+
+import com.onlyfido.util.SessionManager;
+
 import domain.recoup.RecoupApplyDetailExtend;
 import domain.recoup.RecoupApplyRecordExtend;
-import domain.recoup.RecoupDicCostclass1;
-import domain.recoup.RecoupDicCostclass2;
-import domain.recoup.RecoupDicPayclass;
-import domain.recoup.RecoupDicProject;
+import domain.recoup.SysDeDatarangeitem;
 
 /**
  * @author justin
@@ -56,6 +55,10 @@ public class RecoupApplyController implements Serializable {
 	private RecoupApplyDetailExtend detailForAdd = new RecoupApplyDetailExtend();
 
 	private RecoupApplyDetailExtend selectedDetail = new RecoupApplyDetailExtend();
+	
+	//项目列表
+	private List<SysDeDatarangeitem> projects =new ArrayList<SysDeDatarangeitem>();
+	
 
 
 	private boolean addFlag = false;
@@ -71,10 +74,10 @@ public class RecoupApplyController implements Serializable {
 	@PostConstruct
 	public void init() {
 //		payclasses = new ArrayList<RecoupDicPayclass>();
-//		projects = new ArrayList<RecoupDicProject>();
+		projects = new ArrayList<SysDeDatarangeitem>();
 //		costclasses1 = new ArrayList<RecoupDicCostclass1>();
 //		costclasses2 = new ArrayList<RecoupDicCostclass2>();
-//		projects = recoupApplyService.selectAllProjects();
+		projects = recoupApplyService.selectAllItem("RC003");
 //		payclasses = recoupApplyService.selectAllPayclasses();
 //		costclasses1 = recoupApplyService.selectAllCostclasses1();
 //		costclasses2 = recoupApplyService.selectAllCostclasses2();
@@ -113,7 +116,7 @@ public class RecoupApplyController implements Serializable {
 	public void getRecordDefaultValue() {
 		recordForAdd = new RecoupApplyRecordExtend();
 		recordForAdd.setUserName(SessionManager.getCurUser().getUsername());//((int)SessionManager.getCurEmployee().getId());
-		recordForAdd.setUserId(Integer.getInteger(SessionManager.getCurUser().getId().toString()));
+		recordForAdd.setUserId(SessionManager.getCurUser().getId());
 		recordForAdd.setApplyDate(DateUtil.parseDate(
 				DateUtil.getDate(new Date()), "yyyy-MM-dd").toString());
 	}
@@ -343,6 +346,24 @@ public class RecoupApplyController implements Serializable {
 	 */
 	public void setRecordList(List<RecoupApplyRecordExtend> recordList) {
 		this.recordList = recordList;
+	}
+
+	  
+	    /**
+		 * @param projects the projects to set
+		 */  
+	    
+	public void setProjects(List<SysDeDatarangeitem> projects) {
+		this.projects = projects;
+	}
+
+	  
+		/**
+		 * @return the projects
+		 */  
+	    
+	public List<SysDeDatarangeitem> getProjects() {
+		return projects;
 	}
 
 
