@@ -12,6 +12,8 @@
     
 package domain.recoup;
 
+import java.util.Date;
+
   
 	/** 
  * @ClassName: RecoupApplyDetailExtend 
@@ -29,6 +31,24 @@ public class RecoupApplyDetailExtend extends RecoupApplyDetail{
 		    
 		private static final long serialVersionUID = 10L;
 		 
-		
+		private Date feeDate;
+
+		  
+		    /**
+			 * @param feeDate the feeDate to set
+			 */  
+		    
+		public void setFeeDate(Date feeDate) {
+			this.feeDate = feeDate;
+		}
+
+		  
+			/**
+			 * @return the feeDate
+			 */  
+		    
+		public Date getFeeDate() {
+			return feeDate;
+		}
 
 }

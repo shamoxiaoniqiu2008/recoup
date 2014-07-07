@@ -12,6 +12,8 @@
     
 package domain.recoup;
 
+import java.util.Date;
+
   
 	/** 
  * @ClassName: RecoupApplyRecordExtend 
@@ -31,5 +33,43 @@ public class RecoupApplyRecordExtend extends  RecoupApplyRecord{
 	
 		    
 		private static final long serialVersionUID = 1000000001L;
+		
+		private String userName;
+		private Date applyDateTime;
+		
+		/**
+		 * @return the userName
+		 */
+		
+		public String getUserName() {
+			return userName;
+		}
+
+		/**
+		 * @param userName the userName to set
+		 */
+		
+		public void setUserName(String userName) {
+			this.userName = userName;
+		}
+
+		  
+		    /**
+			 * @param applyDateTime the applyDateTime to set
+			 */  
+		    
+		public void setApplyDateTime(Date applyDateTime) {
+			this.applyDateTime = applyDateTime;
+		}
+
+		  
+			/**
+			 * @return the applyDateTime
+			 */  
+		    
+		public Date getApplyDateTime() {
+			return applyDateTime;
+		}
+		
 
 }

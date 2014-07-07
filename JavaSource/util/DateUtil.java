@@ -397,4 +397,8 @@ public class DateUtil {
 		Date d = parseDate(temp, "yyyy-MM-dd");
 		return d;
 	}
+	
+	public static String getDateyyyyMMdd(java.util.Date date) {
+		return format(date, "yyyyMMdd");
+	}
 }

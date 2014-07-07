@@ -306,4 +306,22 @@ public class RecoupApplyService {
 		example.or().andRangeCodeLike(rangeCode);
 		return sysDeDatarangeitemMapper.selectByExample(example);
 	}
+	
+	public List<SysDeDatarangeitem> selectAllpayItem(String rangeCode,Long parentId){
+		SysDeDatarangeitemExample example = new SysDeDatarangeitemExample();
+		if(parentId == 1L){
+			example.or().andRangeCodeEqualTo(rangeCode).andParentIdIsNull();
+			example.or().andRangeCodeEqualTo(rangeCode).andParentIdEqualTo("");
+		}else{
+			example.or().andRangeCodeEqualTo(rangeCode).andParentIdIsNotNull();
+			example.or().andRangeCodeEqualTo(rangeCode).andParentIdNotEqualTo("");
+		}
+		return sysDeDatarangeitemMapper.selectByExample(example);
+	}
+	
+	public List<SysDeDatarangeitem> selectAllpayItemBy(String parentId){
+		SysDeDatarangeitemExample example = new SysDeDatarangeitemExample();
+		example.or().andParentIdEqualTo(parentId);
+		return sysDeDatarangeitemMapper.selectByExample(example);
+	}
 }

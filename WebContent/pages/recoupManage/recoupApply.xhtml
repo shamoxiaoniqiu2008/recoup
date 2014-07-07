@@ -15,7 +15,6 @@
 
 	<h:head>
 		<title>#{pageConfig.recoupApply}</title>
-
 		<link type="text/css" rel="stylesheet"
 			href="#{request.contextPath}/css/default.css" />
 		<link type="text/css" rel="stylesheet"
@@ -73,7 +72,6 @@
 				</p:column>
 				<p:column headerText="报销日期" style="text-align:center">
 					<h:outputText value="">
-						<f:convertDateTime pattern="yyyy-MM-dd" />
 					</h:outputText>
 				</p:column>
 				<p:column headerText="金额" style="text-align:center">
@@ -113,42 +111,41 @@
 						<td width="150"><h:selectOneMenu
 								value="#{recoupApplyController.recordForAdd.projCode}">
 								<f:selectItems value="#{recoupApplyController.projects}"
-									var="projects" itemLabel="#{projects.projectName}"
-									itemValue="#{projects.Code}"></f:selectItems>
+									var="projects" itemLabel="#{projects.name}"
+									itemValue="#{projects.code}"></f:selectItems>
 							</h:selectOneMenu>
 						</td>
 						<td width="60">日期</td>
 						<td width="150"><p:calendar
-								value="#{recoupApplyController.recordForAdd.applyDate}"
-								pattern="yyyyMMdd"></p:calendar>
+								value="#{recoupApplyController.recordForAdd.applyDateTime}" pattern="yyyyMMdd"></p:calendar>
 						</td>
 					</tr>
 					<tr>
 						<td>费用类别</td>
 						<td><h:panelGrid columns="2">
 								<h:selectOneMenu
-									value="#{recoupApplyController.recordForAdd.typeId1}">
+									value="#{recoupApplyController.recordForAdd.expTypeCodeP}">
 									<f:selectItem itemLabel="请选择" itemValue="0"></f:selectItem>
 									<f:selectItems value="#{recoupApplyController.costclasses1}"
-										var="costclasses1" itemLabel="#{costclasses1.class1Name}"
-										itemValue="#{costclasses1.id}"></f:selectItems>
+										var="costclasses1" itemLabel="#{costclasses1.name}"
+										itemValue="#{costclasses1.code}"></f:selectItems>
 									<p:ajax event="change"
 										listener="#{recoupApplyController.getType2List}"
 										update=":addRecoupForm:selectOneMenuTypeId2"></p:ajax>
 								</h:selectOneMenu>
 								<h:selectOneMenu
-									value="#{recoupApplyController.recordForAdd.typeId2}"
+									value="#{recoupApplyController.recordForAdd.expTypeCode}"
 									id="selectOneMenuTypeId2">
 									<f:selectItem itemLabel="请选择" itemValue="0"></f:selectItem>
 									<f:selectItems value="#{recoupApplyController.costclasses2}"
-										var="costclasses2" itemLabel="#{costclasses2.class2Name}"
-										itemValue="#{costclasses1.id}"></f:selectItems>
+										var="costclasses2" itemLabel="#{costclasses2.name}"
+										itemValue="#{costclasses1.code}"></f:selectItems>
 								</h:selectOneMenu>
 							</h:panelGrid>
 						</td>
 						<td>姓名</td>
 						<td><p:inputText
-								value="#{recoupApplyController.recordForAdd.neme}"
+								value="#{recoupApplyController.recordForAdd.userName}"
 								readonly="true"></p:inputText>
 						</td>
 						<td>状态</td>
@@ -167,8 +164,8 @@
 						<td><h:selectOneMenu
 								value="#{recoupApplyController.recordForAdd.payType}">
 								<f:selectItems value="#{recoupApplyController.payclasses}"
-									var="payclasses" itemLabel="#{payclasses.className}"
-									itemValue="#{payclasses.id}"></f:selectItems>
+									var="payclasses" itemLabel="#{payclasses.name}"
+									itemValue="#{payclasses.code}"></f:selectItems>
 							</h:selectOneMenu>
 						</td>
 						<td>支付状态</td>
@@ -179,13 +176,13 @@
 					</tr>
 					<tr>
 						<td>事由</td>
-						<td colspan="5"><p:inputText size="80"
+						<td colspan="5"><p:inputText size="91"
 								value="#{recoupApplyController.recordForAdd.reason}"></p:inputText>
 						</td>
 					</tr>
 					<tr>
 						<td>其他说明</td>
-						<td colspan="5"><p:inputText size="80"
+						<td colspan="5"><p:inputText size="91"
 								value="#{recoupApplyController.recordForAdd.ohers}"></p:inputText>
 						</td>
 					</tr>
@@ -203,15 +200,15 @@
 					value="#{recoupApplyController.detailListForAdd}" var="details"
 					widgetVar="invoiceDetailT"
 					paginator="true" paginatorPosition="bottom" rows="5" editable="true" editMode="cell"> 
-					<p:ajax event="cellEdit" listener="#{recoupApplyController.onCellEdit}" update=":msg,:addRecoupForm:amountInputText" />
+					<p:ajax event="cellEdit" listener="#{recoupApplyController.onCellEdit}"  process="@this"   update=":msg,:addRecoupForm:amountInputText,:addRecoupForm:detailTable" />
 					<p:column headerText="时间">
 						<p:cellEditor>
 						<f:facet name="output">
 						<h:outputText value="#{details.feeDatetime}">
-							<f:convertDateTime pattern="yyyyMMdd" timeZone="GMT+8"></f:convertDateTime>
+							<f:convertDateTime pattern="yyyyMMdd" timeZone="GMT-8"></f:convertDateTime>
 						</h:outputText>
 						</f:facet>
-						<f:facet name="input"><p:calendar id="timeInput" value="#{details.feeDatetime}" style="width:100%" pattern="yyyyMMdd"></p:calendar></f:facet>
+						<f:facet name="input"><p:inputText id="timeInput" value="#{details.feeDatetime}" style="width:100%" pattern="yyyyMMdd"></p:inputText></f:facet>
 						</p:cellEditor>
 					</p:column>
 					<p:column headerText="名称(摘要)">
@@ -249,7 +246,7 @@
 					<p:column headerText="金额">
 					<p:cellEditor>
 						<f:facet name="output">
-						<h:outputText value="#{details.amount}"></h:outputText>
+						<h:outputText value="#{details.amount}" id="amountDetailInput"></h:outputText>
 						</f:facet>
 						<f:facet name="input"><p:inputText id="amountInput" value="#{details.amount}" style="width:100%"/></f:facet>
 					</p:cellEditor>
@@ -314,8 +311,8 @@
 					<tr>
 						<td>时间</td>
 						<td><p:calendar
-								value="#{recoupApplyController.detailForAdd.feeDatetime}"
-								pattern="yyyyMMdd" required="true" requiredMessage="请选择时间！"></p:calendar>
+								value="#{recoupApplyController.detailForAdd.feeDate}"
+								required="true" requiredMessage="请选择时间！" pattern="yyyyMMdd"></p:calendar>
 						</td>
 						<td>名称(摘要)</td>
 						<td><p:inputText

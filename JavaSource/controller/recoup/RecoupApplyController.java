@@ -58,9 +58,13 @@ public class RecoupApplyController implements Serializable {
 	
 	//项目列表
 	private List<SysDeDatarangeitem> projects =new ArrayList<SysDeDatarangeitem>();
+	//支付方式
+	private List<SysDeDatarangeitem> payclasses = new ArrayList<SysDeDatarangeitem>();
+	//费用大类
+	private List<SysDeDatarangeitem> costclasses1 = new ArrayList<SysDeDatarangeitem>();
+	//费用亚类
+	private List<SysDeDatarangeitem> costclasses2 = new ArrayList<SysDeDatarangeitem>();
 	
-
-
 	private boolean addFlag = false;
 
 	/**
@@ -73,14 +77,14 @@ public class RecoupApplyController implements Serializable {
 	
 	@PostConstruct
 	public void init() {
-//		payclasses = new ArrayList<RecoupDicPayclass>();
+		payclasses = new ArrayList<SysDeDatarangeitem>();
 		projects = new ArrayList<SysDeDatarangeitem>();
-//		costclasses1 = new ArrayList<RecoupDicCostclass1>();
-//		costclasses2 = new ArrayList<RecoupDicCostclass2>();
+		costclasses1 = new ArrayList<SysDeDatarangeitem>();
+		costclasses2 = new ArrayList<SysDeDatarangeitem>();
 		projects = recoupApplyService.selectAllItem("RC003");
-//		payclasses = recoupApplyService.selectAllPayclasses();
-//		costclasses1 = recoupApplyService.selectAllCostclasses1();
-//		costclasses2 = recoupApplyService.selectAllCostclasses2();
+		payclasses = recoupApplyService.selectAllItem("RC002");
+		costclasses1 = recoupApplyService.selectAllpayItem("RC001",(long)1);
+		costclasses2 = recoupApplyService.selectAllpayItem("RC001",(long)2);
 	}
 
 	/**
@@ -96,8 +100,7 @@ public class RecoupApplyController implements Serializable {
 	 */
 	public void getDetailDefaultValue() {
 		detailForAdd = new RecoupApplyDetailExtend();
-		detailForAdd.setFeeDatetime(DateUtil.parseDate(
-				DateUtil.getDate(new Date()), "yyyy-MM-dd").toString());
+		detailForAdd.setFeeDate(new Date());
 		detailForAdd.setAmount(BigDecimal.ZERO);
 		addFlag = true;
 	}
@@ -115,10 +118,9 @@ public class RecoupApplyController implements Serializable {
 	 */
 	public void getRecordDefaultValue() {
 		recordForAdd = new RecoupApplyRecordExtend();
-		recordForAdd.setUserName(SessionManager.getCurUser().getUsername());//((int)SessionManager.getCurEmployee().getId());
+		recordForAdd.setUserName(SessionManager.getCurUser().getUsername());
 		recordForAdd.setUserId(SessionManager.getCurUser().getId());
-		recordForAdd.setApplyDate(DateUtil.parseDate(
-				DateUtil.getDate(new Date()), "yyyy-MM-dd").toString());
+		recordForAdd.setApplyDateTime((DateUtil.parseDate(DateUtil.getDateyyyyMMdd(new Date()), "yyyyMMdd")));
 	}
 
 	/**
@@ -146,7 +148,8 @@ public class RecoupApplyController implements Serializable {
 			BigDecimal tempAmount = BigDecimal.ZERO;
 			recordForAdd.setMoney(BigDecimal.ZERO);
 			for(RecoupApplyDetailExtend detail : detailListForAdd){
-				tempAmount = tempAmount.add(detail.getAmount());
+				tempAmount = tempAmount.add(detail.getPrice().multiply(new BigDecimal(detail.getQty())));
+				detail.setFeeDatetime(DateUtil.getDateyyyyMMdd(detail.getFeeDate()));
 			}
 			recordForAdd.setMoney(tempAmount);
 		}
@@ -213,6 +216,11 @@ public class RecoupApplyController implements Serializable {
 	
 	
 	public void getType2List(){
+		if(recordForAdd.getExpTypeCodeP().equals("0")){
+			costclasses2 = recoupApplyService.selectAllpayItem("RC001",(long)2);
+		}else{
+			costclasses2 = recoupApplyService.selectAllpayItemBy(recordForAdd.getExpTypeCodeP());
+		}
 //		if(recordForAdd.getTypeId1() != 0L){
 //			costclasses2 = recoupApplyService.getCostclass2ByTypeId1(recordForAdd.getTypeId1());
 //		}else{
@@ -242,7 +250,8 @@ public class RecoupApplyController implements Serializable {
 			BigDecimal tempAmount = BigDecimal.ZERO;
 			recordForAdd.setMoney(BigDecimal.ZERO);
 			for(RecoupApplyDetailExtend detail : detailListForAdd){
-				tempAmount = tempAmount.add(detail.getAmount());
+				detail.setAmount(detail.getPrice().multiply(new BigDecimal(detail.getQty())));
+				tempAmount = tempAmount.add(detail.getPrice().multiply(new BigDecimal(detail.getQty())));
 			}
 			recordForAdd.setMoney(tempAmount);
 		}
@@ -365,6 +374,70 @@ public class RecoupApplyController implements Serializable {
 	public List<SysDeDatarangeitem> getProjects() {
 		return projects;
 	}
+
+		/**
+		 * @return the payclasses
+		 */
+		
+		public List<SysDeDatarangeitem> getPayclasses() {
+			return payclasses;
+		}
+
+		/**
+		 * @param payclasses the payclasses to set
+		 */
+		
+		public void setPayclasses(List<SysDeDatarangeitem> payclasses) {
+			this.payclasses = payclasses;
+		}
+
+		/**
+		 * @return the costclasses1
+		 */
+		
+		public List<SysDeDatarangeitem> getCostclasses1() {
+			return costclasses1;
+		}
+
+		/**
+		 * @param costclasses1 the costclasses1 to set
+		 */
+		
+		public void setCostclasses1(List<SysDeDatarangeitem> costclasses1) {
+			this.costclasses1 = costclasses1;
+		}
+
+		/**
+		 * @return the costclasses2
+		 */
+		
+		public List<SysDeDatarangeitem> getCostclasses2() {
+			return costclasses2;
+		}
+
+		/**
+		 * @param costclasses2 the costclasses2 to set
+		 */
+		
+		public void setCostclasses2(List<SysDeDatarangeitem> costclasses2) {
+			this.costclasses2 = costclasses2;
+		}
+
+		/**
+		 * @return the addFlag
+		 */
+		
+		public boolean isAddFlag() {
+			return addFlag;
+		}
+
+		/**
+		 * @param addFlag the addFlag to set
+		 */
+		
+		public void setAddFlag(boolean addFlag) {
+			this.addFlag = addFlag;
+		}
 
 
 	
