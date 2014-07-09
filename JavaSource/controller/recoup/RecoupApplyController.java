@@ -120,7 +120,7 @@ public class RecoupApplyController implements Serializable {
 		recordForAdd = new RecoupApplyRecordExtend();
 		recordForAdd.setUserName(SessionManager.getCurUser().getUsername());
 		recordForAdd.setUserId(SessionManager.getCurUser().getId());
-		recordForAdd.setApplyDateTime((DateUtil.parseDate(DateUtil.getDateyyyyMMdd(new Date()), "yyyyMMdd")));
+		recordForAdd.setApplyDateTime(DateUtil.parseDate(DateUtil.getDateyyyyMMdd(new Date()), "yyyyMMdd"));
 	}
 
 	/**
@@ -176,10 +176,16 @@ public class RecoupApplyController implements Serializable {
 	 */
 	public void saveRecoup(){
 		System.out.println("调用保存！");
-		long recordId = recoupApplyService.saveRecoupApplyRecord(recordForAdd);
-		recoupApplyService.saveRecoupApplyDetailExtend(recordId,detailListForAdd);
+		recoupApplyService.insertApplyRecordAndDetail(recordForAdd, detailListForAdd,1);
 		FacesContext.getCurrentInstance().addMessage(null,
-				new FacesMessage("保存报销记录成功", "保存报销记录成功！"));
+				new FacesMessage("保存报销申请成功", "保存报销申请成功！"));
+	}
+	
+	public void commitRecoup(){
+		System.out.println("调用提交！");
+		recoupApplyService.insertApplyRecordAndDetail(recordForAdd, detailListForAdd,2);
+		FacesContext.getCurrentInstance().addMessage(null,
+				new FacesMessage("提交报销申请成功", "提交报销申请成功！"));
 	}
 	
 	
@@ -221,11 +227,6 @@ public class RecoupApplyController implements Serializable {
 		}else{
 			costclasses2 = recoupApplyService.selectAllpayItemBy(recordForAdd.getExpTypeCodeP());
 		}
-//		if(recordForAdd.getTypeId1() != 0L){
-//			costclasses2 = recoupApplyService.getCostclass2ByTypeId1(recordForAdd.getTypeId1());
-//		}else{
-//			costclasses2 = recoupApplyService.selectAllCostclasses2();
-//		}
 	}
 	
 	

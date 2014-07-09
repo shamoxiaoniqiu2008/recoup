@@ -58,4 +58,15 @@ alter table `recoup`.`pension_employee`
    change `fee_datetime` `fee_datetime` varchar(15) NOT NULL comment '费用发生时间'
    -- add by qiufj end on 2014-7-3 16:47:45
    
+   --调整报销主记录和明细记录日期字段长度
+   ALTER TABLE `recoup_apply_detail`
+	ALTER `fee_datetime` DROP DEFAULT;
+ALTER TABLE `recoup_apply_detail`
+	CHANGE COLUMN `fee_datetime` `fee_datetime` VARCHAR(90) NOT NULL COMMENT '费用发生时间' AFTER `record_id`;
+	
+	
+	ALTER TABLE `recoup_apply_record`
+	ALTER `apply_date` DROP DEFAULT;
+ALTER TABLE `recoup_apply_record`
+	CHANGE COLUMN `apply_date` `apply_date` VARCHAR(90) NOT NULL COMMENT '申请日期' AFTER `proj_code`;
    

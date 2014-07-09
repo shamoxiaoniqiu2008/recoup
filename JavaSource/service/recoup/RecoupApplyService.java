@@ -18,6 +18,7 @@ import javax.faces.context.FacesContext;
 import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import persistence.recoup.RecoupApplyDetailMapper;
 import persistence.recoup.RecoupApplyRecordMapper;
@@ -62,10 +63,9 @@ public class RecoupApplyService {
 	@Autowired
 	private RecoupApplyRecordMapper recoupApplyRecordMapper;
 	@Autowired
-	private RecoupApplyDetailMapper recoupApplyDetailMapper;
-	@Autowired
 	private SysDeDatarangeitemMapper sysDeDatarangeitemMapper;
-	
+	@Autowired
+	private RecoupApplyDetailMapper recoupApplyDetailMapper;
 	/**
 	 * 
 		* @Title: selectAllProjects 
@@ -307,6 +307,19 @@ public class RecoupApplyService {
 		return sysDeDatarangeitemMapper.selectByExample(example);
 	}
 	
+	/**
+	 * 
+		* @Title: selectAllpayItem 
+		* @Description: TODO
+		* @param @param rangeCode
+		* @param @param parentId
+		* @param @return
+		* @return List<SysDeDatarangeitem>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-9 下午10:46:50
+		* @version V1.0
+	 */
 	public List<SysDeDatarangeitem> selectAllpayItem(String rangeCode,Long parentId){
 		SysDeDatarangeitemExample example = new SysDeDatarangeitemExample();
 		if(parentId == 1L){
@@ -319,9 +332,50 @@ public class RecoupApplyService {
 		return sysDeDatarangeitemMapper.selectByExample(example);
 	}
 	
+	/**
+	 * 
+		* @Title: selectAllpayItemBy 
+		* @Description: TODO
+		* @param @param parentId
+		* @param @return
+		* @return List<SysDeDatarangeitem>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-9 下午10:46:54
+		* @version V1.0
+	 */
 	public List<SysDeDatarangeitem> selectAllpayItemBy(String parentId){
 		SysDeDatarangeitemExample example = new SysDeDatarangeitemExample();
 		example.or().andParentIdEqualTo(parentId);
 		return sysDeDatarangeitemMapper.selectByExample(example);
+	}
+	
+	/**
+	 * 
+		* @Title: insertApplyRecordAndDetail 
+		* @Description: 保存或者提交报销记录（主记录及明细记录）
+		* @param @param recordForAdd
+		* @param @param detailListForAdd
+		* @param @param status
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-10 上午12:00:38
+		* @version V1.0
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void insertApplyRecordAndDetail(RecoupApplyRecordExtend recordForAdd,List<RecoupApplyDetailExtend> detailListForAdd,int status){
+		String receiptNum = ReceiptNumGenerator.getInstance().getReceiptNum(recordForAdd.getProjCode(),"01","Y01","userid","C",recordForAdd.getMoney());
+		recordForAdd.setReceiptNo(receiptNum);
+		recordForAdd.setState(status);
+		recordForAdd.setApplyDate(recordForAdd.getApplyDateTime().toString());
+		int recordId = recoupApplyRecordMapper.insertSelective(recordForAdd);
+		if(detailListForAdd.size() > 0){
+			for(RecoupApplyDetailExtend detail: detailListForAdd){
+				detail.setRecordId((long)recordId);
+				detail.setFeeDatetime(detail.getFeeDate().toString());
+				recoupApplyDetailMapper.insertSelective(detail);
+			}
+		}
 	}
 }

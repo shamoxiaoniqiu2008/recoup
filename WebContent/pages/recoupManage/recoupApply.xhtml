@@ -139,7 +139,7 @@
 									<f:selectItem itemLabel="请选择" itemValue="0"></f:selectItem>
 									<f:selectItems value="#{recoupApplyController.costclasses2}"
 										var="costclasses2" itemLabel="#{costclasses2.name}"
-										itemValue="#{costclasses1.code}"></f:selectItems>
+										itemValue="#{costclasses2.code}"></f:selectItems>
 								</h:selectOneMenu>
 							</h:panelGrid>
 						</td>
@@ -204,11 +204,11 @@
 					<p:column headerText="时间">
 						<p:cellEditor>
 						<f:facet name="output">
-						<h:outputText value="#{details.feeDatetime}">
+						<h:outputText value="#{details.feeDate}">
 							<f:convertDateTime pattern="yyyyMMdd" timeZone="GMT-8"></f:convertDateTime>
 						</h:outputText>
 						</f:facet>
-						<f:facet name="input"><p:inputText id="timeInput" value="#{details.feeDatetime}" style="width:100%" pattern="yyyyMMdd"></p:inputText></f:facet>
+						<f:facet name="input"><p:inputText id="timeInput" value="#{details.feeDate}" style="width:100%" pattern="yyyyMMdd"></p:inputText></f:facet>
 						</p:cellEditor>
 					</p:column>
 					<p:column headerText="名称(摘要)">
@@ -285,9 +285,10 @@
 				<div id="commandDiv" align="center" style="margin-top: 10px">
 					<h:form>
 						<p:commandButton styleClass="commonbtn" value="保存"
-							action="#{recoupApplyController.saveRecoup}">
+							action="#{recoupApplyController.saveRecoup}" update=":msg,:ListForm">
 						</p:commandButton>
-						<p:commandButton styleClass="commonbtn" value="提交">
+						<p:commandButton styleClass="commonbtn" value="提交"
+						action="#{recoupApplyController.commitRecoup}" update=":msg,:ListForm">
 						</p:commandButton>
 						<p:commandButton styleClass="commonbtn"
 							onclick="applyDialog.hide()" value="取消">
