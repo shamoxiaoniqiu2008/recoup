@@ -29,6 +29,11 @@ import com.onlyfido.util.SessionManager;
 import domain.recoup.RecoupApplyDetailExtend;
 import domain.recoup.RecoupApplyRecordExtend;
 import domain.recoup.SysDeDatarangeitem;
+import exception.ClassSelectException;
+import exception.DetailAddException;
+import exception.ItemSelectException;
+import exception.PayWaySelectException;
+import exception.SuperClassSelectException;
 
 /**
  * @author justin
@@ -50,6 +55,8 @@ public class RecoupApplyController implements Serializable {
 
 	private RecoupApplyRecordExtend recordForAdd = new RecoupApplyRecordExtend();
 
+	private RecoupApplyRecordExtend selectedRecord = new RecoupApplyRecordExtend();
+	
 	private List<RecoupApplyDetailExtend> detailListForAdd = new ArrayList<RecoupApplyDetailExtend>();
 
 	private RecoupApplyDetailExtend detailForAdd = new RecoupApplyDetailExtend();
@@ -64,8 +71,18 @@ public class RecoupApplyController implements Serializable {
 	private List<SysDeDatarangeitem> costclasses1 = new ArrayList<SysDeDatarangeitem>();
 	//费用亚类
 	private List<SysDeDatarangeitem> costclasses2 = new ArrayList<SysDeDatarangeitem>();
-	
+	//添加还是编辑Flag
 	private boolean addFlag = false;
+	//项目代码
+	private String projectCode;
+	//支付状态
+	private Integer payState;
+	//申请开始日期
+	private Date applyDateStart;
+	//申请截止日期
+	private Date applyDateEnd;
+	
+	
 
 	/**
 	 * 说明：
@@ -85,6 +102,22 @@ public class RecoupApplyController implements Serializable {
 		payclasses = recoupApplyService.selectAllItem("RC002");
 		costclasses1 = recoupApplyService.selectAllpayItem("RC001",(long)1);
 		costclasses2 = recoupApplyService.selectAllpayItem("RC001",(long)2);
+		searchRecoupBy();
+	}
+	
+	/**
+	 * 
+		* @Title: searchRecoupBy 
+		* @Description: TODO
+		* @param 
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 上午10:46:16
+		* @version V1.0
+	 */
+	public void searchRecoupBy(){
+		recordList = recoupApplyService.getRecoupBy(projectCode, payState, applyDateStart, applyDateEnd);
 	}
 
 	/**
@@ -172,20 +205,107 @@ public class RecoupApplyController implements Serializable {
 	}
 	
 	/**
-	 * 保存报销申请
+	 * 
+		* @Title: saveRecoup 
+		* @Description: TODO
+		* @param 
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 上午09:02:12
+		* @version V1.0
 	 */
 	public void saveRecoup(){
 		System.out.println("调用保存！");
-		recoupApplyService.insertApplyRecordAndDetail(recordForAdd, detailListForAdd,1);
-		FacesContext.getCurrentInstance().addMessage(null,
-				new FacesMessage("保存报销申请成功", "保存报销申请成功！"));
+		try {
+			if(recoupApplyService.checkValue(recordForAdd, detailListForAdd)){
+				recoupApplyService.insertApplyRecordAndDetail(recordForAdd, detailListForAdd,1);
+				//初始化
+				getRecordDefaultValue();
+				searchRecoupBy();
+				detailListForAdd = new ArrayList<RecoupApplyDetailExtend>();
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage("保存报销申请成功", "保存报销申请成功！"));
+			}
+		} catch (ItemSelectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请选择项目！", "请选择项目！"));
+		} catch (DetailAddException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请添加明细！", "请添加明细！"));
+		} catch (SuperClassSelectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请选择一级费用类别！", "请选择一级费用类别！"));
+		} catch (ClassSelectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请选择二级费用类别！", "请选择二级费用类别！"));
+		} catch (PayWaySelectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请选择支付方式！", "请选择支付方式！"));
+		}
+		
 	}
 	
+	/**
+	 * 
+		* @Title: commitRecoup 
+		* @Description: TODO
+		* @param 
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 上午09:02:20
+		* @version V1.0
+	 */
 	public void commitRecoup(){
 		System.out.println("调用提交！");
-		recoupApplyService.insertApplyRecordAndDetail(recordForAdd, detailListForAdd,2);
-		FacesContext.getCurrentInstance().addMessage(null,
-				new FacesMessage("提交报销申请成功", "提交报销申请成功！"));
+		try {
+			if(recoupApplyService.checkValue(recordForAdd, detailListForAdd)){
+				recoupApplyService.insertApplyRecordAndDetail(recordForAdd, detailListForAdd,2);
+				//初始化
+				getRecordDefaultValue();
+				searchRecoupBy();
+				detailListForAdd = new ArrayList<RecoupApplyDetailExtend>();
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage("提交报销申请成功", "提交报销申请成功！"));
+			}
+		}catch (ItemSelectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请选择项目！", "请选择项目！"));
+		} catch (DetailAddException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请添加明细！", "请添加明细！"));
+		} catch (SuperClassSelectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请选择一级费用类别！", "请选择一级费用类别！"));
+		} catch (ClassSelectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请选择二级费用类别！", "请选择二级费用类别！"));
+		} catch (PayWaySelectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage("请选择支付方式！", "请选择支付方式！"));
+		}
+		
 	}
 	
 	
@@ -220,7 +340,25 @@ public class RecoupApplyController implements Serializable {
 
 	}
 	
+	public void onRowSelect(SelectEvent e){
+		
+	}
 	
+	public void onRowUnSelect(UnselectEvent e){
+		
+	}
+	
+	/**
+	 * 
+		* @Title: getType2List 
+		* @Description: TODO
+		* @param 
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 上午09:02:32
+		* @version V1.0
+	 */
 	public void getType2List(){
 		if(recordForAdd.getExpTypeCodeP().equals("0")){
 			costclasses2 = recoupApplyService.selectAllpayItem("RC001",(long)2);
@@ -229,17 +367,49 @@ public class RecoupApplyController implements Serializable {
 		}
 	}
 	
-	
+	/**
+	 * 
+		* @Title: onRowEdit 
+		* @Description: TODO
+		* @param @param event
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 上午09:02:36
+		* @version V1.0
+	 */
 	public void onRowEdit(RowEditEvent event) {
         FacesMessage msg = new FacesMessage("Edited", null);
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
      
+	/**
+	 * 
+		* @Title: onRowCancel 
+		* @Description: TODO
+		* @param @param event
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 上午09:02:40
+		* @version V1.0
+	 */
     public void onRowCancel(RowEditEvent event) {
         FacesMessage msg = new FacesMessage("Edit Cancelled", null);
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
      
+    /**
+     * 
+    	* @Title: onCellEdit 
+    	* @Description: TODO
+    	* @param @param event
+    	* @return void
+    	* @throws 
+    	* @author Justin.Su
+    	* @date 2014-7-12 上午09:02:45
+    	* @version V1.0
+     */
     public void onCellEdit(CellEditEvent event) {
         Object oldValue = event.getOldValue();
         Object newValue = event.getNewValue();
@@ -439,6 +609,98 @@ public class RecoupApplyController implements Serializable {
 		public void setAddFlag(boolean addFlag) {
 			this.addFlag = addFlag;
 		}
+
+		  
+		    /**
+			 * @param projectCode the projectCode to set
+			 */  
+		    
+		public void setProjectCode(String projectCode) {
+			this.projectCode = projectCode;
+		}
+
+		  
+			/**
+			 * @return the projectCode
+			 */  
+		    
+		public String getProjectCode() {
+			return projectCode;
+		}
+
+		
+
+				  
+				    /**
+					 * @param applyDateStart the applyDateStart to set
+					 */  
+				    
+				public void setApplyDateStart(Date applyDateStart) {
+					this.applyDateStart = applyDateStart;
+				}
+
+				  
+					/**
+					 * @return the applyDateStart
+					 */  
+				    
+				public Date getApplyDateStart() {
+					return applyDateStart;
+				}
+
+					  
+					    /**
+						 * @param applyDateEnd the applyDateEnd to set
+						 */  
+					    
+					public void setApplyDateEnd(Date applyDateEnd) {
+						this.applyDateEnd = applyDateEnd;
+					}
+
+					  
+						/**
+						 * @return the applyDateEnd
+						 */  
+					    
+					public Date getApplyDateEnd() {
+						return applyDateEnd;
+					}
+
+						  
+						    /**
+							 * @param payState the payState to set
+							 */  
+						    
+						public void setPayState(Integer payState) {
+							this.payState = payState;
+						}
+
+						  
+							/**
+							 * @return the payState
+							 */  
+						    
+						public Integer getPayState() {
+							return payState;
+						}
+
+							  
+							    /**
+								 * @param selectedRecord the selectedRecord to set
+								 */  
+							    
+							public void setSelectedRecord(RecoupApplyRecordExtend selectedRecord) {
+								this.selectedRecord = selectedRecord;
+							}
+
+							  
+								/**
+								 * @return the selectedRecord
+								 */  
+							    
+							public RecoupApplyRecordExtend getSelectedRecord() {
+								return selectedRecord;
+							}
 
 
 	

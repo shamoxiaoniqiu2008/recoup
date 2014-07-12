@@ -39,15 +39,24 @@
 		<p:growl id="msg"></p:growl>
 		<h:form id="searchForm" style="display: inline">
 			<h:panelGrid columns="9">
-				<h:outputText value="项目"></h:outputText>
-				<p:inputText></p:inputText>
-				<h:outputText value="状态"></h:outputText>
-				<p:selectOneMenu></p:selectOneMenu>
-				<h:outputText value="日期"></h:outputText>
-				<p:calendar></p:calendar>
+				<h:outputText value="项目名称"></h:outputText>
+				<h:selectOneMenu id="itemMenu" value="#{recoupApplyController.projectCode}">
+					<f:selectItem itemValue="" itemLabel="请选择"></f:selectItem>
+					<f:selectItems value="#{recoupApplyController.projects}" var="projectList" itemValue="#{projectList.code}" itemLabel="#{projectList.name}"></f:selectItems>
+				</h:selectOneMenu>
+				<h:outputText value="支付状态"></h:outputText>
+				<h:selectOneMenu value="#{recoupApplyController.payState}">
+					<f:selectItem itemValue="0" itemLabel="请选择"></f:selectItem>
+					<f:selectItem itemValue="1" itemLabel="未支付"></f:selectItem>
+					<f:selectItem itemValue="2" itemLabel="已支付"></f:selectItem>
+				</h:selectOneMenu>
+				<h:outputText value="申请日期"></h:outputText>
+				<p:calendar value="#{recoupApplyController.applyDateStart}" pattern="yyyy-MM-dd">
+				</p:calendar>
 				<h:outputLabel>至</h:outputLabel>
-				<p:calendar></p:calendar>
-				<p:commandButton styleClass="commonbtn" value="查询">
+				<p:calendar value="#{recoupApplyController.applyDateEnd}" pattern="yyyy-MM-dd">
+				</p:calendar>
+				<p:commandButton styleClass="commonbtn" value="查询" action="#{recoupApplyController.searchRecoupBy}" update=":msg,:ListForm" >
 				</p:commandButton>
 			</h:panelGrid>
 		</h:form>
@@ -56,36 +65,37 @@
 		<h:form id="ListForm" style="display: inline">
 			<p:dataTable id="recoupList" var="recoups" emptyMessage="当前无内容"
 				selectionMode="single" rows="10" paginatorAlwaysVisible="fasle"
-				paginatorPosition="bottom"
+				selection="#{recoupApplyController.selectedRecord}" rowKey="#{recoups.id}"
+				paginatorPosition="bottom" value="#{recoupApplyController.recordList}"
 				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-				paginator="true">
+				paginator="true" widgetVar="recoups">
 				<p:ajax event="rowSelect" update=":msg" />
 				<p:ajax event="rowUnselect" update=":msg" />
 				<p:column headerText="单据号" style="text-align:center">
-					<h:outputText value="" />
+					<h:outputText value="#{recoups.receiptNo}" />
 				</p:column>
 				<p:column headerText="申请人" style="text-align:center">
-					<h:outputText value="" />
+					<h:outputText value="#{recoups.userName}" />
 				</p:column>
 				<p:column headerText="项目" style="text-align:center">
-					<h:outputText value="" />
+					<h:outputText value="#{recoups.projName}" />
 				</p:column>
-				<p:column headerText="报销日期" style="text-align:center">
-					<h:outputText value="">
+				<p:column headerText="申请日期" style="text-align:center">
+					<h:outputText value="#{recoups.applyDate}" >
+						<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"></f:convertDateTime>
 					</h:outputText>
 				</p:column>
 				<p:column headerText="金额" style="text-align:center">
-					<h:outputText value="" />
+					<h:outputText value="#{recoups.money}" />
 				</p:column>
 				<p:column headerText="状态" style="text-align:center">
-					<h:outputText value="">
-					</h:outputText>
+					<h:outputText value="#{recoups.stateName}" />
 				</p:column>
 				<p:column headerText="支付状态" style="text-align:center">
-					<h:outputText value="" />
+					<h:outputText value="#{recoups.payStateName}" />
 				</p:column>
 				<p:column headerText="描述" style="text-align:center">
-					<h:outputText value="" />
+					<h:outputText value="#{recoups.reason}" />
 				</p:column>
 			</p:dataTable>
 
@@ -110,14 +120,15 @@
 						<td width="60">项目名称</td>
 						<td width="150"><h:selectOneMenu
 								value="#{recoupApplyController.recordForAdd.projCode}">
+								<f:selectItem itemLabel="请选择" itemValue="0"></f:selectItem>
 								<f:selectItems value="#{recoupApplyController.projects}"
 									var="projects" itemLabel="#{projects.name}"
 									itemValue="#{projects.code}"></f:selectItems>
 							</h:selectOneMenu>
 						</td>
-						<td width="60">日期</td>
+						<td width="60">申请日期</td>
 						<td width="150"><p:calendar
-								value="#{recoupApplyController.recordForAdd.applyDateTime}" pattern="yyyyMMdd"></p:calendar>
+								value="#{recoupApplyController.recordForAdd.applyDateTime}" pattern="yyyyMMdd" timeZone="GMT+8"></p:calendar>
 						</td>
 					</tr>
 					<tr>
@@ -163,6 +174,7 @@
 						<td>支付方式</td>
 						<td><h:selectOneMenu
 								value="#{recoupApplyController.recordForAdd.payType}">
+								<f:selectItem itemLabel="请选择" itemValue="0"></f:selectItem>
 								<f:selectItems value="#{recoupApplyController.payclasses}"
 									var="payclasses" itemLabel="#{payclasses.name}"
 									itemValue="#{payclasses.code}"></f:selectItems>
@@ -205,7 +217,7 @@
 						<p:cellEditor>
 						<f:facet name="output">
 						<h:outputText value="#{details.feeDate}">
-							<f:convertDateTime pattern="yyyyMMdd" timeZone="GMT-8"></f:convertDateTime>
+							<f:convertDateTime pattern="yyyyMMdd" timeZone="GMT+8"></f:convertDateTime>
 						</h:outputText>
 						</f:facet>
 						<f:facet name="input"><p:inputText id="timeInput" value="#{details.feeDate}" style="width:100%" pattern="yyyyMMdd"></p:inputText></f:facet>
@@ -285,10 +297,10 @@
 				<div id="commandDiv" align="center" style="margin-top: 10px">
 					<h:form>
 						<p:commandButton styleClass="commonbtn" value="保存"
-							action="#{recoupApplyController.saveRecoup}" update=":msg,:ListForm">
+							action="#{recoupApplyController.saveRecoup}" update=":msg,:ListForm,:addRecoupForm">
 						</p:commandButton>
 						<p:commandButton styleClass="commonbtn" value="提交"
-						action="#{recoupApplyController.commitRecoup}" update=":msg,:ListForm">
+						action="#{recoupApplyController.commitRecoup}" update=":msg,:ListForm,:addRecoupForm">
 						</p:commandButton>
 						<p:commandButton styleClass="commonbtn"
 							onclick="applyDialog.hide()" value="取消">
@@ -313,7 +325,7 @@
 						<td>时间</td>
 						<td><p:calendar
 								value="#{recoupApplyController.detailForAdd.feeDate}"
-								required="true" requiredMessage="请选择时间！" pattern="yyyyMMdd"></p:calendar>
+								required="true" requiredMessage="请选择时间！" pattern="yyyyMMdd" timeZone="GMT+8"></p:calendar>
 						</td>
 						<td>名称(摘要)</td>
 						<td><p:inputText

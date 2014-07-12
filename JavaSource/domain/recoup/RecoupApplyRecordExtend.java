@@ -36,6 +36,9 @@ public class RecoupApplyRecordExtend extends  RecoupApplyRecord{
 		
 		private String userName;
 		private Date applyDateTime;
+		private String stateName;
+		private String payStateName;
+		
 		
 		/**
 		 * @return the userName
@@ -70,6 +73,42 @@ public class RecoupApplyRecordExtend extends  RecoupApplyRecord{
 		public Date getApplyDateTime() {
 			return applyDateTime;
 		}
+
+			  
+			    /**
+				 * @param stateName the stateName to set
+				 */  
+			    
+			public void setStateName(String stateName) {
+				this.stateName = stateName;
+			}
+
+			  
+				/**
+				 * @return the stateName
+				 */  
+			    
+			public String getStateName() {
+				return stateName;
+			}
+
+				  
+				    /**
+					 * @param payStateName the payStateName to set
+					 */  
+				    
+				public void setPayStateName(String payStateName) {
+					this.payStateName = payStateName;
+				}
+
+				  
+					/**
+					 * @return the payStateName
+					 */  
+				    
+				public String getPayStateName() {
+					return payStateName;
+				}
 		
 
 }

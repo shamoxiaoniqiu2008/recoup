@@ -1,9 +1,13 @@
 package persistence.recoup;
 
+import java.util.Date;
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
 import domain.recoup.RecoupApplyRecord;
 import domain.recoup.RecoupApplyRecordExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
+import domain.recoup.RecoupApplyRecordExtend;
 
 public interface RecoupApplyRecordMapper {
 
@@ -74,4 +78,21 @@ public interface RecoupApplyRecordMapper {
 	 * @mbggenerated  Sun Jul 06 21:50:40 CST 2014
 	 */
 	int updateByPrimaryKey(RecoupApplyRecord record);
+	
+	/**
+	 * 
+		* @Title: selectRecoupListBy 
+		* @Description: TODO
+		* @param @param projectCode
+		* @param @param payState
+		* @param @param applyDateStart
+		* @param @param applyDateEnd
+		* @param @return
+		* @return List<RecoupApplyRecordExtend>
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 上午10:44:09
+		* @version V1.0
+	 */
+	List<RecoupApplyRecordExtend> selectRecoupListBy(@Param("projectCode") String projectCode,@Param("payState") Integer payState,@Param("applyDateStart") Date applyDateStart,@Param("applyDateEnd") Date applyDateEnd);
 }

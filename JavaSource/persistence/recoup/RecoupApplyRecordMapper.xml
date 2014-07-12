@@ -425,4 +425,43 @@
       ohers = #{ohers,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
+  
+  <select id="selectRecoupListBy" parameterType="map" resultType="domain.recoup.RecoupApplyRecordExtend">
+  	select
+  		rar.id as id
+		,rar.receipt_no as receiptNo
+		,psu.loginname as userName
+		,sdd.NAME as projName
+		,rar.apply_date as applyDate
+		,rar.money as money
+		,rar.state as state
+		,case rar.state when 1 then '保存' when 2 then '提交' when 3 then '退回' when 4 then '完成' else '未知' end as stateName
+		,rar.pay_state as payState
+		,case rar.pay_state when 1 then '未支付' when 2 then '已支付' else '未知' end as payStateName
+		,rar.reason as reason
+	from
+		recoup_apply_record rar
+	inner join
+		pension_sys_user psu
+	on
+		rar.user_id = psu.id
+	inner join
+		sys_de_datarangeitem sdd
+	on
+		rar.proj_code = sdd.CODE
+	where
+		1=1
+	<if test="projectCode != null &amp;&amp; projectCode !='' ">
+		and rar.proj_code =  #{projectCode,jdbcType=VARCHAR}
+	</if>
+	<if test="payState !=null &amp;&amp; payState !=0">
+		and rar.pay_state = #{payState,jdbcType=INTEGER}
+	</if>
+	<if test="applyDateStart != null">
+		and ( str_to_date(rar.apply_date,'%Y-%m-%d') &gt;  #{applyDateStart}  or  str_to_date(rar.apply_date,'%Y-%m-%d') =  #{applyDateStart} ) 
+	</if>
+	<if test="applyDateEnd != null">
+		and (str_to_date(rar.apply_date,'%Y-%m-%d') &lt;  #{applyDateEnd} or  str_to_date(rar.apply_date,'%Y-%m-%d') =  #{applyDateEnd})
+	</if>
+  </select>
 </mapper>
