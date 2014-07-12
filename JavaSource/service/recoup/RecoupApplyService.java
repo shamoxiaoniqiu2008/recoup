@@ -33,6 +33,7 @@ import util.FileUtil;
 import util.ReceiptNumGenerator;
 import domain.recoup.RecoupApplyDetailExtend;
 import domain.recoup.RecoupApplyRecord;
+import domain.recoup.RecoupApplyRecordExample;
 import domain.recoup.RecoupApplyRecordExtend;
 import domain.recoup.RecoupDicCostclass1;
 import domain.recoup.RecoupDicCostclass1Example;
@@ -451,6 +452,45 @@ public class RecoupApplyService {
 			flag = true;
 		}
 		return flag;
+	}
+	
+	/**
+	 * 
+		* @Title: deleteRecoupRecord 
+		* @Description: TODO
+		* @param @param selectedRecord
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 下午03:42:49
+		* @version V1.0
+	 */
+	public void deleteRecoupRecord(RecoupApplyRecordExtend selectedRecord){
+		RecoupApplyRecord record = new RecoupApplyRecord();
+		record.setCleared(1);
+		record.setState(5);
+		RecoupApplyRecordExample example = new RecoupApplyRecordExample();
+		example.or().andIdEqualTo(selectedRecord.getId());
+		recoupApplyRecordMapper.updateByExampleSelective(record, example);
+	}
+	
+	/**
+	 * 
+		* @Title: updateRecoupRecord 
+		* @Description: TODO
+		* @param @param selectedRecord
+		* @return void
+		* @throws 
+		* @author Justin.Su
+		* @date 2014-7-12 下午04:08:47
+		* @version V1.0
+	 */
+	public void updateRecoupRecord(RecoupApplyRecordExtend selectedRecord){
+		RecoupApplyRecord record = new RecoupApplyRecord();
+		record.setState(2);
+		RecoupApplyRecordExample example = new RecoupApplyRecordExample();
+		example.or().andIdEqualTo(selectedRecord.getId());
+		recoupApplyRecordMapper.updateByExampleSelective(record, example);
 	}
 
 }

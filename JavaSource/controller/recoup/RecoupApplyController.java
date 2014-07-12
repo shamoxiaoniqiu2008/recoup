@@ -14,13 +14,13 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.CellEditEvent;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.UnselectEvent;
 import org.primefaces.model.UploadedFile;
-
 import service.recoup.RecoupApplyService;
 import util.DateUtil;
 
@@ -322,8 +322,7 @@ public class RecoupApplyController implements Serializable {
 		String currentPath = servletContext.getRealPath("");
 		
 		String photoPath = recoupApplyService.fileUpload(currentPath,file);
-		//此flag的作用是啥？不是很清楚。
-		
+		//此flag的作用是啥？不是很清楚。		
 		if (addFlag) {
 			detailForAdd.setImageUrl(photoPath);
 		} else {
@@ -426,6 +425,117 @@ public class RecoupApplyController implements Serializable {
 			}
 			recordForAdd.setMoney(tempAmount);
 		}
+    }
+    
+    /**
+     * 
+    	* @Title: checkCancel 
+    	* @Description: TODO
+    	* @param 
+    	* @return void
+    	* @throws 
+    	* @author Justin.Su
+    	* @date 2014-7-12 下午04:57:09
+    	* @version V1.0
+     */
+    public void checkCancel(){
+    	RequestContext request = RequestContext.getCurrentInstance();
+    	if(selectedRecord == null){
+    		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "请选择一条记录！", "请选择一条记录！");
+    		 FacesContext.getCurrentInstance().addMessage(null, msg);
+    		 request.addCallbackParam("cancelFlag", false);
+    	}else if(selectedRecord.getState() == 4){
+    	FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "审批已经完成，无法撤销！", "审批已经完成，无法撤销！");
+   		 FacesContext.getCurrentInstance().addMessage(null, msg);
+   		request.addCallbackParam("cancelFlag", false);
+    	}
+    	else{
+    		request.addCallbackParam("cancelFlag", true);
+    	}
+    }
+    
+    /**
+     * 
+    	* @Title: checkSubmit 
+    	* @Description: TODO
+    	* @param 
+    	* @return void
+    	* @throws 
+    	* @author Justin.Su
+    	* @date 2014-7-12 下午04:57:13
+    	* @version V1.0
+     */
+    public void checkSubmit(){
+    	RequestContext request = RequestContext.getCurrentInstance();
+    	if(selectedRecord == null){
+    		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "请选择一条记录！", "请选择一条记录！");
+    		 FacesContext.getCurrentInstance().addMessage(null, msg);
+    		 request.addCallbackParam("submitFlag", false);
+    	}else if(selectedRecord.getState() != 1){
+    		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "非保存状态的记录，无法提交！", "非保存状态的记录，无法提交！！");
+      		 FacesContext.getCurrentInstance().addMessage(null, msg);
+   		request.addCallbackParam("submitFlag", false);
+    	}
+    	else{
+    		request.addCallbackParam("submitFlag", true);
+    	}
+    }
+    
+    /**
+     * 
+    	* @Title: checkView 
+    	* @Description: TODO
+    	* @param 
+    	* @return void
+    	* @throws 
+    	* @author Justin.Su
+    	* @date 2014-7-12 下午04:58:55
+    	* @version V1.0
+     */
+    public void checkView(){
+    	RequestContext request = RequestContext.getCurrentInstance();
+    	if(selectedRecord == null){
+    		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "请选择一条记录！", "请选择一条记录！");
+    		 FacesContext.getCurrentInstance().addMessage(null, msg);
+    		 request.addCallbackParam("viewFlag", false);
+    	}
+    	else{
+    		request.addCallbackParam("viewFlag", true);
+    		recordForAdd = selectedRecord;
+    		
+    	}
+    }
+    
+    /**
+     * 
+    	* @Title: cancelRecoup 
+    	* @Description: TODO
+    	* @param 
+    	* @return void
+    	* @throws 
+    	* @author Justin.Su
+    	* @date 2014-7-12 下午03:43:47
+    	* @version V1.0
+     */
+    public void cancelRecoup(){
+		recoupApplyService.deleteRecoupRecord(selectedRecord);
+		searchRecoupBy();
+    }
+    
+    /**
+     * 
+    	* @Title: submitRecoup 
+    	* @Description: TODO
+    	* @param 
+    	* @return void
+    	* @throws 
+    	* @author Justin.Su
+    	* @date 2014-7-12 下午04:08:39
+    	* @version V1.0
+     */
+    public void submitRecoup(){
+		recoupApplyService.updateRecoupRecord(selectedRecord);
+		searchRecoupBy();
     }
 
 	/**

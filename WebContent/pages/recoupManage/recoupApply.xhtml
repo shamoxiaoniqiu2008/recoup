@@ -100,14 +100,59 @@
 			</p:dataTable>
 
 			<div align="center">
-				<p:commandButton styleClass="commonbtn" value="报销填单"
+				<p:commandButton styleClass="commonbtn" value="填单"
 					onclick="applyDialog.show()"
 					action="#{recoupApplyController.getRecordDefaultValue}"
 					update=":addRecoupForm">
 				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="撤销" 
+				action="#{recoupApplyController.checkCancel}"
+				oncomplete="checkCancel(xhr,status,args)"
+				update=":msg">
+				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="提交" 
+				action="#{recoupApplyController.checkSubmit}"
+				oncomplete="checkSubmit(xhr,status,args)" 
+				update=":msg">
+				</p:commandButton>
+				<p:commandButton styleClass="commonbtn" value="查看" 
+				action="#{recoupApplyController.checkView}"
+				oncomplete="checkView(xhr,status,args)"
+				update=":msg,:addRecoupForm">
+				</p:commandButton>
 			</div>
 		</h:form>
-
+		
+		<p:dialog id="cancelDialog" widgetVar="cancelDialog" header="撤销填单"
+		modal="true" appendTo="@(body)" height="80px" width="180px"
+		resizable="false" position="center">
+			<h:form>
+				<h:outputLabel>确定要撤销吗？</h:outputLabel>
+				<div align="center">
+					<p:commandButton styleClass="commonbtn" value="撤销"
+					action="#{recoupApplyController.cancelRecoup}"
+					update=":msg,:ListForm" oncomplete="cancelDialog.hide()"></p:commandButton>
+					<p:commandButton styleClass="commonbtn" value="取消"
+					onclick="cancelDialog.hide()"></p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		
+		<p:dialog id="submitDialog" widgetVar="submitDialog" header="提交填单"
+		modal="true" appendTo="@(body)" height="80px" width="180px"
+		resizable="false" position="center">
+			<h:form>
+				<h:outputLabel >确定要提交吗？</h:outputLabel>
+				<div align="center">
+					<p:commandButton styleClass="commonbtn" value="提交"
+					action="#{recoupApplyController.submitRecoup}"
+					update=":msg,:ListForm" oncomplete="submitDialog.hide()"></p:commandButton>
+					<p:commandButton styleClass="commonbtn" value="取消"
+					onclick="submitDialog.hide()"></p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		
 		<p:dialog id="applyDialog" widgetVar="applyDialog" header="申请信息"
 			modal="true" appendTo="@(body)" height="480px" width="800px"
 			resizable="true" position="center" >
@@ -416,6 +461,24 @@
 		function getPicUrl() {
 			var invoiceUrl = document.getElementById('invoicePicture').value;
 			alert(invoiceUrl);
+		}
+		
+		function checkCancel(xhr,status,args){
+			if(args.cancelFlag){
+				cancelDialog.show();
+			}
+		}
+		
+		function checkSubmit(xhr,status,args){
+			if(args.submitFlag){
+				submitDialog.show();
+			}
+		}
+		
+		function checkView(xhr,status,args){
+			if(args.viewFlag){
+				applyDialog.show();
+			}
 		}
 	</script>
 </f:view>
