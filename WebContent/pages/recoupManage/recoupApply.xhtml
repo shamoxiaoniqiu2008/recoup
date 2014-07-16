@@ -56,7 +56,7 @@
 				<h:outputLabel>至</h:outputLabel>
 				<p:calendar value="#{recoupApplyController.applyDateEnd}" pattern="yyyy-MM-dd">
 				</p:calendar>
-				<p:commandButton styleClass="commonbtn" value="查询" action="#{recoupApplyController.searchRecoupBy}" update=":msg,:ListForm" >
+				<p:commandButton styleClass="commonbtn" value="申请查询" action="#{recoupApplyController.searchRecoupBy}" update=":msg,:ListForm" >
 				</p:commandButton>
 			</h:panelGrid>
 		</h:form>
@@ -100,22 +100,17 @@
 			</p:dataTable>
 
 			<div align="center">
-				<p:commandButton styleClass="commonbtn" value="填单"
+				<p:commandButton styleClass="commonbtn" value="申请填单"
 					onclick="applyDialog.show()"
 					action="#{recoupApplyController.getRecordDefaultValue}"
 					update=":addRecoupForm">
 				</p:commandButton>
-				<p:commandButton styleClass="commonbtn" value="撤销" 
-				action="#{recoupApplyController.checkCancel}"
-				oncomplete="checkCancel(xhr,status,args)"
-				update=":msg">
-				</p:commandButton>
-				<p:commandButton styleClass="commonbtn" value="提交" 
+				<p:commandButton styleClass="commonbtn" value="申请提交" 
 				action="#{recoupApplyController.checkSubmit}"
 				oncomplete="checkSubmit(xhr,status,args)" 
 				update=":msg">
 				</p:commandButton>
-				<p:commandButton styleClass="commonbtn" value="查看" 
+				<p:commandButton styleClass="commonbtn" value="申请查看" 
 				action="#{recoupApplyController.checkView}"
 				oncomplete="checkView(xhr,status,args)"
 				update=":msg,:addRecoupForm">
